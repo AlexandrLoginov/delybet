@@ -41,7 +41,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="min-h-screen pt-[80px] pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
+          <div className="min-h-screen pt-[96px] pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
             {children}
           </div>
           <NavBar />
