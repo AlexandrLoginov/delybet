@@ -1,7 +1,7 @@
 import { MatchesView } from "@/components/matches/MatchesView";
 
 export const metadata = {
-  title: "Матчи · SportAI",
+  title: "Матчи · DelyBet",
 };
 
 export default function MatchesPage() {

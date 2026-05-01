@@ -21,7 +21,7 @@ interface UpgradeModalProps {
 
 const FEATURES = [
   "Безлимит анализов матчей в день",
-  "Развёрнутая аргументация Claude",
+  "Развёрнутая аргументация ИИ",
   "Ключевые факторы и влияние новостей",
   "Live-обновления по ходу матча",
   "Hot picks от ИИ ежедневно",
@@ -41,7 +41,7 @@ export function UpgradeModal({ trigger, defaultOpen = false }: UpgradeModalProps
                 <Medal className="h-3.5 w-3.5" strokeWidth={2} />
               </div>
               <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">
-                SportAI Pro
+                DelyBet Pro
               </span>
             </div>
             <DrawerTitle className="pt-2 text-left">

@@ -116,7 +116,7 @@ export function MatchesView() {
               Матчи дня
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              ИИ-анализ от Claude · каждые 2 минуты
+              ИИ-анализ · обновление каждые 2 минуты
             </p>
             <div
               className="mt-2 flex items-center gap-2 text-xs text-muted-foreground"

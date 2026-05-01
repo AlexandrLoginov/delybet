@@ -1,12 +1,12 @@
-# SportAI — Руководство для Cursor
+# DelyBet — Руководство для Cursor
 
 ## Быстрый старт
 
 ### 1. Создать проект
 
 ```bash
-npx create-next-app@latest sportai --typescript --tailwind --app --src-dir
-cd sportai
+npx create-next-app@latest delybet --typescript --tailwind --app --src-dir
+cd delybet
 ```
 
 ### 2. Установить зависимости
@@ -73,9 +73,9 @@ GET /api/analysis/:matchId?sport=football&live=true
   ↓
 buildPrompt() — формируем структурированный промпт
   ↓
-Claude API (claude-sonnet-4-5) — генерируем анализ
+Anthropic Messages API — генерация ИИ‑анализа
   ↓
-parseClaudeResponse() — извлекаем JSON
+parseAnalysisResponse() — разбор JSON
   ↓
 Сохраняем в Redis
   ↓
@@ -88,7 +88,7 @@ parseClaudeResponse() — извлекаем JSON
 
 ### Создать главную страницу
 ```
-Создай главный экран SportAI: тёмный фон #08101f, 
+Создай главный экран DelyBet: тёмный фон #08101f, 
 табы "Предстоящие" и "Live", фильтр по видам спорта (футбол, баскетбол, теннис, волейбол),
 список карточек матчей. Используй компоненты из src/components/matches/.
 Данные загружай через Server Component из /api/matches/upcoming
@@ -99,7 +99,7 @@ parseClaudeResponse() — извлекаем JSON
 Создай страницу /match/[id] с полным ИИ-анализом.
 Загружай данные из /api/analysis/[matchId].
 Показывай: счёт, полосу вероятностей (зелёный/серый/синий),
-блок рекомендации Claude, табы Статистика/Форма/Новости.
+блок ИИ‑рекомендации, табы Статистика/Форма/Новости.
 Для isPro=false показывай Paywall overlay поверх детального анализа.
 ```
 

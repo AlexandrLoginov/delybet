@@ -1,4 +1,4 @@
-# SportAI — Cursor Starter Guide
+# DelyBet — Cursor Starter Guide
 
 ## Стек
 - **Framework:** Next.js 14 (App Router)
@@ -8,7 +8,7 @@
 - **Cache:** Redis (Upstash — serverless, бесплатный тир)
 - **Auth:** NextAuth.js
 - **Payments:** Stripe
-- **AI:** Anthropic Claude API (claude-sonnet-4-5)
+- **AI:** Anthropic Messages API (`ANTHROPIC_API_KEY`, опционально `ANTHROPIC_MODEL`)
 - **Sport Data:** API-Football + API-Sports
 - **Deploy:** Vercel
 
@@ -17,8 +17,8 @@
 ## Быстрый старт
 
 ```bash
-npx create-next-app@latest sportai --typescript --tailwind --app --src-dir
-cd sportai
+npx create-next-app@latest delybet --typescript --tailwind --app --src-dir
+cd delybet
 npm install @prisma/client prisma @anthropic-ai/sdk axios redis stripe next-auth
 npx prisma init
 ```
@@ -28,7 +28,7 @@ npx prisma init
 ## Структура проекта
 
 ```
-sportai/
+delybet/
 ├── src/
 │   ├── app/
 │   │   ├── (auth)/
@@ -63,7 +63,7 @@ sportai/
 │   │       └── SportFilter.tsx
 │   ├── lib/
 │   │   ├── sports-api.ts       # Клиент API-Football
-│   │   ├── ai-analysis.ts      # Логика Claude
+│   │   ├── ai-analysis.ts      # Интеграция ИИ‑анализа
 │   │   ├── cache.ts            # Redis wrapper
 │   │   ├── prisma.ts           # Prisma client singleton
 │   │   └── subscription.ts     # Проверка подписки
@@ -82,7 +82,7 @@ sportai/
 
 ```env
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/sportai"
+DATABASE_URL="postgresql://user:password@localhost:5432/delybet"
 
 # Auth
 NEXTAUTH_SECRET="your-secret"
@@ -94,6 +94,7 @@ API_SPORTS_KEY="your-key"          # тот же провайдер
 
 # AI
 ANTHROPIC_API_KEY="your-key"
+ANTHROPIC_MODEL=""
 
 # Cache
 UPSTASH_REDIS_REST_URL="your-url"

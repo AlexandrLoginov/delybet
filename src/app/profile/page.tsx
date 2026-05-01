@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { DarkThemeSwitch } from "@/components/theme/dark-theme-switch";
 
 export const metadata = {
-  title: "Профиль · SportAI",
+  title: "Профиль · DelyBet",
 };
 
 const USER = {
@@ -27,8 +27,8 @@ const USER = {
   joinedISO: "2025-11-12",
 };
 
-const TG_CHANNEL_URL = "https://t.me/sportai_news";
-const TG_CHANNEL_HANDLE = "@sportai_news";
+const TG_CHANNEL_URL = "https://t.me/delybet_news";
+const TG_CHANNEL_HANDLE = "@delybet_news";
 
 export default function ProfilePage() {
   const joined = new Date(USER.joinedISO).toLocaleDateString("ru-RU", {
@@ -81,7 +81,7 @@ export default function ProfilePage() {
               <Medal className="h-4 w-4" strokeWidth={2} />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold">SportAI Pro</div>
+              <div className="text-sm font-semibold">DelyBet Pro</div>
               <p className="text-xs text-muted-foreground">
                 Безлимитный доступ к ИИ-анализам и ключевым факторам
               </p>
@@ -127,7 +127,7 @@ export default function ProfilePage() {
         </section>
 
         <p className="text-center text-[11px] text-muted-foreground">
-          SportAI · v1.0.0 · Powered by Claude Sonnet 4.5
+          DelyBet · v1.0.0
         </p>
       </main>
     </>

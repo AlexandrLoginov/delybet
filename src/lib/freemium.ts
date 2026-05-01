@@ -2,39 +2,71 @@ import { MOCK_MATCHES } from "@/lib/mock-data";
 import type { Match, SportSlug } from "@/types/match";
 
 /** Легаси: один общий слот до разделения на Live / Предстоящие. */
-export const FREE_PREVIEW_STORAGE_KEY = "sportai-free-preview-match-id";
+const LEGACY_COMBINED_PREVIEW_KEY = "sportai-free-preview-match-id";
 
-const FREE_PREVIEW_STORAGE_KEY_UPCOMING = "sportai-free-preview-upcoming-id";
-const FREE_PREVIEW_STORAGE_KEY_LIVE = "sportai-free-preview-live-id";
+/** Текущие ключи хранилища. */
+const FREE_PREVIEW_STORAGE_KEY_UPCOMING = "delybet-free-preview-upcoming-id";
+const FREE_PREVIEW_STORAGE_KEY_LIVE = "delybet-free-preview-live-id";
+
+const LEGACY_PREVIEW_KEY_UPCOMING = "sportai-free-preview-upcoming-id";
+const LEGACY_PREVIEW_KEY_LIVE = "sportai-free-preview-live-id";
+
+const FREE_PREVIEW_CHANGE_EVENT = "delybet-free-preview-change";
 
 export type FreePreviewKind = "upcoming" | "live";
 
 let legacyMigrated = false;
 
+function dispatchFreePreviewChange(): void {
+  window.dispatchEvent(new Event(FREE_PREVIEW_CHANGE_EVENT));
+}
+
 function migrateLegacyFreePreviewOnce(): void {
   if (typeof window === "undefined" || legacyMigrated) return;
 
   try {
-    const legacy = window.localStorage.getItem(FREE_PREVIEW_STORAGE_KEY);
-    if (!legacy) {
-      legacyMigrated = true;
-      return;
+    let changed = false;
+
+    const migratePair = (legacyKey: string, modernKey: string): void => {
+      const legacyVal = window.localStorage.getItem(legacyKey);
+      if (!legacyVal) {
+        window.localStorage.removeItem(legacyKey);
+        return;
+      }
+      if (!window.localStorage.getItem(modernKey)) {
+        window.localStorage.setItem(modernKey, legacyVal);
+        changed = true;
+      }
+      window.localStorage.removeItem(legacyKey);
+    };
+
+    migratePair(
+      LEGACY_PREVIEW_KEY_UPCOMING,
+      FREE_PREVIEW_STORAGE_KEY_UPCOMING
+    );
+    migratePair(LEGACY_PREVIEW_KEY_LIVE, FREE_PREVIEW_STORAGE_KEY_LIVE);
+
+    const combined = window.localStorage.getItem(LEGACY_COMBINED_PREVIEW_KEY);
+    if (combined) {
+      const match = MOCK_MATCHES.find((m) => m.id === combined);
+      const kind: FreePreviewKind =
+        match?.status === "live" ? "live" : "upcoming";
+      const key =
+        kind === "live"
+          ? FREE_PREVIEW_STORAGE_KEY_LIVE
+          : FREE_PREVIEW_STORAGE_KEY_UPCOMING;
+      if (!window.localStorage.getItem(key)) {
+        window.localStorage.setItem(key, combined);
+        changed = true;
+      }
+      window.localStorage.removeItem(LEGACY_COMBINED_PREVIEW_KEY);
+      changed = true;
     }
 
-    const match = MOCK_MATCHES.find((m) => m.id === legacy);
-    const kind: FreePreviewKind =
-      match?.status === "live" ? "live" : "upcoming";
-    const key =
-      kind === "live"
-        ? FREE_PREVIEW_STORAGE_KEY_LIVE
-        : FREE_PREVIEW_STORAGE_KEY_UPCOMING;
-
-    if (!window.localStorage.getItem(key)) {
-      window.localStorage.setItem(key, legacy);
-    }
-    window.localStorage.removeItem(FREE_PREVIEW_STORAGE_KEY);
-    window.dispatchEvent(new Event("sportai-free-preview-change"));
     legacyMigrated = true;
+    if (changed) {
+      dispatchFreePreviewChange();
+    }
   } catch {
     /* allow retry next read */
   }
@@ -138,7 +170,7 @@ export function redeemFreePreview(
   try {
     migrateLegacyFreePreviewOnce();
     window.localStorage.setItem(storageKeyForKind(kind), matchId);
-    window.dispatchEvent(new Event("sportai-free-preview-change"));
+    dispatchFreePreviewChange();
   } catch {
     /* quota / privacy mode */
   }
@@ -148,9 +180,9 @@ export function subscribeFreePreviewChange(listener: () => void): () => void {
   if (typeof window === "undefined") return () => {};
 
   window.addEventListener("storage", listener);
-  window.addEventListener("sportai-free-preview-change", listener);
+  window.addEventListener(FREE_PREVIEW_CHANGE_EVENT, listener);
   return () => {
     window.removeEventListener("storage", listener);
-    window.removeEventListener("sportai-free-preview-change", listener);
+    window.removeEventListener(FREE_PREVIEW_CHANGE_EVENT, listener);
   };
 }

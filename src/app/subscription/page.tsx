@@ -9,13 +9,13 @@ import { SubscriptionDailyUsage } from "@/components/subscription/SubscriptionDa
 import { cn } from "@/lib/utils";
 
 export const metadata = {
-  title: "Подписка · SportAI",
+  title: "Подписка · DelyBet",
 };
 
 const FEATURES = [
   { label: "Анализы предстоящих матчей", free: "1 в день", pro: "Без лимита" },
   { label: "Анализы Live", free: "1 в день", pro: "Без лимита" },
-  { label: "Краткое резюме Claude", free: true, pro: true },
+  { label: "Краткое ИИ‑резюме", free: true, pro: true },
   { label: "Развёрнутая аргументация", free: false, pro: true },
   { label: "Ключевые факторы матча", free: false, pro: true },
   { label: "Влияние новостей", free: false, pro: true },
@@ -48,7 +48,7 @@ export default function SubscriptionPage() {
             Подписка
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Текущий план и возможности SportAI Pro
+            Текущий план и возможности DelyBet Pro
           </p>
         </div>
         <Card>
@@ -81,7 +81,7 @@ export default function SubscriptionPage() {
               </div>
               <div className="flex-1">
                 <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">
-                  SportAI Pro
+                  DelyBet Pro
                 </span>
                 <div className="text-xs text-muted-foreground">
                   7 дней бесплатно, далее 499 ₽/мес

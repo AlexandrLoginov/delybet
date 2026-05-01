@@ -110,7 +110,7 @@ export function MatchAnalysisView({
                 </div>
                 <Badge variant="muted" className="gap-1">
                   <LineChart className="h-2.5 w-2.5 text-primary" strokeWidth={2} />
-                  Claude Sonnet 4.5
+                  ИИ-модель
                 </Badge>
               </div>
               <ProbabilityBar

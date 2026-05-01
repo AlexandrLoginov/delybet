@@ -13,9 +13,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SportAI — ИИ-анализ матчей",
+  title: "DelyBet — ИИ-анализ матчей",
   description:
-    "Получай разбор матчей от Claude: вероятности, ключевые факторы, влияние новостей и live-обновления.",
+    "Разбор матчей с помощью ИИ: вероятности, ключевые факторы, влияние новостей и обновления в лайве.",
 };
 
 export const viewport: Viewport = {

@@ -45,7 +45,7 @@ export function HistoryView() {
             История
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Прошедшие матчи и точность ИИ-прогнозов Claude
+            Прошедшие матчи и точность ИИ‑прогнозов
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3">

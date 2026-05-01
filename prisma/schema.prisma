@@ -48,7 +48,7 @@ model MatchAnalysis {
   id          String   @id @default(cuid())
   matchId     String   // ID из внешнего API
   sport       Sport
-  analysis    Json     // полный объект анализа от Claude
+  analysis    Json     // полный объект ИИ‑анализа
   probHome    Float
   probDraw    Float?
   probAway    Float

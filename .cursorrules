@@ -1,8 +1,8 @@
-# .cursorrules — SportAI
+# .cursorrules — DelyBet
 
 ## Проект
-SportAI — сервис ИИ-анализа спортивных матчей.
-Стек: Next.js 14, TypeScript, Tailwind, Prisma, PostgreSQL, Redis (Upstash), Claude API.
+DelyBet — сервис ИИ-анализа спортивных матчей.
+Стек: Next.js 14, TypeScript, Tailwind, Prisma, PostgreSQL, Redis (Upstash), Anthropic Messages API.
 
 ## Архитектурные принципы
 - Все API routes в `src/app/api/`
@@ -14,7 +14,7 @@ SportAI — сервис ИИ-анализа спортивных матчей.
 ## Цвета и дизайн
 - Никогда не хардкодь цвета в компонентах — используй только CSS variables или Tailwind design tokens
 - Иерархия фонов строго: `bg-base` → `bg-surface` → `bg-card` (чем глубже, тем выше elevation)
-- Акцент `#F0B90B` используй только для: CTA-кнопок, active-state, highlight, и букв `ly` в wordmark
+- Акцент `#F0B90B` используй только для: CTA-кнопок, active-state, highlight, и части wordmark (например `Bet` в DelyBet)
 - `--success` (`#2EBD85`) используй для побед, позитивных трендов и бейджа Pro
 - `--danger` (`#F6465D`) используй для поражений, ошибок и live-dot
 - Границы по умолчанию: `var(--border)` (opacity 0.08). `var(--border-strong)` используй только для усиленных акцентов
@@ -43,7 +43,7 @@ SportAI — сервис ИИ-анализа спортивных матчей.
 ## Внешние API
 - Спорт: `api-sports.io` — ключ `process.env.API_SPORTS_KEY`
 - Новости: `newsapi.org` — ключ `process.env.NEWS_API_KEY`
-- AI: `@anthropic-ai/sdk` — ключ `process.env.ANTHROPIC_API_KEY`, модель `claude-sonnet-4-5`
+- ИИ: `@anthropic-ai/sdk` — ключи `process.env.ANTHROPIC_API_KEY`, модель задаётся `process.env.ANTHROPIC_MODEL` (или дефолт в `src/lib/ai-analysis.ts`)
 - Кэш: Upstash Redis REST API — см. `src/lib/cache.ts`
 
 ## Telegram Mini App
