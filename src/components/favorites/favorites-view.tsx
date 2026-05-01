@@ -67,7 +67,7 @@ export function FavoritesView() {
           <p className="mt-1 text-xs text-muted-foreground">
             Открой анализ матча и нажми «В избранное» вверху экрана.
           </p>
-          <Button asChild variant="outline" size="sm" className="mt-5 gap-1.5">
+          <Button asChild size="sm" className="mt-5 gap-1.5">
             <Link href="/matches">
               <Trophy className="h-3.5 w-3.5" strokeWidth={2} />
               К матчам

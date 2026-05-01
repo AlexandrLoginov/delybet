@@ -1,4 +1,5 @@
-import { Bolt, CircleCheck, CircleX, Medal } from "lucide-react";
+import Link from "next/link";
+import { Bolt, ChevronLeft, CircleCheck, CircleX, Medal } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,13 +44,13 @@ export default function SubscriptionPage() {
   return (
     <>
       <main className="mx-auto w-full max-w-2xl space-y-6 px-4 pb-6 pt-5">
-        <div>
-          <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
-            Подписка
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Текущий план и возможности DelyBet Pro
-          </p>
+        <div className="mb-5">
+          <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
+            <Link href="/profile">
+              <ChevronLeft className="h-4 w-4 shrink-0" strokeWidth={2} />
+              Профиль
+            </Link>
+          </Button>
         </div>
         <Card>
           <CardContent className="space-y-4 p-5">

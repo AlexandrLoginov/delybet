@@ -9,7 +9,13 @@ import {
   Trophy,
   type LucideIcon,
 } from "lucide-react";
+import { useSyncExternalStore } from "react";
 
+import {
+  getFavoriteMatchesServerSnapshot,
+  getFavoriteMatchesSnapshot,
+  subscribeFavoritesChange,
+} from "@/lib/favorites";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -17,6 +23,8 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   match: (path: string) => boolean;
+  /** Показать индикатор рядом с иконкой при ненулевом `indicatorKey`. */
+  indicatorWhen?: (key: string) => boolean;
 }
 
 const ITEMS: NavItem[] = [
@@ -38,6 +46,7 @@ const ITEMS: NavItem[] = [
     label: "Избранное",
     icon: Star,
     match: (p) => p.startsWith("/favorites"),
+    indicatorWhen: (key) => key.length > 0,
   },
   {
     href: "/profile",
@@ -49,6 +58,11 @@ const ITEMS: NavItem[] = [
 
 export function NavBar() {
   const pathname = usePathname() ?? "/";
+  const favoritesKey = useSyncExternalStore(
+    subscribeFavoritesChange,
+    getFavoriteMatchesSnapshot,
+    getFavoriteMatchesServerSnapshot
+  );
 
   return (
     <nav
@@ -59,6 +73,9 @@ export function NavBar() {
         {ITEMS.map((item) => {
           const active = item.match(pathname);
           const Icon = item.icon;
+          const showFavDot =
+            item.indicatorWhen?.(favoritesKey) ?? false;
+
           return (
             <Link
               key={item.href}
@@ -71,14 +88,22 @@ export function NavBar() {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Icon
-                className={cn(
-                  "h-[18px] w-[18px] transition-transform",
-                  active && "scale-110 text-primary"
-                )}
-                strokeWidth={active ? 2.25 : 2}
-                aria-hidden
-              />
+              <span className="relative inline-flex">
+                <Icon
+                  className={cn(
+                    "h-[18px] w-[18px] transition-transform",
+                    active && "scale-110 text-primary"
+                  )}
+                  strokeWidth={active ? 2.25 : 2}
+                  aria-hidden
+                />
+                {showFavDot ? (
+                  <span
+                    className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-primary ring-2 ring-background"
+                    aria-hidden
+                  />
+                ) : null}
+              </span>
               {item.label}
             </Link>
           );
