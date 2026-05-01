@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   CircleUser,
   History,
-  Medal,
+  Star,
   Trophy,
   type LucideIcon,
 } from "lucide-react";
@@ -34,10 +34,10 @@ const ITEMS: NavItem[] = [
     match: (p) => p.startsWith("/history"),
   },
   {
-    href: "/subscription",
-    label: "Подписка",
-    icon: Medal,
-    match: (p) => p.startsWith("/subscription"),
+    href: "/favorites",
+    label: "Избранное",
+    icon: Star,
+    match: (p) => p.startsWith("/favorites"),
   },
   {
     href: "/profile",

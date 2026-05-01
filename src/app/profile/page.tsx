@@ -110,6 +110,12 @@ export default function ProfilePage() {
                 hint="За час до матча и при изменении прогноза"
                 action={<ToggleStub />}
               />
+              <SettingRowLink
+                icon={Medal}
+                label="Подписка"
+                hint="Текущий план и переход на DelyBet Pro"
+                href="/subscription"
+              />
               <SettingRowExternal
                 icon={Megaphone}
                 label="Telegram-канал"

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, ChevronLeft, MapPin } from "lucide-react";
+import { Calendar, ChevronLeft, MapPin, Star } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,7 +18,12 @@ import { StatsBars } from "@/components/analysis/StatsBars";
 import { FormChips } from "@/components/analysis/FormChips";
 import { NewsImpactList } from "@/components/analysis/NewsImpactList";
 import { PaywallOverlay } from "@/components/paywall/PaywallOverlay";
-import { formatKickoff } from "@/lib/utils";
+import {
+  FAVORITES_CHANGE_EVENT,
+  isFavoriteMatchId,
+  toggleFavoriteMatchId,
+} from "@/lib/favorites";
+import { cn, formatKickoff } from "@/lib/utils";
 import type { Match } from "@/types/match";
 import type { FullAnalysis } from "@/types/analysis";
 
@@ -34,16 +40,57 @@ export function MatchAnalysisView({
 }: MatchAnalysisViewProps) {
   const isLive = match.status === "live";
   const { day, time } = formatKickoff(match.kickoffISO);
+  const [favorite, setFavorite] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setFavorite(isFavoriteMatchId(match.id));
+    sync();
+    window.addEventListener(FAVORITES_CHANGE_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(FAVORITES_CHANGE_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, [match.id]);
 
   return (
     <>
       <main className="mx-auto w-full max-w-2xl px-4 pb-6 pt-5">
-        <div className="mb-5">
-          <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
+        <div className="mb-5 flex min-h-8 items-center justify-between gap-2">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="-ml-2 min-w-0 shrink gap-1.5"
+          >
             <Link href="/matches">
-              <ChevronLeft className="h-4 w-4" strokeWidth={2} />
-              Матчи
+              <ChevronLeft className="h-4 w-4 shrink-0" strokeWidth={2} />
+              <span className="truncate">Матчи</span>
             </Link>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className={cn(
+              "shrink-0 gap-1.5",
+              favorite &&
+                "border-primary/50 bg-primary/10 text-foreground hover:bg-primary/15"
+            )}
+            aria-pressed={favorite}
+            onClick={() => {
+              setFavorite(toggleFavoriteMatchId(match.id));
+            }}
+          >
+            <Star
+              className={cn(
+                "h-3.5 w-3.5",
+                favorite && "fill-primary text-primary"
+              )}
+              strokeWidth={2}
+              aria-hidden
+            />
+            {favorite ? "В избранном" : "В избранное"}
           </Button>
         </div>
         <Card>
