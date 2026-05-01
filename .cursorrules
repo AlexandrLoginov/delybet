@@ -1,0 +1,52 @@
+# .cursorrules — SportAI
+
+## Проект
+SportAI — сервис ИИ-анализа спортивных матчей.
+Стек: Next.js 14, TypeScript, Tailwind, Prisma, PostgreSQL, Redis (Upstash), Claude API.
+
+## Архитектурные принципы
+- Все API routes в `src/app/api/`
+- Бизнес-логика в `src/lib/` — не в компонентах
+- Компоненты только отображают данные, не содержат fetch-логики
+- Используй React Server Components там, где нет интерактивности
+- Кэшируй все внешние API-запросы через Redis (см. `src/lib/cache.ts`)
+
+## Цвета и дизайн
+- Никогда не хардкодь цвета в компонентах — используй только CSS variables или Tailwind design tokens
+- Иерархия фонов строго: `bg-base` → `bg-surface` → `bg-card` (чем глубже, тем выше elevation)
+- Акцент `#F0B90B` используй только для: CTA-кнопок, active-state, highlight, и букв `ly` в wordmark
+- `--success` (`#2EBD85`) используй для побед, позитивных трендов и бейджа Pro
+- `--danger` (`#F6465D`) используй для поражений, ошибок и live-dot
+- Границы по умолчанию: `var(--border)` (opacity 0.08). `var(--border-strong)` используй только для усиленных акцентов
+- Поддерживай обе темы. Для light mode на `<html>` выставляй `data-theme="light"`
+- Радиусы: 12-14px для карточек, 8px для кнопок
+- Типографика: Geist. Wordmark — `font-weight: 600` и `letter-spacing: -1.5px`; body text — `400/500`
+
+## Подписка
+- `isPro: false` → показывай только `summary` и `probabilities`
+- `isPro: true` → показывай полный анализ: `detailedAnalysis`, `keyFactors`, `newsImpact`
+- При лимите (402) → показывай `UpgradeModal`, не редиректь
+
+## Конвенции кода
+- Именуй файлы: kebab-case для route.ts, PascalCase для компонентов
+- Типы выноси в `src/types/`
+- Обрабатывай ошибки: каждый API-route должен иметь try/catch
+- Используй `async/await`, не `.then()`
+- Не используй `any` — типизируй все внешние API-ответы
+
+## Запрещено
+- Не храни API-ключи в коде — только через `process.env`
+- Не делай fetch напрямую в компонентах — только через API-routes или server actions
+- Не используй `useEffect` для загрузки данных — используй Server Components или SWR/React Query
+- Не добавляй `console.log` в продакшн-код
+
+## Внешние API
+- Спорт: `api-sports.io` — ключ `process.env.API_SPORTS_KEY`
+- Новости: `newsapi.org` — ключ `process.env.NEWS_API_KEY`
+- AI: `@anthropic-ai/sdk` — ключ `process.env.ANTHROPIC_API_KEY`, модель `claude-sonnet-4-5`
+- Кэш: Upstash Redis REST API — см. `src/lib/cache.ts`
+
+## Telegram Mini App
+- Файлы для TMA в `src/app/tma/`
+- Используй `@twa-dev/sdk` для Telegram Web App API
+- Авторизация через Telegram initData — верифицируй на сервере через HMAC

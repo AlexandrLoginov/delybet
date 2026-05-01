@@ -1,0 +1,75 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  name           String?
+  telegramId     String?        @unique
+  createdAt      DateTime       @default(now())
+  subscription   Subscription?
+  dailyUsage     DailyUsage[]
+  sports         String[]       @default(["football"])
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id])
+  stripeCustomerId     String   @unique
+  stripeSubscriptionId String?  @unique
+  plan                 Plan     @default(FREE)
+  status               String   @default("active") // active | canceled | past_due
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model DailyUsage {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  date       DateTime @default(now()) @db.Date
+  upcoming   Int      @default(0) // кол-во просмотренных предстоящих матчей
+  live       Int      @default(0) // кол-во просмотренных live матчей
+
+  @@unique([userId, date])
+}
+
+model MatchAnalysis {
+  id          String   @id @default(cuid())
+  matchId     String   // ID из внешнего API
+  sport       Sport
+  analysis    Json     // полный объект анализа от Claude
+  probHome    Float
+  probDraw    Float?
+  probAway    Float
+  recommendation String
+  confidence  String   // HIGH | MEDIUM | LOW
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  expiresAt   DateTime // TTL для инвалидации
+
+  @@unique([matchId])
+  @@index([matchId, sport])
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum Sport {
+  FOOTBALL
+  BASKETBALL
+  TENNIS
+  VOLLEYBALL
+}
