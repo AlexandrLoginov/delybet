@@ -1,13 +1,15 @@
 "use client";
 
-import { Archive, Target, Trophy, type LucideIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Archive, Lock, Target, Trophy, type LucideIcon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HistoryCard } from "@/components/history/HistoryCard";
+import { UpgradeModal } from "@/components/paywall/UpgradeModal";
 import { HISTORY_UI_DEMO_AGGREGATES } from "@/lib/history-demo-aggregates";
 import { MOCK_HISTORY } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 import type { HistoryMatch } from "@/types/match";
 
 type HistoryPeriod = "today" | "week" | "month" | "threeMonths";
@@ -19,6 +21,12 @@ const PERIODS: HistoryPeriod[] = [
   "threeMonths",
 ];
 
+const PERIODS_VISIBLE_FOR_FREE = PERIODS.filter((p) => p !== "threeMonths");
+
+/** Одна строка в ячейке — та же высота, что у соседних сегментов. */
+const TAB_SEGMENT_CN =
+  "whitespace-nowrap px-1 py-2 text-[10px] leading-tight sm:text-xs";
+
 /** Заголовок списка под табами совпадает с выбранным периодом. */
 const HISTORY_PERIOD_TITLE: Record<HistoryPeriod, string> = {
   today: "Сегодня",
@@ -27,8 +35,14 @@ const HISTORY_PERIOD_TITLE: Record<HistoryPeriod, string> = {
   threeMonths: "3 месяца",
 };
 
-export function HistoryView() {
-  const [period, setPeriod] = useState<HistoryPeriod>("threeMonths");
+export function HistoryView({ isPro = false }: { isPro?: boolean }) {
+  const [period, setPeriod] = useState<HistoryPeriod>(() =>
+    isPro ? "threeMonths" : "month"
+  );
+
+  useEffect(() => {
+    if (!isPro && period === "threeMonths") setPeriod("month");
+  }, [isPro, period]);
 
   const demoAgg: { total: number; correct: number } =
     HISTORY_UI_DEMO_AGGREGATES[period];
@@ -71,33 +85,42 @@ export function HistoryView() {
           className="mt-6"
         >
           <TabsList className="grid h-auto w-full grid-cols-4 gap-1 p-1">
-            <TabsTrigger
-              value="today"
-              className="whitespace-normal px-1 py-2 text-[10px] leading-tight sm:text-xs"
-            >
+            <TabsTrigger value="today" className={TAB_SEGMENT_CN}>
               Сегодня
             </TabsTrigger>
-            <TabsTrigger
-              value="week"
-              className="whitespace-normal px-1 py-2 text-[10px] leading-tight sm:text-xs"
-            >
+            <TabsTrigger value="week" className={TAB_SEGMENT_CN}>
               Неделя
             </TabsTrigger>
-            <TabsTrigger
-              value="month"
-              className="whitespace-normal px-1 py-2 text-[10px] leading-tight sm:text-xs"
-            >
+            <TabsTrigger value="month" className={TAB_SEGMENT_CN}>
               Месяц
             </TabsTrigger>
-            <TabsTrigger
-              value="threeMonths"
-              className="whitespace-normal px-1 py-2 text-[10px] leading-tight sm:text-xs"
-            >
-              3 месяца
-            </TabsTrigger>
+            {isPro ? (
+              <TabsTrigger value="threeMonths" className={TAB_SEGMENT_CN}>
+                3 месяца
+              </TabsTrigger>
+            ) : (
+              <UpgradeModal
+                trigger={
+                  <button
+                    type="button"
+                    aria-label="3 месяца — только в DelyBet Pro"
+                    className={cn(
+                      "flex w-full flex-row flex-nowrap items-center justify-center gap-1 rounded-md px-1 py-2 text-[10px] font-medium leading-tight text-muted-foreground outline-none ring-offset-background whitespace-nowrap transition-colors hover:bg-background/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-xs"
+                    )}
+                  >
+                    <Lock
+                      className="h-2.5 w-2.5 shrink-0 opacity-70"
+                      strokeWidth={2}
+                      aria-hidden
+                    />
+                    <span>3 месяца</span>
+                  </button>
+                }
+              />
+            )}
           </TabsList>
 
-          {PERIODS.map((p) => (
+          {(isPro ? PERIODS : PERIODS_VISIBLE_FOR_FREE).map((p) => (
             <TabsContent key={p} value={p} className="mt-8">
               <HistoryGroupedList period={p} />
             </TabsContent>
