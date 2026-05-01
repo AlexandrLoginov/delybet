@@ -50,7 +50,21 @@ function storageKeyForKind(kind: FreePreviewKind): string {
     : FREE_PREVIEW_STORAGE_KEY_UPCOMING;
 }
 
-/** По возрастанию kickoffISO: один id на каждый sport среди переданных матчей. */
+/**
+ * Единственный доступный без Pro матч во вкладке Live — самый ранний по kickoff
+ * среди всех live в моках (независимо от фильтра вида спорта на экране).
+ */
+export function getFreeLivePreviewEligibleId(): string | null {
+  const live = MOCK_MATCHES.filter((m) => m.status === "live");
+  if (!live.length) return null;
+  const sorted = [...live].sort(
+    (a, b) =>
+      new Date(a.kickoffISO).getTime() - new Date(b.kickoffISO).getTime()
+  );
+  return sorted[0]?.id ?? null;
+}
+
+/** По возрастанию kickoffISO: один id на каждый sport среди переданных матчей (вкладка «Предстоящие»). */
 export function computeEligibleMatchIds(
   matches: Pick<Match, "id" | "sport" | "kickoffISO">[]
 ): Set<string> {
@@ -81,6 +95,9 @@ export function getTabMatchesFromMock(tab: "upcoming" | "live"): Match[] {
 /** Совпадает со списком при фильтре «все виды спорта» для вкладки матча. */
 export function isMatchGloballyEligibleForFreePreview(match: Match): boolean {
   const kind = freePreviewKindForMatch(match);
+  if (kind === "live") {
+    return match.id === getFreeLivePreviewEligibleId();
+  }
   const eligible = computeEligibleMatchIds(getTabMatchesFromMock(kind));
   return eligible.has(match.id);
 }

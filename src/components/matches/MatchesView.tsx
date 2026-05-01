@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { SportFilter } from "@/components/matches/SportFilter";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
-import { computeEligibleMatchIds } from "@/lib/freemium";
+import {
+  computeEligibleMatchIds,
+  getFreeLivePreviewEligibleId,
+} from "@/lib/freemium";
 import { MOCK_MATCHES } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import type { Match, SportSlug } from "@/types/match";
@@ -47,6 +50,15 @@ export function MatchesView() {
       return m.status === "upcoming";
     });
 
+    if (tab === "live") {
+      const freeLiveId = getFreeLivePreviewEligibleId();
+      if (!freeLiveId) return filtered;
+      const idx = filtered.findIndex((m) => m.id === freeLiveId);
+      if (idx <= 0) return filtered;
+      const first = filtered[idx];
+      return [first, ...filtered.filter((_, i) => i !== idx)];
+    }
+
     if (
       sport !== "all" ||
       !redeemedFreeMatchId ||
@@ -63,7 +75,13 @@ export function MatchesView() {
     return redeemedMatch ? [redeemedMatch, ...rest] : filtered;
   }, [sport, tab, redeemedFreeMatchId]);
 
-  const eligibleIds = useMemo(() => computeEligibleMatchIds(matches), [matches]);
+  const eligibleIds = useMemo(() => {
+    if (tab === "live") {
+      const id = getFreeLivePreviewEligibleId();
+      return id ? new Set<string>([id]) : new Set<string>();
+    }
+    return computeEligibleMatchIds(matches);
+  }, [tab, matches]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
