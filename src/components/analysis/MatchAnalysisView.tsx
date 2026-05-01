@@ -177,7 +177,7 @@ export function MatchAnalysisView({
         </div>
 
         <Tabs defaultValue="stats" className="mt-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid h-auto w-full grid-cols-3 gap-1">
             <TabsTrigger value="stats">Статистика</TabsTrigger>
             <TabsTrigger value="form">Форма</TabsTrigger>
             <TabsTrigger value="news">Новости</TabsTrigger>

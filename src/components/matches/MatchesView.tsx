@@ -144,12 +144,12 @@ export function MatchesView() {
           value={tab}
           onValueChange={(v) => setTab(v as "upcoming" | "live")}
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1">
             <TabsTrigger value="upcoming">Предстоящие</TabsTrigger>
             <TabsTrigger value="live">
               Live
               {liveCount > 0 && (
-                <span className="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive/15 px-1 text-[10px] font-semibold text-destructive">
+                <span className="inline-flex min-h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive/15 px-1 text-[10px] font-semibold tabular-nums leading-tight text-destructive">
                   {liveCount}
                 </span>
               )}

@@ -23,10 +23,6 @@ const PERIODS: HistoryPeriod[] = [
 
 const PERIODS_VISIBLE_FOR_FREE = PERIODS.filter((p) => p !== "threeMonths");
 
-/** Одна строка в ячейке — та же высота, что у соседних сегментов. */
-const TAB_SEGMENT_CN =
-  "whitespace-nowrap px-1 py-2 text-[10px] leading-tight sm:text-xs";
-
 /** Заголовок списка под табами совпадает с выбранным периодом. */
 const HISTORY_PERIOD_TITLE: Record<HistoryPeriod, string> = {
   today: "Сегодня",
@@ -67,20 +63,12 @@ export function HistoryView({ isPro = false }: { isPro?: boolean }) {
           value={period}
           onValueChange={(v) => setPeriod(v as HistoryPeriod)}
         >
-          <TabsList className="grid h-auto w-full grid-cols-4 gap-1 p-1">
-            <TabsTrigger value="today" className={TAB_SEGMENT_CN}>
-              Сегодня
-            </TabsTrigger>
-            <TabsTrigger value="week" className={TAB_SEGMENT_CN}>
-              Неделя
-            </TabsTrigger>
-            <TabsTrigger value="month" className={TAB_SEGMENT_CN}>
-              Месяц
-            </TabsTrigger>
+          <TabsList className="grid h-auto w-full grid-cols-4 gap-1">
+            <TabsTrigger value="today">Сегодня</TabsTrigger>
+            <TabsTrigger value="week">Неделя</TabsTrigger>
+            <TabsTrigger value="month">Месяц</TabsTrigger>
             {isPro ? (
-              <TabsTrigger value="threeMonths" className={TAB_SEGMENT_CN}>
-                3 месяца
-              </TabsTrigger>
+              <TabsTrigger value="threeMonths">3 месяца</TabsTrigger>
             ) : (
               <UpgradeModal
                 trigger={
@@ -88,7 +76,7 @@ export function HistoryView({ isPro = false }: { isPro?: boolean }) {
                     type="button"
                     aria-label="3 месяца — только в DelyBet Pro"
                     className={cn(
-                      "flex w-full flex-row flex-nowrap items-center justify-center gap-1 rounded-md px-1 py-2 text-[10px] font-medium leading-tight text-muted-foreground outline-none ring-offset-background whitespace-nowrap transition-colors hover:bg-background/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-xs"
+                      "flex w-full min-h-0 flex-row flex-nowrap items-center justify-center gap-1 rounded-md px-1 py-2 text-[10px] font-medium leading-tight text-muted-foreground outline-none ring-offset-background whitespace-nowrap transition-colors hover:bg-background/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-xs sm:leading-tight"
                     )}
                   >
                     <Lock

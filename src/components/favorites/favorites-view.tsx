@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { Star, Trophy } from "lucide-react";
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
 import { MatchCard } from "@/components/matches/MatchCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import {
   getFavoriteMatchesServerSnapshot,
@@ -13,8 +14,8 @@ import {
   subscribeFavoritesChange,
 } from "@/lib/favorites";
 import {
-  freePreviewKindForMatch,
-  isMatchGloballyEligibleForFreePreview,
+  computeEligibleMatchIds,
+  getFreeLivePreviewEligibleId,
 } from "@/lib/freemium";
 import { MOCK_MATCHES } from "@/lib/mock-data";
 import type { Match } from "@/types/match";
@@ -30,7 +31,83 @@ function groupByLeague(matches: Match[]) {
   return Array.from(map.entries()).map(([league, items]) => ({ league, items }));
 }
 
+function orderFavoriteLive(list: Match[]): Match[] {
+  const freeLiveId = getFreeLivePreviewEligibleId();
+  if (!freeLiveId) return list;
+  const idx = list.findIndex((m) => m.id === freeLiveId);
+  if (idx <= 0) return list;
+  const first = list[idx];
+  return [first, ...list.filter((_, i) => i !== idx)];
+}
+
+function orderFavoriteUpcoming(
+  list: Match[],
+  redeemedFreeMatchId: string | null
+): Match[] {
+  if (
+    !redeemedFreeMatchId ||
+    list[0]?.id === redeemedFreeMatchId
+  ) {
+    return list;
+  }
+
+  const idx = list.findIndex((m) => m.id === redeemedFreeMatchId);
+  if (idx <= 0) return list;
+
+  const redeemedMatch = list[idx];
+  const rest = list.filter((_, i) => i !== idx);
+  return redeemedMatch ? [redeemedMatch, ...rest] : list;
+}
+
+function FavoritesGroupedList({
+  matches,
+  eligibleIds,
+  redeemedFreeMatchId,
+}: {
+  matches: Match[];
+  eligibleIds: Set<string>;
+  redeemedFreeMatchId: string | null;
+}) {
+  return (
+    <div className="space-y-5">
+      {groupByLeague(matches).map(({ league, items }) => (
+        <section key={league} className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {league}
+            </h2>
+            <span className="tabular-nums text-xs text-muted-foreground">
+              {items.length}
+            </span>
+          </div>
+          <div className="flex flex-col gap-2">
+            {items.map((m) => {
+              const isEligibleSpot = eligibleIds.has(m.id);
+              const unlocked =
+                redeemedFreeMatchId === null
+                  ? isEligibleSpot
+                  : redeemedFreeMatchId === m.id;
+              const consumeFreePreviewOnClick =
+                redeemedFreeMatchId === null && isEligibleSpot;
+
+              return (
+                <MatchCard
+                  key={m.id}
+                  match={m}
+                  unlocked={unlocked}
+                  consumeFreePreviewOnClick={consumeFreePreviewOnClick}
+                />
+              );
+            })}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
 export function FavoritesView() {
+  const [tab, setTab] = useState<"upcoming" | "live">("upcoming");
   const favoriteKey = useSyncExternalStore(
     subscribeFavoritesChange,
     getFavoriteMatchesSnapshot,
@@ -46,6 +123,50 @@ export function FavoritesView() {
         new Date(b.kickoffISO).getTime() - new Date(a.kickoffISO).getTime()
     );
   }, [favoriteKey]);
+
+  const favoritesUpcoming = useMemo(
+    () => favorites.filter((m) => m.status === "upcoming"),
+    [favorites]
+  );
+  const favoritesLive = useMemo(
+    () => favorites.filter((m) => m.status === "live"),
+    [favorites]
+  );
+
+  const upcomingOrdered = useMemo(
+    () =>
+      orderFavoriteUpcoming(favoritesUpcoming, freePreviewSlots.upcoming),
+    [favoritesUpcoming, freePreviewSlots.upcoming]
+  );
+
+  const liveOrdered = useMemo(
+    () => orderFavoriteLive(favoritesLive),
+    [favoritesLive]
+  );
+
+  const eligibleIdsUpcoming = useMemo(
+    () => computeEligibleMatchIds(upcomingOrdered),
+    [upcomingOrdered]
+  );
+
+  const eligibleIdsLive = useMemo(() => {
+    const id = getFreeLivePreviewEligibleId();
+    return id ? new Set<string>([id]) : new Set<string>();
+  }, []);
+
+  useEffect(() => {
+    if (
+      favorites.length > 0 &&
+      favoritesUpcoming.length === 0 &&
+      favoritesLive.length > 0
+    ) {
+      setTab("live");
+    }
+  }, [
+    favorites.length,
+    favoritesUpcoming.length,
+    favoritesLive.length,
+  ]);
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 pb-6 pt-5">
@@ -75,46 +196,60 @@ export function FavoritesView() {
           </Button>
         </div>
       ) : (
-        <div className="space-y-5">
-          {groupByLeague(favorites).map(({ league, items }) => (
-            <section key={league} className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {league}
-                </h2>
-                <span className="tabular-nums text-xs text-muted-foreground">
-                  {items.length}
-                </span>
-              </div>
-              <div className="flex flex-col gap-2">
-                {items.map((m) => {
-                  const kind = freePreviewKindForMatch(m);
-                  const redeemedFreeMatchId =
-                    kind === "live"
-                      ? freePreviewSlots.live
-                      : freePreviewSlots.upcoming;
-                  const isEligibleSpot =
-                    isMatchGloballyEligibleForFreePreview(m);
-                  const unlocked =
-                    redeemedFreeMatchId === null
-                      ? isEligibleSpot
-                      : redeemedFreeMatchId === m.id;
-                  const consumeFreePreviewOnClick =
-                    redeemedFreeMatchId === null && isEligibleSpot;
+        <Tabs
+          value={tab}
+          onValueChange={(v) => setTab(v as "upcoming" | "live")}
+          className="mt-6"
+        >
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1">
+            <TabsTrigger value="upcoming">
+              Предстоящие
+              <span className="inline-flex min-h-4 min-w-[1rem] items-center justify-center rounded-full bg-muted px-1 text-[10px] font-semibold tabular-nums leading-tight text-muted-foreground">
+                {favoritesUpcoming.length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="live">
+              Live
+              <span
+                className={
+                  favoritesLive.length > 0
+                    ? "inline-flex min-h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive/15 px-1 text-[10px] font-semibold tabular-nums leading-tight text-destructive"
+                    : "inline-flex min-h-4 min-w-[1rem] items-center justify-center rounded-full bg-muted px-1 text-[10px] font-semibold tabular-nums leading-tight text-muted-foreground"
+                }
+              >
+                {favoritesLive.length}
+              </span>
+            </TabsTrigger>
+          </TabsList>
 
-                  return (
-                    <MatchCard
-                      key={m.id}
-                      match={m}
-                      unlocked={unlocked}
-                      consumeFreePreviewOnClick={consumeFreePreviewOnClick}
-                    />
-                  );
-                })}
+          <TabsContent value="upcoming" className="mt-6">
+            {!upcomingOrdered.length ? (
+              <div className="rounded-xl border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
+                В избранном нет предстоящих матчей
               </div>
-            </section>
-          ))}
-        </div>
+            ) : (
+              <FavoritesGroupedList
+                matches={upcomingOrdered}
+                eligibleIds={eligibleIdsUpcoming}
+                redeemedFreeMatchId={freePreviewSlots.upcoming}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="live" className="mt-6">
+            {!liveOrdered.length ? (
+              <div className="rounded-xl border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
+                В избранном нет текущих live-матчей
+              </div>
+            ) : (
+              <FavoritesGroupedList
+                matches={liveOrdered}
+                eligibleIds={eligibleIdsLive}
+                redeemedFreeMatchId={freePreviewSlots.live}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       )}
     </main>
   );
