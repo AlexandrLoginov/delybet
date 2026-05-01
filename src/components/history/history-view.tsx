@@ -62,27 +62,10 @@ export function HistoryView({ isPro = false }: { isPro?: boolean }) {
             Прошедшие матчи и точность ИИ‑прогнозов
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <StatTile
-            icon={Target}
-            label="Точность"
-            value={`${accuracy}%`}
-            sub={`${demoAgg.correct} из ${demoAgg.total}`}
-            tone="primary"
-          />
-          <StatTile
-            icon={Trophy}
-            label="Угаданных"
-            value={String(demoAgg.correct)}
-            sub={`за ${demoAgg.total} матчей`}
-            tone="success"
-          />
-        </div>
 
         <Tabs
           value={period}
           onValueChange={(v) => setPeriod(v as HistoryPeriod)}
-          className="mt-6"
         >
           <TabsList className="grid h-auto w-full grid-cols-4 gap-1 p-1">
             <TabsTrigger value="today" className={TAB_SEGMENT_CN}>
@@ -119,6 +102,23 @@ export function HistoryView({ isPro = false }: { isPro?: boolean }) {
               />
             )}
           </TabsList>
+
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <StatTile
+              icon={Target}
+              label="Точность"
+              value={`${accuracy}%`}
+              sub={`${demoAgg.correct} из ${demoAgg.total}`}
+              tone="primary"
+            />
+            <StatTile
+              icon={Trophy}
+              label="Угаданных"
+              value={String(demoAgg.correct)}
+              sub={`за ${demoAgg.total} матчей`}
+              tone="success"
+            />
+          </div>
 
           {(isPro ? PERIODS : PERIODS_VISIBLE_FOR_FREE).map((p) => (
             <TabsContent key={p} value={p} className="mt-8">
