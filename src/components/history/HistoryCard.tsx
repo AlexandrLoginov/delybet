@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CircleCheck, CircleX, LineChart } from "lucide-react";
+import { CircleCheck, CircleX } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { TeamLogo } from "@/components/matches/TeamLogo";
@@ -55,7 +55,7 @@ export function HistoryCard({ match }: HistoryCardProps) {
           </span>
           <Badge
             variant={correct ? "success" : "live"}
-            className="gap-1 px-1.5 py-px"
+            className="gap-1 px-1.5"
           >
             {correct ? (
               <>
@@ -97,10 +97,6 @@ export function HistoryCard({ match }: HistoryCardProps) {
 
       <div className="border-t border-border">
         <div className="flex items-center gap-2 px-5 py-2.5 text-[11px]">
-          <LineChart
-            className="h-3.5 w-3.5 shrink-0 text-primary"
-            strokeWidth={2}
-          />
           <span className="font-semibold uppercase tracking-wider text-muted-foreground">
             ИИ
           </span>
@@ -113,7 +109,7 @@ export function HistoryCard({ match }: HistoryCardProps) {
             </span>
             <span
               className={cn(
-                "rounded px-1.5 py-0.5 text-[10px] font-semibold ring-1 ring-inset",
+                "rounded px-1.5 py-1 text-[10px] font-semibold ring-1 ring-inset",
                 correct
                   ? "bg-success-muted text-success ring-success/30"
                   : "bg-destructive/10 text-destructive ring-destructive/30"

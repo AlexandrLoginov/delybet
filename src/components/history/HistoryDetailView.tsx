@@ -73,7 +73,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
               <span>·</span>
               <span className="truncate">{match.round}</span>
             </div>
-            <Badge variant="muted" className="px-2 py-0.5">
+            <Badge variant="muted" className="px-2">
               {dateLabel}
             </Badge>
           </div>
@@ -156,7 +156,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
                     ? "ИИ угадал исход"
                     : "ИИ ошибся в прогнозе"}
                 </span>
-                <Badge variant="muted" className="px-1.5 py-px">
+                <Badge variant="muted" className="px-1.5">
                   {match.prediction.confidence === "HIGH"
                     ? "Высокая"
                     : match.prediction.confidence === "MEDIUM"
@@ -313,7 +313,7 @@ function ResultTile({
         {highlighted && (
           <Badge
             variant={correct ? "success" : "live"}
-            className="gap-1 px-1.5 py-px"
+            className="gap-1 px-1.5"
           >
             {correct ? (
               <CircleCheck className="h-2.5 w-2.5" strokeWidth={2} />

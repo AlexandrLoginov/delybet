@@ -57,7 +57,7 @@ export default function ProfilePage() {
                   <span className="truncate text-base font-semibold">
                     {USER.name}
                   </span>
-                  <Badge variant="muted" className="px-1.5 py-px">
+                  <Badge variant="muted" className="px-1.5">
                     Free
                   </Badge>
                 </div>

@@ -54,7 +54,7 @@ export default function SubscriptionPage() {
         <Card>
           <CardContent className="space-y-4 p-5">
             <div>
-              <Badge variant="muted" className="px-1.5 py-px">
+              <Badge variant="muted" className="px-1.5">
                 Текущий план
               </Badge>
               <div className="mt-2 text-2xl font-semibold tracking-tight">

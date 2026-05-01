@@ -1,4 +1,4 @@
-import { LineChart, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,9 +31,6 @@ export function RecommendationCard({
       <CardContent className="space-y-4 p-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <LineChart className="h-3.5 w-3.5" strokeWidth={2} />
-            </div>
             <div className="flex flex-col">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Рекомендация ИИ

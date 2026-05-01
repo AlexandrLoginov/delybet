@@ -9,9 +9,14 @@ export function SubscriptionDailyUsage() {
   const liveUsed = live ? 1 : 0;
 
   return (
-    <div className="grid grid-cols-2 gap-3 text-xs">
-      <UsageTile label="Предстоящие сегодня" used={upcomingUsed} limit={1} />
-      <UsageTile label="Live сегодня" used={liveUsed} limit={1} />
+    <div className="space-y-3 text-xs">
+      <p className="text-[13px] font-medium leading-tight text-foreground">
+        Доступно сегодня
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <UsageTile label="Предстоящие" used={upcomingUsed} limit={1} />
+        <UsageTile label="Live" used={liveUsed} limit={1} />
+      </div>
     </div>
   );
 }

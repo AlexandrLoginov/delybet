@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, ChevronLeft, LineChart, MapPin } from "lucide-react";
+import { Calendar, ChevronLeft, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -108,10 +108,7 @@ export function MatchAnalysisView({
                 <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Вероятности
                 </div>
-                <Badge variant="muted" className="gap-1">
-                  <LineChart className="h-2.5 w-2.5 text-primary" strokeWidth={2} />
-                  ИИ-модель
-                </Badge>
+                <Badge variant="muted">ИИ-модель</Badge>
               </div>
               <ProbabilityBar
                 probabilities={analysis.probabilities}
@@ -167,10 +164,7 @@ export function MatchAnalysisView({
               Развёрнутый анализ
             </h2>
             {!isPro && (
-              <Badge variant="pro" className="gap-1">
-                <LineChart className="h-2.5 w-2.5" strokeWidth={2} />
-                Pro
-              </Badge>
+              <Badge variant="pro">Pro</Badge>
             )}
           </div>
 

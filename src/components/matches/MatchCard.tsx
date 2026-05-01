@@ -79,7 +79,7 @@ function MatchCardBody({ match }: { match: Match }) {
     <div className="relative">
       {match.hotPick && (
         <div className="absolute right-4 top-2 z-[1]">
-          <Badge variant="pro" className="px-1.5 py-px text-[10px]">
+          <Badge variant="pro" className="px-1.5 text-[10px]">
             Hot pick
           </Badge>
         </div>
