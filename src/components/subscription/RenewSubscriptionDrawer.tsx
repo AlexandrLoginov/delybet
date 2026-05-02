@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Medal } from "lucide-react";
+import { Medal } from "@phosphor-icons/react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,7 +86,7 @@ export function RenewSubscriptionDrawer({
           <DrawerHeader className="px-0 pt-0">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Medal className="h-3.5 w-3.5" strokeWidth={2} />
+                <Medal className="h-3.5 w-3.5" weight="fill" />
               </div>
               <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">
                 {copy.eyebrow}

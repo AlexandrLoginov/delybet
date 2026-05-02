@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CircleCheck, CircleX } from "lucide-react";
+import { CheckCircle, XCircle } from "@phosphor-icons/react";
 
 import { Badge } from "@/components/ui/badge";
 import { TeamLogo } from "@/components/matches/TeamLogo";
@@ -59,12 +59,12 @@ export function HistoryCard({ match }: HistoryCardProps) {
           >
             {correct ? (
               <>
-                <CircleCheck className="h-2.5 w-2.5" strokeWidth={2} />
+                <CheckCircle className="h-2.5 w-2.5" weight="fill" />
                 Точно
               </>
             ) : (
               <>
-                <CircleX className="h-2.5 w-2.5" strokeWidth={2} />
+                <XCircle className="h-2.5 w-2.5" weight="fill" />
                 Ошибся
               </>
             )}

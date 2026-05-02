@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { CircleCheck, Medal } from "lucide-react";
+import { CheckCircle, Medal } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -62,7 +62,7 @@ export function UpgradeModal({ trigger, defaultOpen = false }: UpgradeModalProps
             <DrawerHeader className="px-0 pt-0">
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                  <Medal className="h-3.5 w-3.5" strokeWidth={2} />
+                  <Medal className="h-3.5 w-3.5" weight="fill" />
                 </div>
                 <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">
                   DelyBet Pro
@@ -80,7 +80,7 @@ export function UpgradeModal({ trigger, defaultOpen = false }: UpgradeModalProps
               {FEATURES.map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm">
                   <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success-muted text-success">
-                    <CircleCheck className="h-2.5 w-2.5" strokeWidth={2} />
+                    <CheckCircle className="h-2.5 w-2.5" weight="fill" />
                   </span>
                   {f}
                 </li>

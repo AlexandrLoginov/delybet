@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { Bolt, ChevronLeft, CircleCheck, CircleX, Medal } from "lucide-react";
+import {
+  CaretLeft,
+  CheckCircle,
+  Lightning,
+  Medal,
+  XCircle,
+} from "@phosphor-icons/react/ssr";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +31,7 @@ export function SubscriptionFreeView() {
       <div className="mb-5">
         <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
           <Link href="/profile">
-            <ChevronLeft className="h-4 w-4 shrink-0" strokeWidth={2} />
+            <CaretLeft className="h-4 w-4 shrink-0" weight="fill" />
             Профиль
           </Link>
         </Button>
@@ -54,7 +60,7 @@ export function SubscriptionFreeView() {
         <div className="border-b bg-primary/[0.08] px-5 py-3">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Medal className="h-4 w-4" strokeWidth={2} />
+              <Medal className="h-4 w-4" weight="fill" />
             </div>
             <div className="flex-1">
               <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">
@@ -65,7 +71,7 @@ export function SubscriptionFreeView() {
               </div>
             </div>
             <Badge variant="pro" className="gap-1">
-              <Bolt className="h-3 w-3" strokeWidth={2} />
+              <Lightning className="h-3 w-3" weight="fill" />
               −40%
             </Badge>
           </div>
@@ -136,11 +142,11 @@ function FeatureCell({
               : "bg-success-muted text-success ring-1 ring-inset ring-success/30"
           )}
         >
-          <CircleCheck className="h-3 w-3" strokeWidth={2} />
+          <CheckCircle className="h-3 w-3" weight="fill" />
         </span>
       ) : (
         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <CircleX className="h-3 w-3" strokeWidth={2} />
+          <XCircle className="h-3 w-3" weight="fill" />
         </span>
       )}
     </div>

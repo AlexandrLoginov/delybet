@@ -1,6 +1,12 @@
 "use client";
 
-import { Archive, Lock, Target, Trophy, type LucideIcon } from "lucide-react";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
+import {
+  Archive,
+  LockSimple,
+  Target,
+  Trophy,
+} from "@phosphor-icons/react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -79,9 +85,9 @@ export function HistoryView({ isPro = false }: { isPro?: boolean }) {
                       "flex w-full min-h-0 flex-row flex-nowrap items-center justify-center gap-1 rounded-md px-1 py-2 text-[10px] font-medium leading-tight text-muted-foreground outline-none ring-offset-background whitespace-nowrap transition-colors hover:bg-background/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-xs sm:leading-tight"
                     )}
                   >
-                    <Lock
+                    <LockSimple
                       className="h-2.5 w-2.5 shrink-0 opacity-70"
-                      strokeWidth={2}
+                      weight="fill"
                       aria-hidden
                     />
                     <span>3 месяца</span>
@@ -118,7 +124,7 @@ export function HistoryView({ isPro = false }: { isPro?: boolean }) {
         <Card className="mt-8">
           <CardContent className="flex items-center gap-3 p-4">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Archive className="h-4 w-4" strokeWidth={2} />
+              <Archive className="h-4 w-4" weight="fill" />
             </div>
             <div className="min-w-0">
               <div className="text-sm font-semibold">
@@ -265,7 +271,7 @@ function StatTile({
   sub,
   tone,
 }: {
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   label: string;
   value: string;
   sub: string;
@@ -282,7 +288,7 @@ function StatTile({
         <div
           className={`inline-flex h-7 w-7 items-center justify-center rounded-md ${toneCls}`}
         >
-          <Icon className="h-4 w-4" strokeWidth={2} />
+          <Icon className="h-4 w-4" weight="fill" />
         </div>
         <div className="space-y-1.5">
           <div className="tabular-nums text-xl font-semibold leading-tight">

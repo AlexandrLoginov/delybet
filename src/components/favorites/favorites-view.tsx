@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BrushCleaning, Star } from "lucide-react";
+import { Broom, Star } from "@phosphor-icons/react";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -237,7 +237,7 @@ export function FavoritesView() {
               aria-label="Очистить избранное"
               onClick={() => setClearOpen(true)}
             >
-              <BrushCleaning className="h-[18px] w-[18px]" strokeWidth={2} />
+              <Broom className="h-[18px] w-[18px]" weight="fill" />
             </Button>
           ) : null}
         </div>
@@ -249,7 +249,7 @@ export function FavoritesView() {
       {!favorites.length ? (
         <div className="rounded-xl border bg-card p-10 text-center">
           <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
-            <Star className="h-4 w-4" strokeWidth={2} />
+            <Star className="h-4 w-4" weight="fill" />
           </div>
           <div className="text-sm font-medium">Пока пусто</div>
           <p className="mt-1 text-xs text-muted-foreground">

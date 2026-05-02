@@ -52,7 +52,7 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       <DrawerPrimitive.Handle
-        className="mx-auto mt-3 mb-1 h-1.5 w-10 shrink-0 rounded-full bg-muted"
+        className="mx-auto mb-4 mt-3 h-1.5 w-10 shrink-0 rounded-full bg-muted"
         aria-hidden
       />
       {children}

@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, ChevronLeft, MapPin, Star } from "lucide-react";
+import {
+  Calendar,
+  CaretLeft,
+  MapPin,
+  Star,
+} from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -64,7 +69,7 @@ export function MatchAnalysisView({
             className="-ml-2 min-w-0 shrink gap-1.5"
           >
             <Link href="/matches">
-              <ChevronLeft className="h-4 w-4 shrink-0" strokeWidth={2} />
+              <CaretLeft className="h-4 w-4 shrink-0" weight="fill" />
               <span className="truncate">Матчи</span>
             </Link>
           </Button>
@@ -83,11 +88,11 @@ export function MatchAnalysisView({
             }}
           >
             <Star
+              weight="fill"
               className={cn(
                 "h-3.5 w-3.5",
-                favorite && "fill-primary text-primary"
+                favorite ? "text-primary" : "text-muted-foreground"
               )}
-              strokeWidth={2}
               aria-hidden
             />
             {favorite ? "В избранном" : "В избранное"}
@@ -106,7 +111,7 @@ export function MatchAnalysisView({
               <LiveBadge minute={match.elapsedMinutes} />
             ) : (
               <Badge variant="muted" className="gap-1">
-                <Calendar className="h-2.5 w-2.5" strokeWidth={2} />
+                <Calendar className="h-2.5 w-2.5" weight="fill" />
                 {day} · {time}
               </Badge>
             )}
@@ -136,7 +141,7 @@ export function MatchAnalysisView({
                       vs
                     </div>
                     <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <MapPin className="h-3 w-3" strokeWidth={2} />
+                      <MapPin className="h-3 w-3" weight="fill" />
                       {match.country}
                     </div>
                   </>

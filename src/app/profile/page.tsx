@@ -1,13 +1,13 @@
 import Link from "next/link";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import {
   Bell,
-  ChevronRight,
+  CaretRight,
   Headphones,
   Medal,
   Megaphone,
   Moon,
-  type LucideIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { DarkThemeSwitch } from "@/components/theme/dark-theme-switch";
@@ -92,7 +92,7 @@ function SettingRow({
   hint,
   action,
 }: {
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   label: string;
   hint: string;
   action: React.ReactNode;
@@ -100,7 +100,7 @@ function SettingRow({
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted text-foreground">
-        <Icon className="h-4 w-4" strokeWidth={2} />
+        <Icon className="h-4 w-4" weight="fill" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium">{label}</div>
@@ -117,7 +117,7 @@ function SettingRowLink({
   hint,
   href,
 }: {
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   label: string;
   hint: string;
   href: string;
@@ -128,15 +128,15 @@ function SettingRowLink({
       className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/40"
     >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted text-foreground">
-        <Icon className="h-4 w-4" strokeWidth={2} />
+        <Icon className="h-4 w-4" weight="fill" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium">{label}</div>
         <div className="text-[11px] text-muted-foreground">{hint}</div>
       </div>
-      <ChevronRight
+      <CaretRight
         className="h-4 w-4 shrink-0 text-muted-foreground"
-        strokeWidth={2}
+        weight="fill"
       />
     </Link>
   );
@@ -148,7 +148,7 @@ function SettingRowExternal({
   hint,
   href,
 }: {
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   label: string;
   hint: string;
   href: string;
@@ -161,15 +161,15 @@ function SettingRowExternal({
       className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/40"
     >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#229ED9]/15 text-[#229ED9]">
-        <Icon className="h-4 w-4" strokeWidth={2} />
+        <Icon className="h-4 w-4" weight="fill" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium">{label}</div>
         <div className="text-[11px] text-muted-foreground">{hint}</div>
       </div>
-      <ChevronRight
+      <CaretRight
         className="h-4 w-4 shrink-0 text-muted-foreground"
-        strokeWidth={2}
+        weight="fill"
       />
     </a>
   );

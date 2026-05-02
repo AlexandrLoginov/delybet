@@ -1,4 +1,4 @@
-import { Equal, TrendingDown, TrendingUp } from "lucide-react";
+import { Equals, TrendDown, TrendUp } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
 import type { KeyFactor } from "@/types/analysis";
@@ -20,10 +20,10 @@ export function KeyFactorsList({
         const isHome = f.impact === "POSITIVE_HOME";
         const isAway = f.impact === "POSITIVE_AWAY";
         const Icon = isHome
-          ? TrendingUp
+          ? TrendUp
           : isAway
-          ? TrendingDown
-          : Equal;
+          ? TrendDown
+          : Equals;
         const tone = isHome
           ? "text-success bg-success-muted ring-success/30"
           : isAway
@@ -43,7 +43,7 @@ export function KeyFactorsList({
                 tone
               )}
             >
-              <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+              <Icon className="h-3.5 w-3.5" weight="fill" />
             </span>
             <div className="min-w-0 flex-1">
               <div className="text-sm leading-snug">{f.factor}</div>

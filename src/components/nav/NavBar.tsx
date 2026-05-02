@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import {
-  CircleUser,
-  History,
+  Notebook,
   Star,
   Trophy,
-  type LucideIcon,
-} from "lucide-react";
+  UserCircle,
+} from "@phosphor-icons/react";
 import { useSyncExternalStore } from "react";
 
 import {
@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 interface NavItem {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   match: (path: string) => boolean;
   /** Показать индикатор рядом с иконкой при ненулевом `indicatorKey`. */
   indicatorWhen?: (key: string) => boolean;
@@ -36,12 +36,6 @@ const ITEMS: NavItem[] = [
       p === "/" || p === "/matches" || p.startsWith("/match/"),
   },
   {
-    href: "/history",
-    label: "История",
-    icon: History,
-    match: (p) => p.startsWith("/history"),
-  },
-  {
     href: "/favorites",
     label: "Избранное",
     icon: Star,
@@ -49,9 +43,15 @@ const ITEMS: NavItem[] = [
     indicatorWhen: (key) => key.length > 0,
   },
   {
+    href: "/history",
+    label: "История",
+    icon: Notebook,
+    match: (p) => p.startsWith("/history"),
+  },
+  {
     href: "/profile",
     label: "Профиль",
-    icon: CircleUser,
+    icon: UserCircle,
     match: (p) => p.startsWith("/profile"),
   },
 ];
@@ -91,11 +91,11 @@ export function NavBar() {
             >
               <span className="relative inline-flex">
                 <Icon
+                  weight="fill"
                   className={cn(
                     "h-[18px] w-[18px] transition-transform",
                     active && "scale-110 text-primary"
                   )}
-                  strokeWidth={active ? 2.25 : 2}
                   aria-hidden
                 />
                 {showFavDot ? (

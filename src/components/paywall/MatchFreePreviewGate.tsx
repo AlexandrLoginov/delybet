@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, Medal } from "lucide-react";
+import { LockSimple, Medal } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -18,7 +18,7 @@ function FreePreviewBlocked() {
   return (
     <main className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center gap-4 px-4 py-16 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-        <Lock className="h-5 w-5" strokeWidth={2} />
+        <LockSimple className="h-5 w-5" weight="fill" />
       </div>
       <div className="space-y-2">
         <h1 className="text-xl font-semibold tracking-tight">
@@ -32,7 +32,7 @@ function FreePreviewBlocked() {
         <UpgradeModal
           trigger={
             <Button className="gap-1.5">
-              <Medal className="h-3.5 w-3.5" strokeWidth={2} />
+              <Medal className="h-3.5 w-3.5" weight="fill" />
               Оформить Pro
             </Button>
           }

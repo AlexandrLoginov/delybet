@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { LockSimple } from "@phosphor-icons/react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +48,7 @@ export function RecommendationCard({
           </div>
           {!isPro && (
             <Badge variant="pro" className="gap-1">
-              <Lock className="h-2.5 w-2.5" strokeWidth={2} />
+              <LockSimple className="h-2.5 w-2.5" weight="fill" />
               Pro
             </Badge>
           )}

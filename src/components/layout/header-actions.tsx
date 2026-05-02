@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Headphones } from "lucide-react";
+import { Headphones } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -60,7 +60,7 @@ export function HeaderActions({ className }: { className?: string }) {
         aria-label="Поддержка"
       >
         <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
-          <Headphones className="h-4 w-4" aria-hidden />
+          <Headphones className="h-4 w-4" weight="fill" aria-hidden />
         </a>
       </Button>
     </div>

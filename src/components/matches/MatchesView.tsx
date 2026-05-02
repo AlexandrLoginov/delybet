@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RefreshCw, Trophy } from "lucide-react";
+import { ArrowClockwise, Trophy } from "@phosphor-icons/react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SportFilter } from "@/components/matches/SportFilter";
@@ -149,13 +149,13 @@ export function MatchesView() {
               role="status"
               aria-live="polite"
             >
-              <RefreshCw
+              <ArrowClockwise
                 className={cn(
                   "h-3.5 w-3.5 shrink-0",
                   analysisSyncing && "animate-spin",
                   analysisSyncing ? "text-primary" : "text-success"
                 )}
-                strokeWidth={2}
+                weight="fill"
               />
               <span>
                 {analysisSyncing ? (
@@ -245,7 +245,7 @@ function MatchList({
     return (
       <div className="rounded-xl border bg-card p-10 text-center">
         <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Trophy className="h-4 w-4" strokeWidth={2} />
+          <Trophy className="h-4 w-4" weight="fill" />
         </div>
         <div className="text-sm font-medium">Сейчас матчей нет</div>
         <p className="mt-1 text-xs text-muted-foreground">

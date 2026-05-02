@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CircleCheck } from "lucide-react";
+import { CheckCircle } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { SPORTS } from "@/lib/mock-data";
 import type { SportSlug } from "@/types/match";
@@ -43,7 +43,7 @@ export function SportsPreference({ initial }: { initial: SportSlug[] }) {
               )}
             >
               {active && (
-                <CircleCheck className="h-2.5 w-2.5" strokeWidth={2} />
+                <CheckCircle className="h-2.5 w-2.5" weight="fill" />
               )}
             </span>
           </button>

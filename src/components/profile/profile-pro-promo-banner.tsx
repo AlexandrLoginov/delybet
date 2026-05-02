@@ -1,6 +1,6 @@
 "use client";
 
-import { Medal } from "lucide-react";
+import { Medal } from "@phosphor-icons/react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ export function ProfileProPromoBanner() {
     <Card className="overflow-hidden border-primary/40">
       <CardContent className="flex items-center gap-3 bg-primary/[0.08] p-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-          <Medal className="h-4 w-4" strokeWidth={2} />
+          <Medal className="h-4 w-4" weight="fill" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold">DelyBet Pro</div>

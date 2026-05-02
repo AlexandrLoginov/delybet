@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Lock, MapPin } from "lucide-react";
+import { LockSimple, MapPin } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import { LiveBadge } from "@/components/matches/LiveBadge";
@@ -59,7 +59,7 @@ export function MatchCard({
         <UpgradeModal
           trigger={
             <Button size="sm" className="gap-1.5 shadow-lg">
-              <Lock className="h-3.5 w-3.5" strokeWidth={2} />
+              <LockSimple className="h-3.5 w-3.5" weight="fill" />
               Открыть в Pro
             </Button>
           }
@@ -123,7 +123,7 @@ function MatchCardBody({ match }: { match: Match }) {
 
           {!isLive && match.venue && (
             <div className="mt-2 flex items-center gap-1 text-[10px] text-muted-foreground">
-              <MapPin className="h-2.5 w-2.5 shrink-0" strokeWidth={2} />
+              <MapPin className="h-2.5 w-2.5 shrink-0" weight="fill" />
               <span className="truncate">{match.venue}</span>
             </div>
           )}

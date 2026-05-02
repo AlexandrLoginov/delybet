@@ -1,10 +1,10 @@
 import Link from "next/link";
 import {
-  ChevronLeft,
-  CircleCheck,
-  CircleX,
+  CaretLeft,
+  CheckCircle,
   Target,
-} from "lucide-react";
+  XCircle,
+} from "@phosphor-icons/react/ssr";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,7 +59,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
         <div className="mb-5">
           <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
             <Link href="/history">
-              <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+              <CaretLeft className="h-4 w-4" weight="fill" />
               История
             </Link>
           </Button>
@@ -144,9 +144,9 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
               )}
             >
               {correct ? (
-                <CircleCheck className="h-4 w-4" strokeWidth={2} />
+                <CheckCircle className="h-4 w-4" weight="fill" />
               ) : (
-                <CircleX className="h-4 w-4" strokeWidth={2} />
+                <XCircle className="h-4 w-4" weight="fill" />
               )}
             </div>
             <div className="min-w-0 space-y-1">
@@ -176,7 +176,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Target className="h-3.5 w-3.5" strokeWidth={2} />
+                <Target className="h-3.5 w-3.5" weight="fill" />
               </div>
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -316,9 +316,9 @@ function ResultTile({
             className="gap-1 px-1.5"
           >
             {correct ? (
-              <CircleCheck className="h-2.5 w-2.5" strokeWidth={2} />
+              <CheckCircle className="h-2.5 w-2.5" weight="fill" />
             ) : (
-              <CircleX className="h-2.5 w-2.5" strokeWidth={2} />
+              <XCircle className="h-2.5 w-2.5" weight="fill" />
             )}
             Ставка ИИ
           </Badge>

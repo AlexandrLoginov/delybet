@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, Radio } from "lucide-react";
+import { ArrowSquareOut, Radio } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +42,7 @@ export function NewsImpactList({ items }: NewsImpactListProps) {
     <>
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          <Radio className="h-4 w-4 text-foreground/80" strokeWidth={2} />
+          <Radio className="h-4 w-4 text-foreground/80" weight="fill" />
           Связка с медиафоном
         </div>
 
@@ -107,7 +107,10 @@ export function NewsImpactList({ items }: NewsImpactListProps) {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/50"
                           >
-                            <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2} />
+                            <ArrowSquareOut
+                              className="h-4 w-4 shrink-0 text-muted-foreground"
+                              weight="fill"
+                            />
                             <span className="min-w-0 break-words">{sourceLinkLabel(s)}</span>
                           </a>
                         </li>

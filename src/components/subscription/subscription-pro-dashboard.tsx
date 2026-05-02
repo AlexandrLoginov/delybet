@@ -2,7 +2,12 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { CalendarClock, ChevronLeft, History, Medal } from "lucide-react";
+import {
+  CaretLeft,
+  ClockClockwise,
+  ClockCounterClockwise,
+  Medal,
+} from "@phosphor-icons/react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,7 +59,7 @@ export function SubscriptionProDashboard() {
       <div className="mb-1">
         <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
           <Link href="/profile">
-            <ChevronLeft className="h-4 w-4 shrink-0" strokeWidth={2} />
+            <CaretLeft className="h-4 w-4 shrink-0" weight="fill" />
             Профиль
           </Link>
         </Button>
@@ -65,7 +70,7 @@ export function SubscriptionProDashboard() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <Medal className="h-5 w-5" strokeWidth={2} />
+                <Medal className="h-5 w-5" weight="fill" />
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -92,7 +97,7 @@ export function SubscriptionProDashboard() {
       <Card>
         <CardContent className="space-y-4 p-5">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            <CalendarClock className="h-4 w-4" strokeWidth={2} />
+            <ClockClockwise className="h-4 w-4" weight="fill" />
             Срок подписки
           </div>
           <div>
@@ -152,7 +157,7 @@ export function SubscriptionProDashboard() {
       <Card>
         <CardContent className="space-y-3 p-5">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            <History className="h-4 w-4" strokeWidth={2} />
+            <ClockCounterClockwise className="h-4 w-4" weight="fill" />
             История подписок
           </div>
           <ul className="divide-y divide-border rounded-lg border border-border bg-background">
