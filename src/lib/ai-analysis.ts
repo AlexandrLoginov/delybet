@@ -34,6 +34,14 @@ export interface AnalysisResult {
     outcome: string;
     confidence: "HIGH" | "MEDIUM" | "LOW";
     reasoning: string;
+    scenarios?: {
+      kind?: string;
+      label: string;
+      pick: string;
+      probability?: number | null;
+      confidence?: string;
+      reasoning?: string | null;
+    }[];
   };
 
   summary: string; // краткая версия для Free-пользователей
@@ -87,7 +95,7 @@ export async function analyzeMatch(
 
   const message = await anthropic.messages.create({
     model: anthropicMessagesModelId(),
-    max_tokens: 1024,
+    max_tokens: 1536,
     system: `Ты — эксперт по спортивной аналитике. Анализируй матчи объективно на основе данных.
 Всегда отвечай строго в JSON-формате без markdown-блоков и лишнего текста.`,
     messages: [{ role: "user", content: prompt }],
@@ -139,9 +147,19 @@ ${news.slice(0, 3).map((n: any) => `- ${n.title}`).join("\n") || "- Нет ак�
     "away": <число 0-100>
   },
   "recommendation": {
-    "outcome": "<победа хозяев / ничья / победа гостей>",
+    "outcome": "<главная формулировка по исходу: П1/P2/X или понятное название>",
     "confidence": "<HIGH | MEDIUM | LOW>",
-    "reasoning": "<1-2 предложения — ключевая причина>"
+    "reasoning": "<1–2 предложения — общая ключевая причина>",
+    "scenarios": [
+      {
+        "kind": "<MATCH_RESULT | TOTAL | BTTS | DOUBLE_CHANCE | HANDICAP | CUSTOM>",
+        "label": "<рынок по-русски, напр. «Тотал 2.5»>",
+        "pick": "<напр. ТБ 2.5 / ТМ 2.5 / Обе забьют — да / 1X>",
+        "probability": <null или число 0–100>,
+        "confidence": "<HIGH | MEDIUM | LOW>",
+        "reasoning": "<1 короткое предложение по этому рынку>"
+      }
+    ]
   },
   "summary": "<краткий вывод, 1 предложение>",
   "detailedAnalysis": "<развёрнутый анализ, 3-4 предложения>",
@@ -157,7 +175,9 @@ ${news.slice(0, 3).map((n: any) => `- ${n.title}`).join("\n") || "- Нет ак�
       "sources": [{ "label": "<издание>", "url": "<https://...>" }]
     }
   ]
-}`;
+}
+
+В recommendation.scenarios добавь **5–8 позиций**: обязательно MATCH_RESULT (исход), TOTAL (ТБ/ТМ по линии), BTTS; при уместности DOUBLE_CHANCE, HANDICAP. Формулировки — как в спортивной аналитике/беттинге по-русски.`;
 }
 
 // ── Парсер JSON-ответа модели ──────────────────────────────────────────────────
@@ -173,7 +193,12 @@ function parseAnalysisResponse(raw: string, matchId: string, isLive: boolean): A
     // Fallback если ответ модели некорректен
     parsed = {
       probabilities: { home: 45, draw: 25, away: 30 },
-      recommendation: { outcome: "Нет данных", confidence: "LOW", reasoning: "Не удалось разобрать ответ" },
+      recommendation: {
+        outcome: "Нет данных",
+        confidence: "LOW",
+        reasoning: "Не удалось разобрать ответ",
+        scenarios: [],
+      },
       summary: "Анализ временно недоступен",
       detailedAnalysis: "",
       keyFactors: [],
@@ -190,12 +215,80 @@ function parseAnalysisResponse(raw: string, matchId: string, isLive: boolean): A
     expiresAt,
     isLive,
     probabilities: parsed.probabilities,
-    recommendation: parsed.recommendation,
+    recommendation: normalizeRecommendation(parsed.recommendation),
     summary: parsed.summary,
     detailedAnalysis: parsed.detailedAnalysis,
     keyFactors: parsed.keyFactors ?? [],
     newsImpact: normalizeNewsImpact(parsed.newsImpact),
   };
+}
+
+const SCENARIO_KINDS = new Set([
+  "MATCH_RESULT",
+  "TOTAL",
+  "BTTS",
+  "DOUBLE_CHANCE",
+  "HANDICAP",
+  "CUSTOM",
+]);
+
+const CONFIDENCE_LEVELS = new Set(["HIGH", "MEDIUM", "LOW"]);
+
+function normalizeRecommendation(raw: unknown): AnalysisResult["recommendation"] {
+  if (!raw || typeof raw !== "object") {
+    return {
+      outcome: "Нет данных",
+      confidence: "LOW",
+      reasoning: "Не удалось разобрать рекомендацию",
+      scenarios: [],
+    };
+  }
+  const r = raw as Record<string, unknown>;
+  const outcome = typeof r.outcome === "string" ? r.outcome : "Нет данных";
+  const confidence =
+    typeof r.confidence === "string" && CONFIDENCE_LEVELS.has(r.confidence)
+      ? (r.confidence as "HIGH" | "MEDIUM" | "LOW")
+      : "LOW";
+  const reasoning =
+    typeof r.reasoning === "string" ? r.reasoning : "";
+
+  const scenarios: NonNullable<AnalysisResult["recommendation"]["scenarios"]> =
+    [];
+  if (Array.isArray(r.scenarios)) {
+    for (const item of r.scenarios) {
+      if (!item || typeof item !== "object") continue;
+      const o = item as Record<string, unknown>;
+      const label = typeof o.label === "string" ? o.label.trim() : "";
+      const pick = typeof o.pick === "string" ? o.pick.trim() : "";
+      if (!label || !pick) continue;
+      const kindRaw = typeof o.kind === "string" ? o.kind.toUpperCase().trim() : "";
+      const kind = SCENARIO_KINDS.has(kindRaw) ? kindRaw : undefined;
+      let probability: number | null | undefined;
+      if (o.probability === null || o.probability === undefined) {
+        probability = o.probability === null ? null : undefined;
+      } else if (typeof o.probability === "number" && Number.isFinite(o.probability)) {
+        probability = Math.round(Math.min(100, Math.max(0, o.probability)));
+      }
+      let scConfidence: "HIGH" | "MEDIUM" | "LOW" | undefined;
+      if (typeof o.confidence === "string" && CONFIDENCE_LEVELS.has(o.confidence)) {
+        scConfidence = o.confidence as "HIGH" | "MEDIUM" | "LOW";
+      }
+      const scReason =
+        typeof o.reasoning === "string" && o.reasoning.trim()
+          ? o.reasoning.trim()
+          : undefined;
+      scenarios.push({
+        kind,
+        label,
+        pick,
+        probability: probability ?? null,
+        confidence: scConfidence,
+        reasoning: scReason ?? null,
+      });
+    }
+  }
+
+  return { outcome, confidence, reasoning, scenarios };
 }
 
 function normalizeNewsImpact(

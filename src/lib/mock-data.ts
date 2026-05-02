@@ -7,7 +7,10 @@ import type {
   SportSlug,
   Team,
 } from "@/types/match";
-import type { FullAnalysis } from "@/types/analysis";
+import type {
+  AnalysisRecommendationScenario,
+  FullAnalysis,
+} from "@/types/analysis";
 
 const inHours = (h: number) => new Date(Date.now() + h * 3600_000).toISOString();
 const hoursAgo = (h: number) => new Date(Date.now() - h * 3600_000).toISOString();
@@ -947,6 +950,210 @@ export function getMockHistoryById(id: string): HistoryMatch | undefined {
   return MOCK_HISTORY.find((m) => m.id === id);
 }
 
+function mockRecommendationScenarios(
+  match: Match,
+  outcomeText: string
+): AnalysisRecommendationScenario[] {
+  const conf = match.aiPick?.confidence ?? "MEDIUM";
+
+  switch (match.sport) {
+    case "football":
+      return [
+        {
+          kind: "MATCH_RESULT",
+          label: "Исход",
+          pick: outcomeText,
+          probability: match.aiPick?.probability ?? null,
+          confidence: conf,
+        },
+        {
+          kind: "DOUBLE_CHANCE",
+          label: "Двойной шанс",
+          pick:
+            match.aiPick?.side === "HOME"
+              ? `1X — запас против поражения ${match.home.shortName}`
+              : match.aiPick?.side === "AWAY"
+                ? `X2 — ${match.away.shortName} не проигрывает`
+                : "1X",
+          probability: match.aiPick?.side === "HOME" ? 72 : match.aiPick?.side === "AWAY" ? 66 : 70,
+          confidence: "HIGH",
+          reasoning:
+            "Доминирующий стиль хозяев и редкий разгром дают узкий класс ошибки по счёту; страховка по ДШ снижает волатильность.",
+        },
+        {
+          kind: "TOTAL",
+          label: "Тотал голов 2.5",
+          pick: "ТБ 2.5",
+          probability: 61,
+          confidence: "MEDIUM",
+          reasoning:
+            "Обе команды последние месяцы набирают xG суммарно около выше линии; гости участвуют в открытых матчах.",
+        },
+        {
+          kind: "TOTAL",
+          label: "Тотал голов 3.5",
+          pick: "ТМ 3.5",
+          probability: 58,
+          confidence: "MEDIUM",
+          reasoning:
+            "При тактике второго тайма тренеры часто уплотняют центр — не каждый матч доходит до четырёх результативных действий.",
+        },
+        {
+          kind: "BTTS",
+          label: "Обе забьют",
+          pick: "Да — обе забьют",
+          probability: 57,
+          confidence: "LOW",
+          reasoning:
+            "У оборон слабее концентрация после стандарта и оба атакующих блока давят высоким прессингом.",
+        },
+        {
+          kind: "HANDICAP",
+          label: `Фора (0) · ${match.home.shortName}`,
+          pick:
+            match.aiPick?.side === "HOME"
+              ? `Фора (0) на хозяев — возврат при ничьей`
+              : `Фора (+1) гостям — узкая недооценка рынка`,
+          probability: match.aiPick?.side === "HOME" ? 55 : 52,
+          confidence: "LOW",
+          reasoning:
+            "Рынок чуть недооценивает качество финиша у выбранной стороны при равном счёте по моментам.",
+        },
+        {
+          kind: "CUSTOM",
+          label: "Индивидуальный тотал хозяев 1.5",
+          pick: "ИТ1Б (1.5)",
+          probability: 54,
+          confidence: "MEDIUM",
+          reasoning:
+            "Домашняя команда стабильно создаёт 1.5+ ожидаемых гола с учётом пенальти-ситуаций.",
+        },
+      ];
+
+    case "basketball": {
+      const fav =
+        match.aiPick?.side === "AWAY" ? match.away.shortName : match.home.shortName;
+      return [
+        {
+          kind: "MATCH_RESULT",
+          label: "Исход (включая овертайм)",
+          pick: outcomeText,
+          probability: match.aiPick?.probability ?? null,
+          confidence: conf,
+        },
+        {
+          kind: "HANDICAP",
+          label: `Фора · ${match.home.shortName}`,
+          pick: `-4.5 / ${match.home.shortName}`,
+          probability: 56,
+          confidence: "MEDIUM",
+          reasoning:
+            "Домашнее табло даёт перевес в второй половине, рынок тянет минус на фаворите.",
+        },
+        {
+          kind: "TOTAL",
+          label: "Тотал очков матча ~224.5",
+          pick: "ТБ 224.5",
+          probability: 59,
+          confidence: "HIGH",
+          reasoning:
+            "Темп в атаках и процент вторых шансов указывают на суммарный защитный разрыв.",
+        },
+        {
+          kind: "TOTAL",
+          label: "Инд. тотал хозяев ~112.5",
+          pick: "ТБ 112.5",
+          probability: 55,
+          confidence: "MEDIUM",
+          reasoning: "Ротация бенча хозяев помогает протянуть серию четвертей.",
+        },
+        {
+          kind: "CUSTOM",
+          label: "Кто лидирует после 1-й половины",
+          pick: `${fav} впереди на перерыве`,
+          probability: 54,
+          confidence: "LOW",
+          reasoning: "Стартовые расстановки чаще выгодны фавориту в первых 12 минутах.",
+        },
+      ];
+    }
+
+    case "tennis":
+      return [
+        {
+          kind: "MATCH_RESULT",
+          label: "Победитель матча",
+          pick: outcomeText,
+          probability: match.aiPick?.probability ?? null,
+          confidence: conf,
+        },
+        {
+          kind: "HANDICAP",
+          label: "Фора по геймам",
+          pick: "+3.5 гейма аутсайдеру",
+          probability: 52,
+          confidence: "MEDIUM",
+          reasoning: "Сервис у аутсайдера держит сеты близкими по счёту.",
+        },
+        {
+          kind: "TOTAL",
+          label: "Тотал геймов (≈22.5)",
+          pick: "ТБ 22.5",
+          probability: 58,
+          confidence: "HIGH",
+          reasoning: "Оба стабильно берут геймы на приёме в середине сета.",
+        },
+        {
+          kind: "CUSTOM",
+          label: "Тотал сетов",
+          pick: "Более 2.5 сетов (три сета)",
+          probability: 47,
+          confidence: "LOW",
+          reasoning: "Разница в классе не гарантирует сухой счёт — возможен третий отрезок.",
+        },
+      ];
+
+    case "volleyball":
+    default:
+      return [
+        {
+          kind: "MATCH_RESULT",
+          label: "Исход (матч до 3–5 сетов)",
+          pick: outcomeText,
+          probability: match.aiPick?.probability ?? null,
+          confidence: conf,
+        },
+        {
+          kind: "TOTAL",
+          label: "Тотал сетов 3.5",
+          pick: "ТБ 3.5 (четыре или пять партий)",
+          probability: 55,
+          confidence: "MEDIUM",
+          reasoning:
+            "Похожая сила в приёме — матч затягивается на четырёх сетах в типичном сценарии.",
+        },
+        {
+          kind: "HANDICAP",
+          label: "Фора по сетам (+1.5)",
+          pick: `${match.away.shortName} (+1.5 сета)`,
+          probability: 52,
+          confidence: "LOW",
+          reasoning:
+            "Камбэк в одном из первых двух сетов вероятнее, чем кажется по коэффициенту.",
+        },
+        {
+          kind: "CUSTOM",
+          label: "Эйс-хот в начале партии",
+          pick: `${match.home.shortName} первой подачей чаще набирает два очка подряд`,
+          probability: 48,
+          confidence: "LOW",
+          reasoning:
+            "Сильный блок гостей смещает старт каждого сета.",
+        },
+      ];
+  }
+}
+
 export function getMockAnalysis(matchId: string): FullAnalysis {
   const match = getMockMatchById(matchId) ?? MOCK_MATCHES[0];
   const isLive = match.status === "live";
@@ -957,6 +1164,9 @@ export function getMockAnalysis(matchId: string): FullAnalysis {
     away: 30,
   };
 
+  const outcomePick =
+    match.aiPick?.outcome ?? `Фаворит: ${match.home.name}`;
+
   return {
     matchId,
     generatedAt: new Date().toISOString(),
@@ -965,10 +1175,11 @@ export function getMockAnalysis(matchId: string): FullAnalysis {
     isPro: false,
     probabilities,
     recommendation: {
-      outcome: match.aiPick?.outcome ?? `Победа: ${match.home.name}`,
+      outcome: outcomePick,
       confidence: match.aiPick?.confidence ?? "HIGH",
       reasoning:
-        "Хозяева в отличной форме (4 победы подряд), играют дома, у соперника травмы ключевых игроков защиты.",
+        "Модель сочла домашнее преимущество и форму решающими; по рынку ожиданных голов — умеренный перевес на открытый футбол второго тайма.",
+      scenarios: mockRecommendationScenarios(match, outcomePick),
     },
     summary:
       "Хозяева — фавориты. Высокая вероятность победы за счёт домашнего фактора и формы.",
