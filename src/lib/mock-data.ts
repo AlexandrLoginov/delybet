@@ -830,6 +830,60 @@ function historyProbs(
   return { probHome: 33, probDraw: 35, probAway: 32 };
 }
 
+function historyFormLetters(seq: FormResult[]): string {
+  return seq.slice(0, 5).map((r) => (r === "W" ? "В" : r === "D" ? "Н" : "П")).join(" · ");
+}
+
+function historyConfidenceBrief(confidence: Confidence): string {
+  switch (confidence) {
+    case "HIGH":
+      return "повышенная уверенность";
+    case "LOW":
+      return "сдержанная уверенность, повышенный разброс";
+    default:
+      return "умеренная уверенность";
+  }
+}
+
+function historyPredictionNarrative(
+  sport: SportSlug,
+  home: Team,
+  away: Team,
+  predicted: "HOME" | "DRAW" | "AWAY",
+  probs: { probHome: number; probDraw: number | null; probAway: number },
+  outcome: string,
+  confidence: Confidence,
+  formHome: FormResult[],
+  formAway: FormResult[]
+): { summary: string; reasoning: string } {
+  const draws =
+    probs.probDraw !== null
+      ? `ничья около ${probs.probDraw}%`
+      : "ничья маркета в расчёт не включалась";
+
+  const lead =
+    predicted === "HOME"
+      ? `Основная масса симуляций упёрлась в положительную асимметрию ${home.shortName}: совокупный перекос качества финиширования против ожиданного блока середины делает ставку модели узкой именно по домашней победе.`
+      : predicted === "AWAY"
+      ? `Подбор факторов сместил апостериорное распределение в пользу ${away.shortName}: качество переходной фазы против стандартной глубины ротаций хозяев зафиксировал переоценку «домашнего» априори.`
+      : `Выбран плотный кластер сценариев типа Х: упор на переходах и экономии ключевых минут второго времени задаёт плато между командами, что отражено в симметричных хвостах распределений.`;
+
+  const sportCue =
+    sport === "football"
+      ? "Футбольная рамка: глубина финиширующего действия, стандарты против компактности обороны второго времени и ожидания по голам суммированы в апостериоре."
+      : sport === "basketball"
+      ? "NBA-контекст: темп вторых шансов, периметр против защиты кольца — линии чистого рейтинга сопоставлены с ротациями ключевых фронткourt-минут."
+      : sport === "tennis"
+      ? "Форматы сетов: учтены циклы ошибок второй первой условностей и эластичность брейковых баталий между подачами."
+      : "Волейбол: баланс эффективности атаки и приёма, стабильность серий переходных розыгрышей на второй времени установки.";
+
+  const summary = `Оценки до первого розыграша: дом ${home.shortName} ~${probs.probHome}%, ${draws}, выездные ~${probs.probAway}%. Ключевая ставка модели «${outcome}» при ${historyConfidenceBrief(confidence)}.`;
+
+  const reasoning = `${lead}\n\nМягкая регуляризация по форме кодами тура: ${home.shortName} ${historyFormLetters(formHome)}, ${away.shortName} ${historyFormLetters(formAway)} — не фильтрует единственный триггер, а смещает вес второстепенных факторов.\n\n${sportCue}\n\nНиже сохранённые вероятности — снимок калибровки на момент прематчевого цикла; фактический исход является постфактум-бенчмарком, отдельно от качества промежуточных гипотез.`;
+
+  return { summary, reasoning };
+}
+
 function wrongPrediction(
   actual: "HOME" | "DRAW" | "AWAY",
   sport: SportSlug,
@@ -892,6 +946,8 @@ function buildGeneratedHistory(): HistoryMatch[] {
     const probs = historyProbs(sport, predicted);
     const confidence: Confidence =
       i % 5 === 0 ? "HIGH" : i % 5 === 2 ? "LOW" : "MEDIUM";
+    const formHomeSeq = historyForm(i);
+    const formAwaySeq = historyForm(i + 19);
 
     const fl = FOOTBALL_LEAGUES[i % FOOTBALL_LEAGUES.length]!;
     const meta =
@@ -921,15 +977,23 @@ function buildGeneratedHistory(): HistoryMatch[] {
       scoreHome,
       scoreAway,
       actualOutcome: actual,
-      lastFiveHome: historyForm(i),
-      lastFiveAway: historyForm(i + 19),
+      lastFiveHome: formHomeSeq,
+      lastFiveAway: formAwaySeq,
       prediction: {
         ...probs,
         outcome,
         confidence,
-        summary: `Модель отдавала преимущество: ${outcome}.`,
-        reasoning:
-          "Сводка по форме, очным встречам и составу на матч (синтетический мок для демонстрации точности).",
+        ...historyPredictionNarrative(
+          sport,
+          home,
+          away,
+          predicted,
+          probs,
+          outcome,
+          confidence,
+          formHomeSeq,
+          formAwaySeq
+        ),
       },
     });
   }
