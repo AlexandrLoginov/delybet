@@ -106,16 +106,9 @@ export function RecommendationCard({
 
   return (
     <section className="space-y-3">
-      <div className="px-1">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <h2 className="text-base font-semibold tracking-tight text-foreground">
-            Сценарии ИИ
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            Отдельная карточка на каждый рынок: исход, тоталы, обе забьют и др.
-          </p>
-        </div>
-      </div>
+      <h2 className="px-1 text-base font-semibold tracking-tight text-foreground">
+        Сценарии ИИ
+      </h2>
 
       {isPro ? (
         <>
