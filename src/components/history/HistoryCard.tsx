@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { CheckCircle, XCircle } from "@phosphor-icons/react";
 
-import { Badge } from "@/components/ui/badge";
+import { AiPickStrip } from "@/components/matches/AiPickStrip";
 import { TeamLogo } from "@/components/matches/TeamLogo";
 import { FormPills } from "@/components/matches/FormPills";
-import { scenariosAnalyzedCountForSport } from "@/lib/analysis-scenario-count";
 import { cn } from "@/lib/utils";
 import type { HistoryMatch } from "@/types/match";
 
@@ -13,24 +11,11 @@ interface HistoryCardProps {
 }
 
 export function HistoryCard({ match }: HistoryCardProps) {
-  const predictedHomeWin = match.prediction.outcome
-    .toLowerCase()
-    .includes(match.home.name.toLowerCase());
-  const predictedDraw = /ничь/i.test(match.prediction.outcome);
-  const predicted: "HOME" | "DRAW" | "AWAY" = predictedHomeWin
-    ? "HOME"
-    : predictedDraw
-    ? "DRAW"
-    : "AWAY";
-
-  const correct = predicted === match.actualOutcome;
   const finished = new Date(match.finishedISO);
   const dateLabel = finished.toLocaleDateString("ru-RU", {
     day: "numeric",
     month: "short",
   });
-
-  const scenariosCount = scenariosAnalyzedCountForSport(match.sport);
 
   return (
     <Link
@@ -39,26 +24,11 @@ export function HistoryCard({ match }: HistoryCardProps) {
       className="group block overflow-hidden rounded-xl border bg-card transition-colors hover:bg-accent/40"
     >
       <div className="grid grid-cols-[76px_1fr] items-start gap-4 px-5 pt-3.5 pb-3">
-        <div className="flex flex-col items-center justify-center gap-1.5 self-stretch border-r border-border pr-4">
+        <div className="flex flex-col items-center justify-center gap-1 self-stretch border-r border-border py-0.5 pr-4">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             {dateLabel}
           </span>
-          <Badge
-            variant={correct ? "success" : "live"}
-            className="gap-1 px-1.5"
-          >
-            {correct ? (
-              <>
-                <CheckCircle className="h-2.5 w-2.5" weight="fill" />
-                Точно
-              </>
-            ) : (
-              <>
-                <XCircle className="h-2.5 w-2.5" weight="fill" />
-                Ошибся
-              </>
-            )}
-          </Badge>
+          <span className="text-[10px] font-semibold text-foreground">Завершено</span>
         </div>
 
         <div className="min-w-0">
@@ -86,17 +56,7 @@ export function HistoryCard({ match }: HistoryCardProps) {
       </div>
 
       <div className="border-t border-border">
-        <div className="flex items-center gap-2 px-5 py-2.5 text-[11px]">
-          <span className="shrink-0 font-semibold uppercase tracking-wider text-muted-foreground">
-            ИИ
-          </span>
-          <span className="min-w-0 flex-1 truncate text-foreground/85">
-            Сценариев проанализировано
-          </span>
-          <span className="shrink-0 tabular-nums font-semibold text-foreground">
-            {scenariosCount}
-          </span>
-        </div>
+        <AiPickStrip pick={match.aiPick} sport={match.sport} forceShow />
       </div>
     </Link>
   );
