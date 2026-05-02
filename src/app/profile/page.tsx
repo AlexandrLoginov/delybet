@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   Bell,
   ChevronRight,
-  Fingerprint,
   Headphones,
   Medal,
   Megaphone,
@@ -11,9 +10,8 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DarkThemeSwitch } from "@/components/theme/dark-theme-switch";
-import { ProfilePlanBadge } from "@/components/profile/profile-plan-badge";
+import { ProfileTelegramIdentity } from "@/components/profile/profile-telegram-identity";
 import { ProfileProPromoBanner } from "@/components/profile/profile-pro-promo-banner";
 import { ProModeDevToggle } from "@/components/profile/pro-mode-dev-toggle";
 
@@ -21,22 +19,10 @@ export const metadata = {
   title: "Профиль · DelyBet",
 };
 
-const USER = {
-  name: "Александр Логинов",
-  telegramId: "387429012",
-  initials: "АЛ",
-  joinedISO: "2025-11-12",
-};
-
 const TG_CHANNEL_URL = "https://t.me/delybet_news";
 const TG_CHANNEL_HANDLE = "@delybet_news";
 
 export default function ProfilePage() {
-  const joined = new Date(USER.joinedISO).toLocaleDateString("ru-RU", {
-    month: "long",
-    year: "numeric",
-  });
-
   return (
     <>
       <main className="mx-auto w-full max-w-2xl space-y-6 px-4 pb-6 pt-5">
@@ -45,34 +31,7 @@ export default function ProfilePage() {
             Профиль
           </h1>
         </div>
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-14 w-14">
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {USER.initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="truncate text-base font-semibold">
-                    {USER.name}
-                  </span>
-                  <ProfilePlanBadge />
-                </div>
-                <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                  <Fingerprint className="h-3 w-3 shrink-0" strokeWidth={2} />
-                  <span className="truncate tabular-num">
-                    ID {USER.telegramId}
-                  </span>
-                </div>
-                <div className="mt-0.5 text-[11px] text-muted-foreground">
-                  С нами с {joined}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <ProfileTelegramIdentity />
 
         <ProfileProPromoBanner />
 
