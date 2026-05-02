@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { BrushCleaning, Star } from "lucide-react";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import {
+  clearAllFavoriteMatchIds,
   getFavoriteMatchesServerSnapshot,
   getFavoriteMatchesSnapshot,
   subscribeFavoritesChange,
@@ -114,6 +122,7 @@ function FavoritesGroupedList({
 
 export function FavoritesView() {
   const [tab, setTab] = useState<"upcoming" | "live">("upcoming");
+  const [clearOpen, setClearOpen] = useState(false);
   const devPro = useDevProPreview();
   const favoriteKey = useSyncExternalStore(
     subscribeFavoritesChange,
@@ -177,10 +186,57 @@ export function FavoritesView() {
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 pb-6 pt-5">
+      <Drawer open={clearOpen} onOpenChange={setClearOpen}>
+        <DrawerContent>
+          <div className="px-6 pb-2">
+            <DrawerHeader className="px-0 pt-0">
+              <DrawerTitle className="text-left text-base leading-snug">
+                Вы уверены, что хотите очистить избранное?
+              </DrawerTitle>
+            </DrawerHeader>
+          </div>
+          <DrawerFooter className="gap-2">
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-full"
+              onClick={() => {
+                clearAllFavoriteMatchIds();
+                setClearOpen(false);
+              }}
+            >
+              Очистить
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => setClearOpen(false)}
+            >
+              Отмена
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
       <div className="mb-5">
-        <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
-          Избранное
-        </h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
+            Избранное
+          </h1>
+          {favorites.length > 0 ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="mt-0.5 shrink-0 rounded-[8px] text-muted-foreground hover:text-foreground"
+              aria-label="Очистить избранное"
+              onClick={() => setClearOpen(true)}
+            >
+              <BrushCleaning className="h-[18px] w-[18px]" strokeWidth={2} />
+            </Button>
+          ) : null}
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Матчи, которые ты сохранил на экране анализа
         </p>

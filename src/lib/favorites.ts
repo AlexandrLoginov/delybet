@@ -44,6 +44,11 @@ export function isFavoriteMatchId(matchId: string): boolean {
   return getFavoriteMatchIds().has(matchId);
 }
 
+/** Удаляет все матчи из избранного и рассылает событие обновления. */
+export function clearAllFavoriteMatchIds(): void {
+  persistFavoriteMatchIds(new Set());
+}
+
 function snapshotFavoriteIdsJoined(): string {
   return [...getFavoriteMatchIds()].sort().join("\0");
 }
