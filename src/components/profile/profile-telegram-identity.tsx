@@ -40,10 +40,17 @@ export function ProfileTelegramIdentity() {
           WebApp.expand();
         }
 
-        const initData = WebApp.initData ?? "";
-        const unsafeUser = WebApp.initDataUnsafe?.user as
-          | TelegramWebAppUser
-          | undefined;
+        const tg = (
+          typeof window !== "undefined"
+            ? (window as unknown as { Telegram?: { WebApp?: typeof WebApp } })
+                .Telegram?.WebApp
+            : undefined
+        );
+
+        const initData =
+          (WebApp.initData || tg?.initData || "").trim();
+        const unsafeUser = (WebApp.initDataUnsafe?.user ??
+          tg?.initDataUnsafe?.user) as TelegramWebAppUser | undefined;
 
         if (!initData && !unsafeUser) {
           setState({ status: "browser" });
@@ -142,11 +149,15 @@ export function ProfileTelegramIdentity() {
       <Card>
         <CardContent className="space-y-3 p-5">
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Откройте профиль из Telegram-бота (веб-приложение), чтобы
-            автоматически подставились имя, фото и ID аккаунта.
+            Данные профиля доступны только внутри{" "}
+            <span className="font-medium text-foreground">Telegram Mini App</span>{" "}
+            с непустым <code className="text-xs">initData</code>.
           </p>
           <p className="text-[11px] text-muted-foreground">
-            В обычном браузере данные Telegram недоступны.
+            В BotFather для меню бота укажите тип{" "}
+            <span className="font-medium text-foreground/90">Web App</span> и HTTPS-URL
+            сайта (не обычную ссылку «открыть в браузере»). После смены настроек
+            полностью закройте мини-приложение и откройте снова из чата с ботом.
           </p>
         </CardContent>
       </Card>

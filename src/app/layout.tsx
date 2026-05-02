@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { NavBar } from "@/components/nav/NavBar";
@@ -35,6 +36,11 @@ export default function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning className={inter.variable}>
       <body className="min-h-screen bg-background font-sans antialiased">
+        {/* Telegram Mini App: до React — иначе initData может быть пустым */}
+        <Script
+          src="https://telegram.org/js/telegram-web-app.js"
+          strategy="beforeInteractive"
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
