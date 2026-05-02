@@ -20,6 +20,7 @@ export function DarkThemeSwitch() {
     <button
       type="button"
       role="switch"
+      data-telegram-gate-exempt
       aria-checked={isDark}
       aria-label="Темная тема"
       onClick={() => setTheme(isDark ? "light" : "dark")}

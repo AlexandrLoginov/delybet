@@ -4,6 +4,8 @@ import Script from "next/script";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { NavBar } from "@/components/nav/NavBar";
+import { TelegramBrowserGateProvider } from "@/components/telegram/telegram-browser-gate-provider";
+import { TelegramSessionProvider } from "@/lib/telegram/use-telegram-session";
 
 import "./globals.css";
 
@@ -47,10 +49,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="min-h-screen pt-[96px] pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
-            {children}
-          </div>
-          <NavBar />
+          <TelegramSessionProvider>
+            <TelegramBrowserGateProvider>
+              <div className="min-h-screen pt-[96px] pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
+                {children}
+              </div>
+              <NavBar />
+            </TelegramBrowserGateProvider>
+          </TelegramSessionProvider>
         </ThemeProvider>
       </body>
     </html>

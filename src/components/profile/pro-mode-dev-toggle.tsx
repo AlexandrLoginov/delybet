@@ -9,7 +9,10 @@ export function ProModeDevToggle() {
 
   return (
     <div className="flex justify-center pb-1">
-      <div className="flex items-center gap-3 rounded-lg border border-border bg-card/60 px-3 py-2">
+      <div
+        data-telegram-gate-exempt
+        className="flex items-center gap-3 rounded-lg border border-border bg-card/60 px-3 py-2"
+      >
         <span className="text-xs font-medium text-muted-foreground">
           Режим Pro (тест)
         </span>

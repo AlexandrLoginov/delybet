@@ -27,7 +27,7 @@ export function AppPageSkeleton({
               />
               <div className="flex min-h-[76px] min-w-0 flex-1 flex-col justify-center gap-2">
                 <Skeleton className="h-5 w-[min(220px,75%)] rounded-lg" />
-                <Skeleton className="h-3.5 w-full max-w-[240px] rounded-md" />
+                <Skeleton className="h-3.5 w-[min(200px,85%)] rounded-md" />
                 <div className="flex items-center gap-2 pt-0.5">
                   <Skeleton className="h-3 w-10 rounded-md" aria-hidden />
                   <Skeleton className="h-5 w-14 rounded-full" aria-hidden />
