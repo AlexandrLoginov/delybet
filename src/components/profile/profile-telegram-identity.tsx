@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ProfilePlanBadge } from "@/components/profile/profile-plan-badge";
 import {
   displayNameFromTelegramUser,
@@ -129,12 +130,15 @@ export function ProfileTelegramIdentity() {
     return (
       <Card>
         <CardContent className="p-5">
-          <div className="flex animate-pulse items-center gap-4">
-            <div className="h-14 w-14 shrink-0 rounded-full bg-muted" />
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="h-4 w-40 rounded bg-muted" />
-              <div className="h-3 w-28 rounded bg-muted" />
-              <div className="h-3 w-36 rounded bg-muted" />
+          <div className="flex min-h-[120px] items-start gap-4">
+            <Skeleton className="h-14 w-14 shrink-0 rounded-full" aria-hidden />
+            <div className="flex min-h-[92px] min-w-0 flex-1 flex-col justify-center gap-2.5">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-[min(220px,70%)] rounded-lg" aria-hidden />
+                <Skeleton className="h-5 w-14 shrink-0 rounded-full" aria-hidden />
+              </div>
+              <Skeleton className="h-3.5 w-40 rounded-md" aria-hidden />
+              <Skeleton className="h-3 w-48 rounded-md" aria-hidden />
             </div>
           </div>
         </CardContent>
