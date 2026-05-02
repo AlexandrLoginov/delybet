@@ -114,42 +114,42 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
                 <TeamLogo team={match.away} size="xl" />
               </TeamColumn>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card
-          className={cn(
-            "mt-4 overflow-hidden border",
-            correct
-              ? "border-success/40 bg-success-muted/40 dark:bg-success-muted/30"
-              : "border-destructive/40 bg-destructive/5"
-          )}
-        >
-          <CardContent className="flex items-start gap-3 p-4">
-            <div
-              className={cn(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-md ring-1 ring-inset",
-                correct
-                  ? "bg-success-muted text-success ring-success/30"
-                  : "bg-destructive/10 text-destructive ring-destructive/30"
-              )}
-            >
-              {correct ? (
-                <CheckCircle className="h-4 w-4" weight="fill" />
-              ) : (
-                <XCircle className="h-4 w-4" weight="fill" />
-              )}
-            </div>
-            <div className="min-w-0 space-y-1">
-              <span className="text-sm font-semibold">
-                {correct
-                  ? "ИИ угадал исход"
-                  : "ИИ ошибся в прогнозе"}
-              </span>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                Прогноз: <span className="text-foreground">{match.prediction.outcome}</span>{" "}
-                · Факт: <span className="text-foreground">{actualLabel}</span>
-              </p>
+            <Separator />
+
+            <div className="flex justify-center px-1">
+              <div className="flex max-w-md items-center gap-3 md:gap-4">
+                {correct ? (
+                  <CheckCircle
+                    className="h-11 w-11 shrink-0 text-success md:h-12 md:w-12"
+                    weight="fill"
+                    aria-hidden
+                  />
+                ) : (
+                  <XCircle
+                    className="h-11 w-11 shrink-0 text-destructive md:h-12 md:w-12"
+                    weight="fill"
+                    aria-hidden
+                  />
+                )}
+                <div className="flex min-w-0 flex-col gap-1.5 text-center">
+                  <p className="text-sm font-semibold text-foreground">
+                    {correct
+                      ? "ИИ угадал исход"
+                      : "ИИ не угадал исход"}
+                  </p>
+                  <p className="text-balance text-sm text-muted-foreground">
+                    Прогноз:&nbsp;
+                    <span className="break-words text-foreground">
+                      {match.prediction.outcome}
+                    </span>
+                  </p>
+                  <p className="text-balance text-xs text-muted-foreground">
+                    Факт:&nbsp;
+                    <span className="text-foreground">{actualLabel}</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

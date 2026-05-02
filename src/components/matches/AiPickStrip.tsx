@@ -6,12 +6,30 @@ interface AiPickStripProps {
   sport: SportSlug;
   /** Карточка истории без `aiPick` — блок со счётчиком сценариев всё равно показываем. */
   forceShow?: boolean;
+  /** Завершённое событие (история): другой текст слева/справа. */
+  variant?: "analysis" | "finished";
 }
 
-export function AiPickStrip({ pick, sport, forceShow = false }: AiPickStripProps) {
+export function AiPickStrip({
+  pick,
+  sport,
+  forceShow = false,
+  variant = "analysis",
+}: AiPickStripProps) {
   if (!pick && !forceShow) return null;
 
-  const n = scenariosAnalyzedCountForSport(sport);
+  const n = variant === "analysis" ? scenariosAnalyzedCountForSport(sport) : null;
+
+  if (variant === "finished") {
+    return (
+      <div className="flex items-center justify-between gap-3 px-5 py-2.5 text-[11px]">
+        <span className="min-w-0 truncate font-medium text-foreground">
+          Событие завершено
+        </span>
+        <span className="shrink-0 font-semibold text-primary">Смотреть результаты</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-between gap-3 px-5 py-2.5 text-[11px]">

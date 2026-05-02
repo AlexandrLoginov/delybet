@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle, XCircle } from "@phosphor-icons/react";
 
 import { AiPickStrip } from "@/components/matches/AiPickStrip";
 import { TeamLogo } from "@/components/matches/TeamLogo";
@@ -11,6 +12,17 @@ interface HistoryCardProps {
 }
 
 export function HistoryCard({ match }: HistoryCardProps) {
+  const predictedHomeWin = match.prediction.outcome
+    .toLowerCase()
+    .includes(match.home.name.toLowerCase());
+  const predictedDraw = /ничь/i.test(match.prediction.outcome);
+  const predicted: "HOME" | "DRAW" | "AWAY" = predictedHomeWin
+    ? "HOME"
+    : predictedDraw
+      ? "DRAW"
+      : "AWAY";
+  const aiCorrect = predicted === match.actualOutcome;
+
   const finished = new Date(match.finishedISO);
   const dateLabel = finished.toLocaleDateString("ru-RU", {
     day: "numeric",
@@ -25,6 +37,22 @@ export function HistoryCard({ match }: HistoryCardProps) {
     >
       <div className="grid grid-cols-[76px_1fr] items-start gap-4 px-5 pt-3.5 pb-3">
         <div className="flex flex-col items-center justify-center gap-1 self-stretch border-r border-border py-0.5 pr-4">
+          <span className="sr-only">
+            {aiCorrect ? "ИИ угадал исход" : "ИИ не угадал исход"}
+          </span>
+          {aiCorrect ? (
+            <CheckCircle
+              className="h-[1.125rem] w-[1.125rem] shrink-0 text-success"
+              weight="fill"
+              aria-hidden
+            />
+          ) : (
+            <XCircle
+              className="h-[1.125rem] w-[1.125rem] shrink-0 text-destructive"
+              weight="fill"
+              aria-hidden
+            />
+          )}
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             {dateLabel}
           </span>
@@ -56,7 +84,12 @@ export function HistoryCard({ match }: HistoryCardProps) {
       </div>
 
       <div className="border-t border-border">
-        <AiPickStrip pick={match.aiPick} sport={match.sport} forceShow />
+        <AiPickStrip
+          pick={match.aiPick}
+          sport={match.sport}
+          forceShow
+          variant="finished"
+        />
       </div>
     </Link>
   );
