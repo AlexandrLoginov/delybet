@@ -72,12 +72,17 @@ export function ProbabilityBar({
           />
         ))}
       </div>
-      <div className="grid grid-cols-3 gap-2 text-xs">
+      <div
+        className={cn(
+          "grid w-full gap-2 text-xs",
+          segments.length === 2 ? "grid-cols-2" : "grid-cols-3"
+        )}
+      >
         {segments.map((s) => (
           <div
             key={s.key}
             className={cn(
-              "flex items-center justify-between rounded px-2.5 py-1.5 ring-1 ring-inset",
+              "flex min-w-0 w-full items-center justify-between rounded px-2.5 py-1.5 ring-1 ring-inset",
               s.chipClass
             )}
           >

@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { MatchAnalysisView } from "@/components/analysis/MatchAnalysisView";
-import { MatchFreePreviewGate } from "@/components/paywall/MatchFreePreviewGate";
+import { MatchAnalysisWithDevPro } from "@/components/analysis/match-analysis-with-dev-pro";
 import { getMockAnalysis, getMockMatchById } from "@/lib/mock-data";
 
 interface MatchPageProps {
@@ -14,11 +13,13 @@ export default function MatchPage({ params, searchParams }: MatchPageProps) {
   if (!match) notFound();
 
   const analysis = getMockAnalysis(params.id);
-  const isPro = searchParams.pro === "true";
+  const urlIsPro = searchParams.pro === "true";
 
   return (
-    <MatchFreePreviewGate match={match} isPro={isPro}>
-      <MatchAnalysisView match={match} analysis={analysis} isPro={isPro} />
-    </MatchFreePreviewGate>
+    <MatchAnalysisWithDevPro
+      match={match}
+      analysis={analysis}
+      urlIsPro={urlIsPro}
+    />
   );
 }

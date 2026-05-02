@@ -12,9 +12,10 @@ import {
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { DarkThemeSwitch } from "@/components/theme/dark-theme-switch";
+import { ProfilePlanBadge } from "@/components/profile/profile-plan-badge";
+import { ProfileProPromoBanner } from "@/components/profile/profile-pro-promo-banner";
+import { ProModeDevToggle } from "@/components/profile/pro-mode-dev-toggle";
 
 export const metadata = {
   title: "Профиль · DelyBet",
@@ -57,9 +58,7 @@ export default function ProfilePage() {
                   <span className="truncate text-base font-semibold">
                     {USER.name}
                   </span>
-                  <Badge variant="muted" className="px-1.5">
-                    Free
-                  </Badge>
+                  <ProfilePlanBadge />
                 </div>
                 <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                   <Fingerprint className="h-3 w-3 shrink-0" strokeWidth={2} />
@@ -75,22 +74,7 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        <Card className="overflow-hidden border-primary/40">
-          <CardContent className="flex items-center gap-3 bg-primary/[0.08] p-4">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Medal className="h-4 w-4" strokeWidth={2} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold">DelyBet Pro</div>
-              <p className="text-xs text-muted-foreground">
-                Безлимитный доступ к ИИ-анализам и ключевым факторам
-              </p>
-            </div>
-            <Button asChild size="sm">
-              <Link href="/subscription">Перейти на Pro</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <ProfileProPromoBanner />
 
         <section className="space-y-3">
           <h2 className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -125,16 +109,19 @@ export default function ProfilePage() {
               <SettingRowLink
                 icon={Headphones}
                 label="Помощь и поддержка"
-                hint="FAQ, связь с командой"
+                hint="Связь с техническим специалистом"
                 href="#"
               />
             </CardContent>
           </Card>
         </section>
 
-        <p className="text-center text-[11px] text-muted-foreground">
-          DelyBet · v1.0.0
-        </p>
+        <div className="space-y-3">
+          <p className="text-center text-[11px] text-muted-foreground">
+            DelyBet · v1.0.0
+          </p>
+          <ProModeDevToggle />
+        </div>
       </main>
     </>
   );

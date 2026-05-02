@@ -1,29 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RefreshCw, Trophy } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SportFilter } from "@/components/matches/SportFilter";
 import { MatchCard } from "@/components/matches/MatchCard";
+import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import {
   computeEligibleMatchIds,
   getFreeLivePreviewEligibleId,
 } from "@/lib/freemium";
-import { MOCK_MATCHES } from "@/lib/mock-data";
+import { MOCK_MATCHES, SPORTS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import type { Match, SportSlug } from "@/types/match";
 
 const PAGE_SIZE = 5;
-const REFRESH_INTERVAL_MS = 120_000;
+const COUNTDOWN_SECONDS = 120;
 const SYNCING_MS = 1800;
 
-function formatAnalysisTime() {
-  return new Date().toLocaleTimeString("ru-RU", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+function formatCountdown(totalSeconds: number) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
 export function MatchesView() {
@@ -31,7 +31,9 @@ export function MatchesView() {
   const [tab, setTab] = useState<"upcoming" | "live">("upcoming");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [analysisSyncing, setAnalysisSyncing] = useState(false);
-  const [analysisUpdatedAt, setAnalysisUpdatedAt] = useState(formatAnalysisTime);
+  const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
+  const secondsRef = useRef(COUNTDOWN_SECONDS);
+  const devPro = useDevProPreview();
   const freePreviewSlots = useFreePreviewRedeemedIds();
   const redeemedFreeMatchId =
     tab === "live" ? freePreviewSlots.live : freePreviewSlots.upcoming;
@@ -41,6 +43,17 @@ export function MatchesView() {
       if (tab === "live") return m.status === "live";
       return m.status === "upcoming";
     }).length;
+  }, [tab]);
+
+  const countsBySport = useMemo(() => {
+    const inTab = (m: Match) =>
+      tab === "live" ? m.status === "live" : m.status === "upcoming";
+    return Object.fromEntries(
+      SPORTS.map(({ slug }) => [
+        slug,
+        MOCK_MATCHES.filter((m) => inTab(m) && m.sport === slug).length,
+      ])
+    ) as Record<SportSlug, number>;
   }, [tab]);
 
   const matches = useMemo(() => {
@@ -88,17 +101,30 @@ export function MatchesView() {
   }, [sport, tab]);
 
   useEffect(() => {
+    const syncingRef = { current: false };
     let timeoutId: ReturnType<typeof setTimeout>;
-    const runSync = () => {
-      setAnalysisSyncing(true);
-      timeoutId = setTimeout(() => {
-        setAnalysisSyncing(false);
-        setAnalysisUpdatedAt(formatAnalysisTime());
-      }, SYNCING_MS);
-    };
-    const intervalId = setInterval(runSync, REFRESH_INTERVAL_MS);
+    const tickId = setInterval(() => {
+      if (syncingRef.current) return;
+      const s = secondsRef.current;
+      if (s <= 1) {
+        syncingRef.current = true;
+        setAnalysisSyncing(true);
+        secondsRef.current = 0;
+        setSecondsLeft(0);
+        timeoutId = setTimeout(() => {
+          syncingRef.current = false;
+          setAnalysisSyncing(false);
+          secondsRef.current = COUNTDOWN_SECONDS;
+          setSecondsLeft(COUNTDOWN_SECONDS);
+        }, SYNCING_MS);
+        return;
+      }
+      const next = s - 1;
+      secondsRef.current = next;
+      setSecondsLeft(next);
+    }, 1000);
     return () => {
-      clearInterval(intervalId);
+      clearInterval(tickId);
       clearTimeout(timeoutId);
     };
   }, []);
@@ -132,9 +158,16 @@ export function MatchesView() {
                 strokeWidth={2}
               />
               <span>
-                {analysisSyncing
-                  ? "Обновляем ИИ-анализ…"
-                  : `ИИ-анализ актуален · ${analysisUpdatedAt}`}
+                {analysisSyncing ? (
+                  "Обновляем ИИ-анализ…"
+                ) : (
+                  <>
+                    Обновление ИИ-анализа через{" "}
+                    <span className="tabular-nums text-foreground">
+                      {formatCountdown(secondsLeft)}
+                    </span>
+                  </>
+                )}
               </span>
             </div>
           </div>
@@ -161,6 +194,7 @@ export function MatchesView() {
               value={sport}
               onChange={setSport}
               allEventsCount={allEventsCount}
+              countsBySport={countsBySport}
             />
           </div>
 
@@ -169,6 +203,7 @@ export function MatchesView() {
               matches={visibleMatches}
               eligibleIds={eligibleIds}
               redeemedFreeMatchId={redeemedFreeMatchId}
+              unlockAllPro={devPro}
             />
 
             {remaining > 0 && (
@@ -199,10 +234,12 @@ function MatchList({
   matches,
   eligibleIds,
   redeemedFreeMatchId,
+  unlockAllPro,
 }: {
   matches: Match[];
   eligibleIds: Set<string>;
   redeemedFreeMatchId: string | null;
+  unlockAllPro: boolean;
 }) {
   if (!matches.length) {
     return (
@@ -235,12 +272,15 @@ function MatchList({
           <div className="flex flex-col gap-2">
             {items.map((m) => {
               const isEligibleSpot = eligibleIds.has(m.id);
-              const unlocked =
-                redeemedFreeMatchId === null
+              const unlocked = unlockAllPro
+                ? true
+                : redeemedFreeMatchId === null
                   ? isEligibleSpot
                   : redeemedFreeMatchId === m.id;
               const consumeFreePreviewOnClick =
-                redeemedFreeMatchId === null && isEligibleSpot;
+                !unlockAllPro &&
+                redeemedFreeMatchId === null &&
+                isEligibleSpot;
 
               return (
                 <MatchCard

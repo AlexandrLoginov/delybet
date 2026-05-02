@@ -1,4 +1,4 @@
-import { HistoryView } from "@/components/history/history-view";
+import { HistoryWithDevPro } from "@/components/history/history-with-dev-pro";
 
 export const metadata = {
   title: "История · DelyBet",
@@ -15,5 +15,7 @@ export default function HistoryPage({
 }: {
   searchParams: { pro?: string | string[] };
 }) {
-  return <HistoryView isPro={readIsPro(searchParams.pro)} />;
+  return (
+    <HistoryWithDevPro urlIsPro={readIsPro(searchParams.pro)} />
+  );
 }

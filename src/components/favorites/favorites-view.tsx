@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Star, Trophy } from "lucide-react";
+import { Star } from "lucide-react";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import {
   getFavoriteMatchesServerSnapshot,
@@ -63,10 +64,12 @@ function FavoritesGroupedList({
   matches,
   eligibleIds,
   redeemedFreeMatchId,
+  unlockAllPro,
 }: {
   matches: Match[];
   eligibleIds: Set<string>;
   redeemedFreeMatchId: string | null;
+  unlockAllPro: boolean;
 }) {
   return (
     <div className="space-y-5">
@@ -83,12 +86,15 @@ function FavoritesGroupedList({
           <div className="flex flex-col gap-2">
             {items.map((m) => {
               const isEligibleSpot = eligibleIds.has(m.id);
-              const unlocked =
-                redeemedFreeMatchId === null
+              const unlocked = unlockAllPro
+                ? true
+                : redeemedFreeMatchId === null
                   ? isEligibleSpot
                   : redeemedFreeMatchId === m.id;
               const consumeFreePreviewOnClick =
-                redeemedFreeMatchId === null && isEligibleSpot;
+                !unlockAllPro &&
+                redeemedFreeMatchId === null &&
+                isEligibleSpot;
 
               return (
                 <MatchCard
@@ -108,6 +114,7 @@ function FavoritesGroupedList({
 
 export function FavoritesView() {
   const [tab, setTab] = useState<"upcoming" | "live">("upcoming");
+  const devPro = useDevProPreview();
   const favoriteKey = useSyncExternalStore(
     subscribeFavoritesChange,
     getFavoriteMatchesSnapshot,
@@ -188,11 +195,8 @@ export function FavoritesView() {
           <p className="mt-1 text-xs text-muted-foreground">
             Открой анализ матча и нажми «В избранное» вверху экрана.
           </p>
-          <Button asChild size="sm" className="mt-5 gap-1.5">
-            <Link href="/matches">
-              <Trophy className="h-3.5 w-3.5" strokeWidth={2} />
-              К матчам
-            </Link>
+          <Button asChild size="sm" className="mt-5">
+            <Link href="/matches">На главную</Link>
           </Button>
         </div>
       ) : (
@@ -232,6 +236,7 @@ export function FavoritesView() {
                 matches={upcomingOrdered}
                 eligibleIds={eligibleIdsUpcoming}
                 redeemedFreeMatchId={freePreviewSlots.upcoming}
+                unlockAllPro={devPro}
               />
             )}
           </TabsContent>
@@ -246,6 +251,7 @@ export function FavoritesView() {
                 matches={liveOrdered}
                 eligibleIds={eligibleIdsLive}
                 redeemedFreeMatchId={freePreviewSlots.live}
+                unlockAllPro={devPro}
               />
             )}
           </TabsContent>
