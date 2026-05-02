@@ -9,7 +9,6 @@ import {
   displayNameFromTelegramUser,
   initialsFromTelegramUser,
 } from "@/lib/telegram/telegram-user-display";
-import { cn } from "@/lib/utils";
 import type { TelegramWebAppUser } from "@/types/telegram";
 
 type IdentityState =
@@ -209,18 +208,9 @@ export function ProfileTelegramIdentity() {
               <p className="mt-1 text-[11px] text-muted-foreground">
                 Данные проверены · {sessionHint}
               </p>
-            ) : (
-              <p
-                className={cn(
-                  "mt-1 text-[11px] text-muted-foreground",
-                  !verified && "italic"
-                )}
-              >
-                {verified
-                  ? "Telegram"
-                  : "Добавьте TELEGRAM_BOT_TOKEN на сервере для проверки подписи"}
-              </p>
-            )}
+            ) : verified ? (
+              <p className="mt-1 text-[11px] text-muted-foreground">Telegram</p>
+            ) : null}
           </div>
         </div>
       </CardContent>
