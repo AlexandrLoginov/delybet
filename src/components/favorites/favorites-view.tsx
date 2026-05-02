@@ -188,10 +188,10 @@ export function FavoritesView() {
     <main className="mx-auto w-full max-w-2xl px-4 pb-6 pt-5">
       <Drawer open={clearOpen} onOpenChange={setClearOpen}>
         <DrawerContent>
-          <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6 pb-4">
-            <DrawerHeader className="px-0 pt-0">
+          <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6">
+            <DrawerHeader className="px-0 pt-0 pb-6">
               <DrawerTitle className="pt-2 text-left">
-                Вы уверены, что хотите очистить избранное?
+                Вы уверены?
               </DrawerTitle>
             </DrawerHeader>
           </div>
