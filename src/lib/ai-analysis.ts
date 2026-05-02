@@ -41,7 +41,13 @@ export interface AnalysisResult {
   // Pro-only поля:
   detailedAnalysis: string;
   keyFactors: { factor: string; impact: "POSITIVE_HOME" | "POSITIVE_AWAY" | "NEUTRAL" }[];
-  newsImpact: { headline: string; impact: string; team: string }[];
+  newsImpact: {
+    headline: string;
+    impact: string;
+    team: string;
+    body?: string;
+    sources?: { label?: string; url: string }[];
+  }[];
 }
 
 // ── Главная функция ───────────────────────────────────────────────────────────
@@ -143,7 +149,13 @@ ${news.slice(0, 3).map((n: any) => `- ${n.title}`).join("\n") || "- Нет ак�
     { "factor": "<фактор>", "impact": "<POSITIVE_HOME | POSITIVE_AWAY | NEUTRAL>" }
   ],
   "newsImpact": [
-    { "headline": "<заголовок новости>", "impact": "<влияние>", "team": "<команда>" }
+    {
+      "headline": "<заголовок новости>",
+      "impact": "<влияние на исход матча, 1–2 предложения>",
+      "team": "<команда>",
+      "body": "<опционально: 2–4 предложения сути новости>",
+      "sources": [{ "label": "<издание>", "url": "<https://...>" }]
+    }
   ]
 }`;
 }
@@ -182,6 +194,41 @@ function parseAnalysisResponse(raw: string, matchId: string, isLive: boolean): A
     summary: parsed.summary,
     detailedAnalysis: parsed.detailedAnalysis,
     keyFactors: parsed.keyFactors ?? [],
-    newsImpact: parsed.newsImpact ?? [],
+    newsImpact: normalizeNewsImpact(parsed.newsImpact),
   };
+}
+
+function normalizeNewsImpact(
+  raw: unknown
+): AnalysisResult["newsImpact"] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((n) => {
+      if (!n || typeof n !== "object") return null;
+      const o = n as Record<string, unknown>;
+      const headline = typeof o.headline === "string" ? o.headline : "";
+      const impact = typeof o.impact === "string" ? o.impact : "";
+      const team = typeof o.team === "string" ? o.team : "";
+      if (!headline && !impact && !team) return null;
+      const body = typeof o.body === "string" ? o.body : undefined;
+      let sources: { label?: string; url: string }[] | undefined;
+      if (Array.isArray(o.sources)) {
+        sources = o.sources
+          .filter((s): s is { label?: string; url: string } => {
+            if (!s || typeof s !== "object") return false;
+            const u = (s as { url?: unknown }).url;
+            return typeof u === "string" && /^https?:\/\//i.test(u.trim());
+          })
+          .map((s) => ({
+            label:
+              typeof (s as { label?: unknown }).label === "string"
+                ? (s as { label: string }).label
+                : undefined,
+            url: (s as { url: string }).url.trim(),
+          }));
+        if (sources.length === 0) sources = undefined;
+      }
+      return { headline, impact, team, body, sources };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
 }

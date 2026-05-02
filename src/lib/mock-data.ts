@@ -986,11 +986,20 @@ export function getMockAnalysis(matchId: string): FullAnalysis {
         headline: "Капитан хозяев восстановился к матчу",
         impact: "Усиление атаки и лидерство на поле",
         team: match.home.name,
+        body: "Клуб подтвердил: капитан полностью восстановился после растяжения и попал в заявку на игру. На последней тренировке он отработал стандарты и сыграл в контрольном спарринге без ограничений.",
+        sources: [
+          { label: "Официальный сайт клуба", url: "https://example.com/news/captain-return" },
+          { label: "Sports Daily", url: "https://example.com/articles/injury-update" },
+        ],
       },
       {
         headline: "Главный тренер гостей под давлением",
         impact: "Возможны тактические эксперименты",
         team: match.away.name,
+        body: "После серии без побед руководство клуба публично поддержало тренера, но СМИ пишут о возможной отставке при поражении в гостях. Игроки просили сосредоточиться только на матче.",
+        sources: [
+          { label: "Match Review", url: "https://example.com/opinion/coach-pressure" },
+        ],
       },
     ],
     stats: [

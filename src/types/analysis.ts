@@ -15,10 +15,20 @@ export interface KeyFactor {
   impact: "POSITIVE_HOME" | "POSITIVE_AWAY" | "NEUTRAL";
 }
 
+/** Ссылка на первоисточник новости */
+export interface NewsSource {
+  /** Короткая подпись: издание, раздел */
+  label?: string;
+  url: string;
+}
+
 export interface NewsImpact {
   headline: string;
   impact: string;
   team: string;
+  /** Полный текст / лиды новости для просмотра в шите */
+  body?: string;
+  sources?: NewsSource[];
 }
 
 export interface MatchStatsView {
