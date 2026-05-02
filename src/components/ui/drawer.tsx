@@ -78,7 +78,7 @@ const DrawerFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "mt-auto flex flex-col gap-2 border-t border-border bg-card px-6 pt-4 pb-[max(2rem,env(safe-area-inset-bottom,0px))]",
+      "mt-auto flex flex-col gap-2 border-t border-border bg-card px-6 pt-4 pb-[max(24px,env(safe-area-inset-bottom,0px))]",
       className
     )}
     {...props}

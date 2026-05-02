@@ -67,7 +67,7 @@ export function NavBar() {
   return (
     <nav
       data-telegram-gate-exempt
-      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/75"
+      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/85 pb-[max(24px,env(safe-area-inset-bottom,0px))] backdrop-blur supports-[backdrop-filter]:bg-background/75"
       aria-label="Главная навигация"
     >
       <div className="mx-auto grid w-full max-w-2xl grid-cols-4">
@@ -83,7 +83,7 @@ export function NavBar() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center gap-1 pt-3 pb-8 text-[11px] font-medium transition-colors",
+                "flex flex-col items-center gap-1 pt-3 pb-0 text-[11px] font-medium transition-colors",
                 active
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground"
@@ -110,10 +110,6 @@ export function NavBar() {
           );
         })}
       </div>
-      <div
-        className="h-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] shrink-0"
-        aria-hidden
-      />
     </nav>
   );
 }

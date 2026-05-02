@@ -51,7 +51,7 @@ export default function RootLayout({
         >
           <TelegramSessionProvider>
             <TelegramBrowserGateProvider>
-              <div className="min-h-screen pt-[96px] pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))]">
+              <div className="min-h-screen pt-[96px] pb-[calc(49px+max(24px,env(safe-area-inset-bottom,0px)))]">
                 {children}
               </div>
               <NavBar />

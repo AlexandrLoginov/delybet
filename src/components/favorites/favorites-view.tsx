@@ -191,7 +191,7 @@ export function FavoritesView() {
           <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6">
             <DrawerHeader className="px-0 pt-0 pb-6">
               <DrawerTitle className="pt-2 text-left">
-                Вы уверены?
+                Вы уверены, что хотите очистить избранные матчи?
               </DrawerTitle>
             </DrawerHeader>
           </div>
