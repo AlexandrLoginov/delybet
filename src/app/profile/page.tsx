@@ -103,7 +103,7 @@ export default function ProfilePage() {
               <SettingRowExternal
                 icon={Megaphone}
                 label="Telegram-канал"
-                hint={`${TG_CHANNEL_HANDLE} · разборы и Hot picks`}
+                hint={`${TG_CHANNEL_HANDLE} · разборы матчей`}
                 href={TG_CHANNEL_URL}
               />
               <SettingRowLink

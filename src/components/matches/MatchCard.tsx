@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Lock, MapPin } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LiveBadge } from "@/components/matches/LiveBadge";
 import { TeamLogo } from "@/components/matches/TeamLogo";
@@ -77,13 +76,6 @@ function MatchCardBody({ match }: { match: Match }) {
 
   return (
     <div className="relative">
-      {match.hotPick && (
-        <div className="absolute right-4 top-2 z-[1]">
-          <Badge variant="pro" className="px-1.5 text-[10px]">
-            Hot pick
-          </Badge>
-        </div>
-      )}
       <div className="grid grid-cols-[76px_1fr] items-start gap-4 px-5 pt-3.5 pb-3">
         <div className="flex flex-col items-center justify-center gap-1 self-stretch border-r border-border pr-4">
           {isLive ? (

@@ -40,7 +40,6 @@ export interface Match {
   away: Team;
   scoreHome?: number;
   scoreAway?: number;
-  hotPick?: boolean;
   lastFiveHome?: FormResult[];
   lastFiveAway?: FormResult[];
   aiPick?: AiPick;

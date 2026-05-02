@@ -88,7 +88,7 @@ export function UpgradeModal({ trigger, defaultOpen = false }: UpgradeModalProps
             </ul>
           </div>
 
-          <DrawerFooter className="gap-2 pb-[max(2rem,calc(env(safe-area-inset-bottom)+1rem))]">
+          <DrawerFooter className="gap-2">
             <Button
               size="lg"
               className="w-full"

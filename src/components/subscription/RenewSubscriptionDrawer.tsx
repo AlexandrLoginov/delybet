@@ -116,14 +116,9 @@ export function RenewSubscriptionDrawer({
               ))}
             </ul>
           </div>
-
-          <div className="rounded-lg border border-border bg-muted/30 px-3 py-2.5 text-[11px] leading-snug text-muted-foreground">
-            Базовый месяц без скидки — {RENEWAL_BASE_MONTHLY_RUB} ₽. Скидки считаются от
-            суммы «{RENEWAL_BASE_MONTHLY_RUB} ₽ × число месяцев» в пакете.
-          </div>
         </div>
 
-        <DrawerFooter className="gap-2 pb-[max(2rem,calc(env(safe-area-inset-bottom)+1rem))]">
+        <DrawerFooter className="gap-2">
           <div className="flex w-full flex-col gap-1 pb-1 text-center">
             <span className="text-xs text-muted-foreground">
               К оплате за выбранный период
