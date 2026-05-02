@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Fingerprint } from "lucide-react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ProfilePlanBadge } from "@/components/profile/profile-plan-badge";
 import {
   displayNameFromTelegramUser,
   initialsFromTelegramUser,
@@ -14,13 +15,7 @@ import type { TelegramWebAppUser } from "@/types/telegram";
 type IdentityState =
   | { status: "loading" }
   | { status: "browser" }
-  | {
-      status: "telegram";
-      user: TelegramWebAppUser;
-      verified: boolean;
-      authDate?: number;
-      verifyError?: "session";
-    };
+  | { status: "telegram"; user: TelegramWebAppUser };
 
 export function ProfileTelegramIdentity() {
   const [state, setState] = useState<IdentityState>({ status: "loading" });
@@ -56,11 +51,7 @@ export function ProfileTelegramIdentity() {
         }
 
         if (unsafeUser) {
-          setState({
-            status: "telegram",
-            user: unsafeUser,
-            verified: false,
-          });
+          setState({ status: "telegram", user: unsafeUser });
         }
 
         if (initData) {
@@ -78,24 +69,14 @@ export function ProfileTelegramIdentity() {
               authDate?: number;
             };
             if (data.user) {
-              setState({
-                status: "telegram",
-                user: data.user,
-                verified: true,
-                authDate: data.authDate,
-              });
+              setState({ status: "telegram", user: data.user });
               return;
             }
           }
 
           if (res.status === 401) {
             if (unsafeUser) {
-              setState({
-                status: "telegram",
-                user: unsafeUser,
-                verified: false,
-                verifyError: "session",
-              });
+              setState({ status: "telegram", user: unsafeUser });
               return;
             }
             setState({ status: "browser" });
@@ -106,11 +87,7 @@ export function ProfileTelegramIdentity() {
         }
 
         if (unsafeUser) {
-          setState({
-            status: "telegram",
-            user: unsafeUser,
-            verified: false,
-          });
+          setState({ status: "telegram", user: unsafeUser });
           return;
         }
 
@@ -129,15 +106,11 @@ export function ProfileTelegramIdentity() {
     return (
       <Card>
         <CardContent className="p-5">
-          <div className="flex min-h-[120px] items-start gap-4">
+          <div className="flex min-h-[88px] items-start gap-4">
             <Skeleton className="h-14 w-14 shrink-0 rounded-full" aria-hidden />
-            <div className="flex min-h-[92px] min-w-0 flex-1 flex-col justify-center gap-2.5">
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-5 w-[min(220px,70%)] rounded-lg" aria-hidden />
-                <Skeleton className="h-5 w-14 shrink-0 rounded-full" aria-hidden />
-              </div>
-              <Skeleton className="h-3.5 w-40 rounded-md" aria-hidden />
-              <Skeleton className="h-3 w-48 rounded-md" aria-hidden />
+            <div className="flex min-h-[56px] min-w-0 flex-1 flex-col justify-center gap-2">
+              <Skeleton className="h-5 w-[min(220px,75%)] rounded-lg" aria-hidden />
+              <Skeleton className="h-3.5 w-32 rounded-md" aria-hidden />
             </div>
           </div>
         </CardContent>
@@ -165,18 +138,9 @@ export function ProfileTelegramIdentity() {
     );
   }
 
-  const { user, verified, authDate, verifyError } = state;
+  const { user } = state;
   const name = displayNameFromTelegramUser(user);
   const initials = initialsFromTelegramUser(user);
-  const sessionHint =
-    authDate != null
-      ? new Date(authDate * 1000).toLocaleString("ru-RU", {
-          day: "numeric",
-          month: "long",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : null;
 
   return (
     <Card>
@@ -191,26 +155,11 @@ export function ProfileTelegramIdentity() {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="truncate text-base font-semibold">{name}</span>
-              <ProfilePlanBadge />
+            <div className="truncate text-base font-semibold text-foreground">{name}</div>
+            <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+              <Fingerprint className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
+              <span className="tabular-num">ID {user.id}</span>
             </div>
-            {user.username ? (
-              <div className="mt-0.5 truncate text-xs text-muted-foreground">
-                @{user.username}
-              </div>
-            ) : null}
-            {verifyError === "session" ? (
-              <p className="mt-1 text-[11px] text-destructive">
-                Сессия устарела. Закройте и снова откройте приложение из бота.
-              </p>
-            ) : verified && sessionHint ? (
-              <p className="mt-1 text-[11px] text-muted-foreground">
-                Данные проверены · {sessionHint}
-              </p>
-            ) : verified ? (
-              <p className="mt-1 text-[11px] text-muted-foreground">Telegram</p>
-            ) : null}
           </div>
         </div>
       </CardContent>

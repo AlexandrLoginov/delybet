@@ -20,18 +20,14 @@ export function AppPageSkeleton({
       ) : variant === "profile" ? (
         <div className="space-y-6">
           <div className="rounded-xl border border-border bg-card p-5">
-            <div className="flex min-h-[120px] items-start gap-4">
+            <div className="flex min-h-[88px] items-start gap-4">
               <Skeleton
                 className="h-14 w-14 shrink-0 rounded-full"
                 aria-hidden
               />
-              <div className="flex min-h-[92px] min-w-0 flex-1 flex-col justify-center gap-2.5">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-5 w-[min(220px,70%)] rounded-lg" />
-                  <Skeleton className="h-5 w-14 shrink-0 rounded-full" />
-                </div>
-                <Skeleton className="h-3.5 w-40 rounded-md" />
-                <Skeleton className="h-3 w-48 rounded-md" />
+              <div className="flex min-h-[56px] min-w-0 flex-1 flex-col justify-center gap-2">
+                <Skeleton className="h-5 w-[min(220px,75%)] rounded-lg" />
+                <Skeleton className="h-3.5 w-32 rounded-md" />
               </div>
             </div>
           </div>
