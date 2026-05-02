@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Fingerprint } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProfilePlanBadge } from "@/components/profile/profile-plan-badge";
 import {
   displayNameFromTelegramUser,
   initialsFromTelegramUser,
@@ -106,11 +106,15 @@ export function ProfileTelegramIdentity() {
     return (
       <Card>
         <CardContent className="p-5">
-          <div className="flex min-h-[88px] items-start gap-4">
+          <div className="flex min-h-[104px] items-start gap-4">
             <Skeleton className="h-14 w-14 shrink-0 rounded-full" aria-hidden />
-            <div className="flex min-h-[56px] min-w-0 flex-1 flex-col justify-center gap-2">
+            <div className="flex min-h-[76px] min-w-0 flex-1 flex-col justify-center gap-2">
               <Skeleton className="h-5 w-[min(220px,75%)] rounded-lg" aria-hidden />
-              <Skeleton className="h-3.5 w-32 rounded-md" aria-hidden />
+              <Skeleton className="h-3.5 w-full max-w-[240px] rounded-md" aria-hidden />
+              <div className="flex items-center gap-2 pt-0.5">
+                <Skeleton className="h-3 w-10 rounded-md" aria-hidden />
+                <Skeleton className="h-5 w-14 rounded-full" aria-hidden />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -154,11 +158,17 @@ export function ProfileTelegramIdentity() {
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 space-y-1.5">
             <div className="truncate text-base font-semibold text-foreground">{name}</div>
-            <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-              <Fingerprint className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
-              <span className="tabular-num">ID {user.id}</span>
+            <p className="text-xs leading-snug text-muted-foreground">
+              <span>ID профиля в Telegram</span>
+              <span className="ml-1.5 tabular-num font-medium text-foreground">
+                {user.id}
+              </span>
+            </p>
+            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+              <span className="text-xs text-muted-foreground">Тариф</span>
+              <ProfilePlanBadge />
             </div>
           </div>
         </div>
