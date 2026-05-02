@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -190,9 +191,10 @@ export function FavoritesView() {
         <DrawerContent>
           <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6">
             <DrawerHeader className="px-0 pt-0 pb-6">
-              <DrawerTitle className="pt-2 text-left">
-                Очистить избранные матчи?
-              </DrawerTitle>
+              <DrawerTitle className="pt-2 text-left">Подтвердите действие</DrawerTitle>
+              <DrawerDescription className="text-left">
+                Вы уверены, что хотите очистить избранные матчи?
+              </DrawerDescription>
             </DrawerHeader>
           </div>
 

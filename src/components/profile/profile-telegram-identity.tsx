@@ -18,10 +18,10 @@ export function ProfileTelegramIdentity() {
   if (state.status === "loading") {
     return (
       <Card>
-        <CardContent className="p-5">
-          <div className="flex min-h-[104px] items-start gap-4">
+        <CardContent className="px-5 py-4">
+          <div className="flex min-h-[96px] items-start gap-4">
             <Skeleton className="h-14 w-14 shrink-0 rounded-full" aria-hidden />
-            <div className="flex min-h-[76px] min-w-0 flex-1 flex-col justify-center gap-2">
+            <div className="flex min-h-[72px] min-w-0 flex-1 flex-col justify-center gap-2">
               <div className="flex flex-col gap-0.5">
                 <Skeleton className="h-5 w-[min(220px,75%)] rounded-lg" aria-hidden />
                 <Skeleton className="h-3.5 w-[min(200px,85%)] rounded-md" aria-hidden />
@@ -54,7 +54,7 @@ export function ProfileTelegramIdentity() {
 
   return (
     <Card>
-      <CardContent className="p-5">
+      <CardContent className="px-5 py-4">
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14">
             {user.photo_url ? (
