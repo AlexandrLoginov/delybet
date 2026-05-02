@@ -22,7 +22,7 @@ const FEATURES = [
   { label: "Развёрнутая аргументация", free: false, pro: true },
   { label: "Ключевые факторы матча", free: false, pro: true },
   { label: "Влияние новостей", free: false, pro: true },
-  { label: "История прогнозов", free: "30 дней", pro: "90 дней" },
+  { label: "Статистика прогнозов", free: "30 дней", pro: "90 дней" },
 ];
 
 export function SubscriptionFreeView() {

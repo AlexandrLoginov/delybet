@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TeamLogo } from "@/components/matches/TeamLogo";
+import { inferPredictedOutcome } from "@/lib/history-prediction";
 import { cn } from "@/lib/utils";
 import type { Confidence, HistoryMatch } from "@/types/match";
 
@@ -26,15 +27,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
     year: "numeric",
   });
 
-  const predictedHomeWin = match.prediction.outcome
-    .toLowerCase()
-    .includes(match.home.name.toLowerCase());
-  const predictedDraw = /ничь/i.test(match.prediction.outcome);
-  const predicted: "HOME" | "DRAW" | "AWAY" = predictedHomeWin
-    ? "HOME"
-    : predictedDraw
-      ? "DRAW"
-      : "AWAY";
+  const predicted = inferPredictedOutcome(match);
   const correct = predicted === match.actualOutcome;
 
   const actualLabel =
@@ -51,9 +44,9 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
       <main className="mx-auto w-full max-w-2xl px-4 pb-6 pt-5">
         <div className="mb-5">
           <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
-            <Link href="/history">
+            <Link href="/statistics">
               <CaretLeft className="h-4 w-4" weight="fill" />
-              История
+              Статистика
             </Link>
           </Button>
         </div>

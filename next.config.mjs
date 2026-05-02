@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      { source: "/history", destination: "/statistics", permanent: true },
+      { source: "/history/:id", destination: "/statistics/:id", permanent: true },
+    ];
+  },
   experimental: {
     optimizePackageImports: ["@phosphor-icons/react"],
   },

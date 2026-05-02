@@ -162,7 +162,7 @@ export function MatchesView() {
                   "Обновляем ИИ-анализ…"
                 ) : (
                   <>
-                    Обновление ИИ-анализа через{" "}
+                    Обновление через:{" "}
                     <span className="tabular-nums text-foreground">
                       {formatCountdown(secondsLeft)}
                     </span>

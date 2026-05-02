@@ -1,7 +1,7 @@
-import { HistoryWithDevPro } from "@/components/history/history-with-dev-pro";
+import { StatisticsWithDevPro } from "@/components/statistics/statistics-with-dev-pro";
 
 export const metadata = {
-  title: "История · DelyBet",
+  title: "Статистика · DelyBet",
 };
 
 function readIsPro(pro: string | string[] | undefined): boolean {
@@ -10,12 +10,12 @@ function readIsPro(pro: string | string[] | undefined): boolean {
   return false;
 }
 
-export default function HistoryPage({
+export default function StatisticsPage({
   searchParams,
 }: {
   searchParams: { pro?: string | string[] };
 }) {
   return (
-    <HistoryWithDevPro urlIsPro={readIsPro(searchParams.pro)} />
+    <StatisticsWithDevPro urlIsPro={readIsPro(searchParams.pro)} />
   );
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import {
-  Notebook,
+  ChartBar,
   Star,
   Trophy,
   UserCircle,
@@ -43,10 +43,10 @@ const ITEMS: NavItem[] = [
     indicatorWhen: (key) => key.length > 0,
   },
   {
-    href: "/history",
-    label: "История",
-    icon: Notebook,
-    match: (p) => p.startsWith("/history"),
+    href: "/statistics",
+    label: "Статистика",
+    icon: ChartBar,
+    match: (p) => p.startsWith("/statistics"),
   },
   {
     href: "/profile",

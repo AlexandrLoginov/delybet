@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const Tabs = TabsPrimitive.Root;
 
 /**
- * Общий контейнер сегментов (отступы и фон как на странице «История»).
+ * Общий контейнер сегментов (отступы и фон как на странице «Статистика»).
  * На экране задайте сетку, например: `className="grid h-auto w-full grid-cols-2"`.
  */
 const TabsList = React.forwardRef<

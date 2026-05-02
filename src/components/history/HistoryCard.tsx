@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CheckCircle, XCircle } from "@phosphor-icons/react";
 
 import { AiPickStrip } from "@/components/matches/AiPickStrip";
+import { inferPredictedOutcome } from "@/lib/history-prediction";
 import { TeamLogo } from "@/components/matches/TeamLogo";
 import { FormPills } from "@/components/matches/FormPills";
 import { cn } from "@/lib/utils";
@@ -12,16 +13,8 @@ interface HistoryCardProps {
 }
 
 export function HistoryCard({ match }: HistoryCardProps) {
-  const predictedHomeWin = match.prediction.outcome
-    .toLowerCase()
-    .includes(match.home.name.toLowerCase());
-  const predictedDraw = /ничь/i.test(match.prediction.outcome);
-  const predicted: "HOME" | "DRAW" | "AWAY" = predictedHomeWin
-    ? "HOME"
-    : predictedDraw
-      ? "DRAW"
-      : "AWAY";
-  const aiCorrect = predicted === match.actualOutcome;
+  const aiCorrect =
+    inferPredictedOutcome(match) === match.actualOutcome;
 
   const finished = new Date(match.finishedISO);
   const dateLabel = finished.toLocaleDateString("ru-RU", {
@@ -31,7 +24,7 @@ export function HistoryCard({ match }: HistoryCardProps) {
 
   return (
     <Link
-      href={`/history/${match.id}`}
+      href={`/statistics/${match.id}`}
       aria-label={`Результат: ${match.home.name} vs ${match.away.name}`}
       className="group block overflow-hidden rounded-xl border bg-card transition-colors hover:bg-accent/40"
     >
