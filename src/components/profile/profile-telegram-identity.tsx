@@ -22,9 +22,11 @@ export function ProfileTelegramIdentity() {
           <div className="flex min-h-[104px] items-start gap-4">
             <Skeleton className="h-14 w-14 shrink-0 rounded-full" aria-hidden />
             <div className="flex min-h-[76px] min-w-0 flex-1 flex-col justify-center gap-2">
-              <Skeleton className="h-5 w-[min(220px,75%)] rounded-lg" aria-hidden />
-              <Skeleton className="h-3.5 w-[min(200px,85%)] rounded-md" aria-hidden />
-              <div className="flex items-center gap-2 pt-0.5">
+              <div className="flex flex-col gap-0.5">
+                <Skeleton className="h-5 w-[min(220px,75%)] rounded-lg" aria-hidden />
+                <Skeleton className="h-3.5 w-[min(200px,85%)] rounded-md" aria-hidden />
+              </div>
+              <div className="flex items-center gap-2">
                 <Skeleton className="h-3 w-10 rounded-md" aria-hidden />
                 <Skeleton className="h-5 w-14 rounded-full" aria-hidden />
               </div>
@@ -62,14 +64,18 @@ export function ProfileTelegramIdentity() {
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <div className="truncate text-base font-semibold text-foreground">{name}</div>
-            {user.username ? (
-              <div className="truncate text-xs text-muted-foreground">
-                @{user.username}
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="space-y-0.5">
+              <div className="truncate text-base font-semibold leading-tight text-foreground">
+                {name}
               </div>
-            ) : null}
-            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+              {user.username ? (
+                <div className="truncate text-xs leading-tight text-muted-foreground">
+                  @{user.username}
+                </div>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs text-muted-foreground">Тариф</span>
               <ProfilePlanBadge />
             </div>
