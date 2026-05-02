@@ -95,7 +95,7 @@ export function UpgradeModal({ trigger, defaultOpen = false }: UpgradeModalProps
               type="button"
               onClick={goToPackages}
             >
-              Перейти на PRO
+              Посмотреть пакеты подписки
             </Button>
             <Button
               variant="ghost"

@@ -19,21 +19,6 @@ const FEATURES = [
   { label: "История прогнозов", free: "30 дней", pro: "90 дней" },
 ];
 
-const FAQ = [
-  {
-    q: "Можно ли отменить в любой момент?",
-    a: "Да. Подписка отменяется в один клик и действует до конца оплаченного периода.",
-  },
-  {
-    q: "На каких устройствах работает?",
-    a: "iOS, Android, веб и Telegram Mini App — одна подписка на все платформы.",
-  },
-  {
-    q: "Как считается точность ИИ?",
-    a: "Сравниваем рекомендованный исход с фактическим результатом матча по итогу. Подробнее в разделе История.",
-  },
-];
-
 export function SubscriptionFreeView() {
   return (
     <main className="mx-auto w-full max-w-2xl space-y-6 px-4 pb-6 pt-5">
@@ -110,24 +95,10 @@ export function SubscriptionFreeView() {
           <UpgradeModal
             trigger={
               <Button size="lg" className="w-full">
-                Попробовать 7 дней бесплатно
+                Перейти на PRO
               </Button>
             }
           />
-          <p className="text-center text-[11px] text-muted-foreground">
-            Без обязательств. Отмена в один клик в настройках профиля.
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="divide-y divide-border p-0">
-          {FAQ.map((item, i) => (
-            <div key={i} className="space-y-1 px-5 py-4">
-              <div className="text-sm font-semibold">{item.q}</div>
-              <p className="text-sm text-muted-foreground">{item.a}</p>
-            </div>
-          ))}
         </CardContent>
       </Card>
     </main>
