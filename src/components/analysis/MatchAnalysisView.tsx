@@ -204,14 +204,9 @@ export function MatchAnalysisView({
         ) : null}
 
         <section className="mt-8 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold tracking-tight">
-              Развёрнутый анализ
-            </h2>
-            {!isPro && (
-              <Badge variant="pro">Pro</Badge>
-            )}
-          </div>
+          <h2 className="text-base font-semibold tracking-tight px-1">
+            Развёрнутый анализ
+          </h2>
 
           {isPro ? (
             <Card>

@@ -8,12 +8,15 @@ interface PaywallOverlayProps {
   children: ReactNode;
   title?: string;
   description?: string;
+  /** Кнопка «Открыть в Pro» в подвале (под текстом блока); по умолчанию скрыта. */
+  upgradeButton?: boolean;
 }
 
 export function PaywallOverlay({
   children,
   title = "Полный анализ — в Pro",
   description = "Открой обоснование рекомендации, ключевые факторы и влияние новостей.",
+  upgradeButton = false,
 }: PaywallOverlayProps) {
   return (
     <div className="relative overflow-hidden rounded-xl border bg-card">
@@ -32,13 +35,15 @@ export function PaywallOverlay({
           <div className="text-sm font-semibold">{title}</div>
           <p className="max-w-sm text-xs text-muted-foreground">{description}</p>
         </div>
-        <UpgradeModal
-          trigger={
-            <Button size="sm" className="px-5">
-              Открыть в Pro
-            </Button>
-          }
-        />
+        {upgradeButton ? (
+          <UpgradeModal
+            trigger={
+              <Button size="sm" className="px-5">
+                Открыть в Pro
+              </Button>
+            }
+          />
+        ) : null}
       </div>
     </div>
   );

@@ -1,6 +1,3 @@
-import { LockSimple } from "@phosphor-icons/react";
-
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PaywallOverlay } from "@/components/paywall/PaywallOverlay";
 import type {
@@ -109,7 +106,7 @@ export function RecommendationCard({
 
   return (
     <section className="space-y-3">
-      <div className="flex flex-wrap items-start justify-between gap-3 px-1">
+      <div className="px-1">
         <div className="flex min-w-0 flex-col gap-0.5">
           <h2 className="text-base font-semibold tracking-tight text-foreground">
             Сценарии ИИ
@@ -118,12 +115,6 @@ export function RecommendationCard({
             Отдельная карточка на каждый рынок: исход, тоталы, обе забьют и др.
           </p>
         </div>
-        {!isPro && (
-          <Badge variant="pro" className="gap-1 shrink-0">
-            <LockSimple className="h-2.5 w-2.5" weight="fill" />
-            Pro
-          </Badge>
-        )}
       </div>
 
       {isPro ? (
