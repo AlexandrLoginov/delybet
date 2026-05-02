@@ -9,7 +9,7 @@ import { AiPickStrip } from "@/components/matches/AiPickStrip";
 import { UpgradeModal } from "@/components/paywall/UpgradeModal";
 import { formatKickoff, formatTimeUntil, cn } from "@/lib/utils";
 import { freePreviewKindForMatch, redeemFreePreview } from "@/lib/freemium";
-import type { FormResult, LiveStats, Match } from "@/types/match";
+import type { FormResult, Match } from "@/types/match";
 
 interface MatchCardProps {
   match: Match;
@@ -127,16 +127,12 @@ function MatchCardBody({ match }: { match: Match }) {
               <span className="truncate">{match.venue}</span>
             </div>
           )}
-
-          {isLive && match.liveStats && (
-            <LiveStatsRow stats={match.liveStats} />
-          )}
         </div>
       </div>
 
       {match.aiPick && (
         <div className="border-t border-border">
-          <AiPickStrip pick={match.aiPick} />
+          <AiPickStrip pick={match.aiPick} sport={match.sport} />
         </div>
       )}
     </div>
@@ -171,31 +167,6 @@ function TeamRow({
           {score}
         </span>
       )}
-    </div>
-  );
-}
-
-function LiveStatsRow({ stats }: { stats: LiveStats }) {
-  return (
-    <div className="mt-2 space-y-1.5 text-[10px] text-muted-foreground">
-      <div className="flex justify-between gap-2 tabular-nums">
-        <span>Владение</span>
-        <span>
-          {stats.possessionHome}% — {stats.possessionAway}%
-        </span>
-      </div>
-      <div className="h-1 overflow-hidden rounded-full bg-muted">
-        <div
-          className="h-full bg-success/70"
-          style={{ width: `${stats.possessionHome}%` }}
-        />
-      </div>
-      <div className="flex justify-between gap-2 tabular-nums">
-        <span>Удары</span>
-        <span>
-          {stats.shotsHome} — {stats.shotsAway}
-        </span>
-      </div>
     </div>
   );
 }

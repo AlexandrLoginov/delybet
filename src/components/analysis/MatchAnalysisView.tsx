@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TeamLogo } from "@/components/matches/TeamLogo";
 import { LiveBadge } from "@/components/matches/LiveBadge";
-import { ProbabilityBar } from "@/components/analysis/ProbabilityBar";
 import { RecommendationCard } from "@/components/analysis/RecommendationCard";
 import { KeyFactorsList } from "@/components/analysis/KeyFactorsList";
 import { StatsBars } from "@/components/analysis/StatsBars";
@@ -155,22 +154,9 @@ export function MatchAnalysisView({
 
             <Separator />
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Вероятности
-                </div>
-                <Badge variant="muted">ИИ-модель</Badge>
-              </div>
-              <ProbabilityBar
-                probabilities={analysis.probabilities}
-                homeLabel={match.home.shortName}
-                awayLabel={match.away.shortName}
-              />
-              <p className="pt-1 text-sm leading-relaxed text-muted-foreground">
-                {analysis.summary}
-              </p>
-            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {analysis.summary}
+            </p>
           </CardContent>
         </Card>
 

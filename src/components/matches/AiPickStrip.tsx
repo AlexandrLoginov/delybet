@@ -1,71 +1,25 @@
-import { cn } from "@/lib/utils";
-import type { AiPick } from "@/types/match";
+import { scenariosAnalyzedCountForSport } from "@/lib/analysis-scenario-count";
+import type { AiPick, SportSlug } from "@/types/match";
 
 interface AiPickStripProps {
   pick?: AiPick;
+  sport: SportSlug;
 }
 
-const CONFIDENCE: Record<
-  AiPick["confidence"],
-  { label: string; cls: string }
-> = {
-  HIGH: {
-    label: "Высокая",
-    cls: "bg-success-muted text-success ring-success/30",
-  },
-  MEDIUM: {
-    label: "Средняя",
-    cls: "bg-primary/15 text-primary ring-primary/30",
-  },
-  LOW: {
-    label: "Низкая",
-    cls: "bg-muted text-muted-foreground ring-border",
-  },
-};
-
-export function AiPickStrip({ pick }: AiPickStripProps) {
+export function AiPickStrip({ pick, sport }: AiPickStripProps) {
   if (!pick) return null;
 
-  const conf = CONFIDENCE[pick.confidence];
-  const segments = [
-    { value: pick.probabilities.home, cls: "bg-success" },
-    {
-      value: pick.probabilities.draw ?? 0,
-      cls: "bg-muted-foreground/40",
-    },
-    { value: pick.probabilities.away, cls: "bg-destructive" },
-  ];
+  const n = scenariosAnalyzedCountForSport(sport);
 
   return (
-    <div className="flex items-center gap-2.5 px-5 py-2.5">
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5 text-[11px]">
-          <span className="font-semibold uppercase tracking-wider text-muted-foreground">
-            ИИ
-          </span>
-          <span className="truncate text-foreground">{pick.outcome}</span>
-          <span className="ml-auto tabular-num font-semibold text-foreground">
-            {pick.probability}%
-          </span>
-        </div>
-        <div className="mt-1.5 flex h-1 w-full overflow-hidden rounded-full bg-muted">
-          {segments.map((s, i) => (
-            <div
-              key={i}
-              className={cn("h-full transition-all", s.cls)}
-              style={{ width: `${s.value}%` }}
-            />
-          ))}
-        </div>
-      </div>
-      <span
-        className={cn(
-          "shrink-0 rounded px-1.5 py-1 text-[10px] font-semibold ring-1 ring-inset",
-          conf.cls
-        )}
-      >
-        {conf.label}
+    <div className="flex items-center gap-2 px-5 py-2.5 text-[11px]">
+      <span className="shrink-0 font-semibold uppercase tracking-wider text-muted-foreground">
+        ИИ
       </span>
+      <span className="min-w-0 flex-1 truncate text-foreground">
+        Сценариев проанализировано
+      </span>
+      <span className="shrink-0 tabular-nums font-semibold text-foreground">{n}</span>
     </div>
   );
 }

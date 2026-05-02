@@ -11,19 +11,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TeamLogo } from "@/components/matches/TeamLogo";
-import { ProbabilityBar } from "@/components/analysis/ProbabilityBar";
 import { cn } from "@/lib/utils";
 import type { HistoryMatch } from "@/types/match";
 
 interface HistoryDetailViewProps {
   match: HistoryMatch;
 }
-
-const CONFIDENCE_LABEL = {
-  HIGH: { label: "Высокая уверенность", tone: "text-success" },
-  MEDIUM: { label: "Средняя уверенность", tone: "text-primary" },
-  LOW: { label: "Низкая уверенность", tone: "text-muted-foreground" },
-} as const;
 
 export function HistoryDetailView({ match }: HistoryDetailViewProps) {
   const date = new Date(match.finishedISO);
@@ -50,8 +43,6 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
       : match.actualOutcome === "AWAY"
       ? `Победа ${match.away.name}`
       : "Ничья";
-
-  const conf = CONFIDENCE_LABEL[match.prediction.confidence];
 
   return (
     <>
@@ -150,20 +141,11 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
               )}
             </div>
             <div className="min-w-0 space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">
-                  {correct
-                    ? "ИИ угадал исход"
-                    : "ИИ ошибся в прогнозе"}
-                </span>
-                <Badge variant="muted" className="px-1.5">
-                  {match.prediction.confidence === "HIGH"
-                    ? "Высокая"
-                    : match.prediction.confidence === "MEDIUM"
-                    ? "Средняя"
-                    : "Низкая"}
-                </Badge>
-              </div>
+              <span className="text-sm font-semibold">
+                {correct
+                  ? "ИИ угадал исход"
+                  : "ИИ ошибся в прогнозе"}
+              </span>
               <p className="text-xs leading-relaxed text-muted-foreground">
                 Прогноз: <span className="text-foreground">{match.prediction.outcome}</span>{" "}
                 · Факт: <span className="text-foreground">{actualLabel}</span>
@@ -175,28 +157,13 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
         <Card className="mt-4">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
                 <Target className="h-3.5 w-3.5" weight="fill" />
               </div>
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Прогноз ИИ перед матчем
-                </div>
-                <span className={cn("text-xs font-medium", conf.tone)}>
-                  {conf.label}
-                </span>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Прогноз ИИ перед матчем
               </div>
             </div>
-
-            <ProbabilityBar
-              probabilities={{
-                home: match.prediction.probHome,
-                draw: match.prediction.probDraw,
-                away: match.prediction.probAway,
-              }}
-              homeLabel={match.home.shortName}
-              awayLabel={match.away.shortName}
-            />
 
             <Separator />
 

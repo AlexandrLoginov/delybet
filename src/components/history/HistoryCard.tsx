@@ -4,18 +4,13 @@ import { CheckCircle, XCircle } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
 import { TeamLogo } from "@/components/matches/TeamLogo";
 import { FormPills } from "@/components/matches/FormPills";
+import { scenariosAnalyzedCountForSport } from "@/lib/analysis-scenario-count";
 import { cn } from "@/lib/utils";
 import type { HistoryMatch } from "@/types/match";
 
 interface HistoryCardProps {
   match: HistoryMatch;
 }
-
-const CONFIDENCE_LABEL = {
-  HIGH: "Высокая",
-  MEDIUM: "Средняя",
-  LOW: "Низкая",
-} as const;
 
 export function HistoryCard({ match }: HistoryCardProps) {
   const predictedHomeWin = match.prediction.outcome
@@ -35,12 +30,7 @@ export function HistoryCard({ match }: HistoryCardProps) {
     month: "short",
   });
 
-  const predictedPct =
-    predicted === "HOME"
-      ? match.prediction.probHome
-      : predicted === "AWAY"
-      ? match.prediction.probAway
-      : match.prediction.probDraw ?? 0;
+  const scenariosCount = scenariosAnalyzedCountForSport(match.sport);
 
   return (
     <Link
@@ -97,26 +87,14 @@ export function HistoryCard({ match }: HistoryCardProps) {
 
       <div className="border-t border-border">
         <div className="flex items-center gap-2 px-5 py-2.5 text-[11px]">
-          <span className="font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="shrink-0 font-semibold uppercase tracking-wider text-muted-foreground">
             ИИ
           </span>
-          <span className="truncate text-foreground/85">
-            {match.prediction.outcome}
+          <span className="min-w-0 flex-1 truncate text-foreground/85">
+            Сценариев проанализировано
           </span>
-          <span className="ml-auto flex items-center gap-2">
-            <span className="tabular-num font-semibold text-foreground">
-              {predictedPct}%
-            </span>
-            <span
-              className={cn(
-                "rounded px-1.5 py-1 text-[10px] font-semibold ring-1 ring-inset",
-                correct
-                  ? "bg-success-muted text-success ring-success/30"
-                  : "bg-destructive/10 text-destructive ring-destructive/30"
-              )}
-            >
-              {CONFIDENCE_LABEL[match.prediction.confidence]}
-            </span>
+          <span className="shrink-0 tabular-nums font-semibold text-foreground">
+            {scenariosCount}
           </span>
         </div>
       </div>
