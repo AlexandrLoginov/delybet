@@ -83,7 +83,7 @@ export function NavBar() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex h-14 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
+                "flex flex-col items-center gap-1 pt-3 pb-8 text-[11px] font-medium transition-colors",
                 active
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground"

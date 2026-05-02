@@ -188,16 +188,8 @@ export function FavoritesView() {
     <main className="mx-auto w-full max-w-2xl px-4 pb-6 pt-5">
       <Drawer open={clearOpen} onOpenChange={setClearOpen}>
         <DrawerContent>
-          <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6">
+          <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6 pb-4">
             <DrawerHeader className="px-0 pt-0">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                  <Star className="h-3.5 w-3.5" strokeWidth={2} />
-                </div>
-                <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">
-                  Избранное
-                </span>
-              </div>
               <DrawerTitle className="pt-2 text-left">
                 Вы уверены, что хотите очистить избранное?
               </DrawerTitle>
