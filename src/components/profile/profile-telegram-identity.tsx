@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Fingerprint } from "lucide-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProfilePlanBadge } from "@/components/profile/profile-plan-badge";
@@ -199,10 +197,6 @@ export function ProfileTelegramIdentity() {
                 @{user.username}
               </div>
             ) : null}
-            <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-              <Fingerprint className="h-3 w-3 shrink-0" strokeWidth={2} />
-              <span className="truncate tabular-num">ID {user.id}</span>
-            </div>
             {verifyError === "session" ? (
               <p className="mt-1 text-[11px] text-destructive">
                 Сессия устарела. Закройте и снова откройте приложение из бота.
