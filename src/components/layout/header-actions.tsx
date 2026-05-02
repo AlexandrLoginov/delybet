@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { faHeadset } from "@fortawesome/free-solid-svg-icons";
+import { Headphones } from "lucide-react";
 
-import { FaIcon } from "@/components/icons/FaIcon";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -61,7 +60,7 @@ export function HeaderActions({ className }: { className?: string }) {
         aria-label="Поддержка"
       >
         <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
-          <FaIcon icon={faHeadset} className="h-4 w-4" />
+          <Headphones className="h-4 w-4" aria-hidden />
         </a>
       </Button>
     </div>
