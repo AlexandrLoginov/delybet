@@ -4,8 +4,18 @@
 import { Buffer } from "node:buffer";
 
 import Anthropic from "@anthropic-ai/sdk";
-import { getMatchById, getMatchStats, getTeamForm, getMatchNews } from "./sports-api";
+
+import type { FormEntry, FullAnalysis, MatchStatsView } from "@/types/analysis";
+
 import { getCached, setCached } from "./cache";
+import {
+  getMatchById,
+  getMatchNews,
+  getMatchStats,
+  getTeamForm,
+  type MatchStats,
+  type TeamForm,
+} from "./sports-api";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -58,17 +68,90 @@ export interface AnalysisResult {
   }[];
 }
 
+function apiFootballSeasonYear(): number {
+  const raw = process.env.API_FOOTBALL_SEASON?.trim();
+  if (raw && /^\d{4}$/.test(raw)) return parseInt(raw, 10);
+  return new Date().getFullYear();
+}
+
+function parsePercentValue(raw: string | number): number {
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return Math.min(100, Math.max(0, Math.round(raw)));
+  }
+  const n = parseInt(String(raw).replace(/[^\d]/g, ""), 10);
+  return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 50;
+}
+
+function matchStatsToViews(stats: MatchStats | null): MatchStatsView[] {
+  if (!stats) return [];
+  return [
+    {
+      label: "Владение мячом",
+      home: parsePercentValue(stats.possession.home),
+      away: parsePercentValue(stats.possession.away),
+      unit: "%",
+    },
+    {
+      label: "Удары",
+      home: Number(stats.shots.home) || 0,
+      away: Number(stats.shots.away) || 0,
+    },
+    {
+      label: "Удары в створ",
+      home: Number(stats.shotsOnTarget.home) || 0,
+      away: Number(stats.shotsOnTarget.away) || 0,
+    },
+    {
+      label: "Угловые",
+      home: Number(stats.corners.home) || 0,
+      away: Number(stats.corners.away) || 0,
+    },
+  ];
+}
+
+function teamFormToEntries(form: TeamForm): FormEntry[] {
+  return form.lastFive.map((r, i) => ({
+    result: r,
+    opponent: `Матч ${i + 1}`,
+    score: "—",
+  }));
+}
+
+function toFullAnalysis(
+  core: AnalysisResult,
+  stats: MatchStats | null,
+  homeForm: TeamForm,
+  awayForm: TeamForm
+): FullAnalysis {
+  return {
+    matchId: core.matchId,
+    generatedAt: core.generatedAt,
+    expiresAt: core.expiresAt,
+    isLive: core.isLive,
+    isPro: false,
+    probabilities: core.probabilities,
+    recommendation: core.recommendation as FullAnalysis["recommendation"],
+    summary: core.summary,
+    detailedAnalysis: core.detailedAnalysis,
+    keyFactors: core.keyFactors,
+    newsImpact: core.newsImpact as FullAnalysis["newsImpact"],
+    stats: matchStatsToViews(stats),
+    homeForm: teamFormToEntries(homeForm),
+    awayForm: teamFormToEntries(awayForm),
+  };
+}
+
 // ── Главная функция ───────────────────────────────────────────────────────────
 
 export async function analyzeMatch(
   matchId: string,
   sport: string = "football",
-  isPro: boolean = false
-): Promise<AnalysisResult> {
+  _isPro: boolean = false
+): Promise<FullAnalysis> {
   const cacheKey = `analysis:${sport}:${matchId}`;
 
   // 1. Проверяем кэш
-  const cached = await getCached<AnalysisResult>(cacheKey);
+  const cached = await getCached<FullAnalysis>(cacheKey);
   if (cached) return cached;
 
   // 2. Собираем данные параллельно
@@ -84,9 +167,10 @@ export async function analyzeMatch(
     match.fixture.status.short === "2H" ||
     match.fixture.status.short === "HT";
 
+  const season = apiFootballSeasonYear();
   const [homeForm, awayForm, news] = await Promise.all([
-    getTeamForm(match.teams.home.id, match.league.id, 2024),
-    getTeamForm(match.teams.away.id, match.league.id, 2024),
+    getTeamForm(match.teams.home.id, match.league.id, season),
+    getTeamForm(match.teams.away.id, match.league.id, season),
     getMatchNews(match.teams.home.name, match.teams.away.name),
   ]);
 
@@ -103,13 +187,14 @@ export async function analyzeMatch(
 
   // 5. Парсим ответ
   const raw = (message.content[0] as { text: string }).text;
-  const analysis = parseAnalysisResponse(raw, matchId, isLive);
+  const core = parseAnalysisResponse(raw, matchId, isLive);
+  const full = toFullAnalysis(core, stats, homeForm, awayForm);
 
   // 6. Кэшируем (2 мин для Live, 15 мин для предстоящих)
   const ttlSeconds = isLive ? 120 : 900;
-  await setCached(cacheKey, analysis, ttlSeconds);
+  await setCached(cacheKey, full, ttlSeconds);
 
-  return analysis;
+  return full;
 }
 
 // ── Построитель промпта ───────────────────────────────────────────────────────

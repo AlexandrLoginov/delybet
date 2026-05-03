@@ -1,25 +1,18 @@
 import { notFound } from "next/navigation";
 
 import { MatchAnalysisWithDevPro } from "@/components/analysis/match-analysis-with-dev-pro";
-import { getMockAnalysis, getMockMatchById } from "@/lib/mock-data";
+import { resolveMatch } from "@/lib/resolve-match";
 
 interface MatchPageProps {
   params: { id: string };
   searchParams: { pro?: string };
 }
 
-export default function MatchPage({ params, searchParams }: MatchPageProps) {
-  const match = getMockMatchById(params.id);
+export default async function MatchPage({ params, searchParams }: MatchPageProps) {
+  const match = await resolveMatch(params.id);
   if (!match) notFound();
 
-  const analysis = getMockAnalysis(params.id);
   const urlIsPro = searchParams.pro === "true";
 
-  return (
-    <MatchAnalysisWithDevPro
-      match={match}
-      analysis={analysis}
-      urlIsPro={urlIsPro}
-    />
-  );
+  return <MatchAnalysisWithDevPro match={match} urlIsPro={urlIsPro} />;
 }

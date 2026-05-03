@@ -2,23 +2,35 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowClockwise, Trophy } from "@phosphor-icons/react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { SportFilter } from "@/components/matches/SportFilter";
+import useSWR from "swr";
+
+import { AppPageSkeleton } from "@/components/layout/app-page-skeleton";
 import { MatchCard } from "@/components/matches/MatchCard";
+import { SportFilter } from "@/components/matches/SportFilter";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import {
   computeEligibleMatchIds,
   getFreeLivePreviewEligibleId,
 } from "@/lib/freemium";
-import { MOCK_MATCHES, SPORTS } from "@/lib/mock-data";
+import { SPORTS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import type { Match, SportSlug } from "@/types/match";
 
 const PAGE_SIZE = 5;
 const COUNTDOWN_SECONDS = 120;
 const SYNCING_MS = 1800;
+
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(typeof json?.message === "string" ? json.message : "FETCH_FAILED");
+  }
+  return json as { matches: Match[] };
+};
 
 function formatCountdown(totalSeconds: number) {
   const m = Math.floor(totalSeconds / 60);
@@ -38,29 +50,40 @@ export function MatchesView() {
   const redeemedFreeMatchId =
     tab === "live" ? freePreviewSlots.live : freePreviewSlots.upcoming;
 
-  const allEventsCount = useMemo(() => {
-    return MOCK_MATCHES.filter((m) => {
-      if (tab === "live") return m.status === "live";
-      return m.status === "upcoming";
-    }).length;
-  }, [tab]);
+  const listUrl = `/api/matches?tab=${tab}&sport=all`;
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: mutateMatches,
+  } = useSWR(listUrl, fetcher, {
+    revalidateOnFocus: true,
+    refreshInterval: 120_000,
+  });
+
+  const { data: livePayload, mutate: mutateLive } = useSWR(
+    "/api/matches?tab=live&sport=all",
+    fetcher,
+    { refreshInterval: 60_000 }
+  );
+
+  const tabMatches = data?.matches ?? [];
+
+  const allEventsCount = tabMatches.length;
 
   const countsBySport = useMemo(() => {
-    const inTab = (m: Match) =>
-      tab === "live" ? m.status === "live" : m.status === "upcoming";
     return Object.fromEntries(
       SPORTS.map(({ slug }) => [
         slug,
-        MOCK_MATCHES.filter((m) => inTab(m) && m.sport === slug).length,
+        tabMatches.filter((m) => m.sport === slug).length,
       ])
     ) as Record<SportSlug, number>;
-  }, [tab]);
+  }, [tabMatches]);
 
   const matches = useMemo(() => {
-    const filtered = MOCK_MATCHES.filter((m) => {
+    const filtered = tabMatches.filter((m) => {
       if (sport !== "all" && m.sport !== sport) return false;
-      if (tab === "live") return m.status === "live";
-      return m.status === "upcoming";
+      return true;
     });
 
     if (tab === "live") {
@@ -86,7 +109,7 @@ export function MatchesView() {
     const redeemedMatch = filtered[idx];
     const rest = filtered.filter((_, i) => i !== idx);
     return redeemedMatch ? [redeemedMatch, ...rest] : filtered;
-  }, [sport, tab, redeemedFreeMatchId]);
+  }, [tabMatches, sport, tab, redeemedFreeMatchId]);
 
   const eligibleIds = useMemo(() => {
     if (tab === "live") {
@@ -99,6 +122,11 @@ export function MatchesView() {
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [sport, tab]);
+
+  const refreshLists = () => {
+    void mutateMatches();
+    void mutateLive();
+  };
 
   useEffect(() => {
     const syncingRef = { current: false };
@@ -116,6 +144,7 @@ export function MatchesView() {
           setAnalysisSyncing(false);
           secondsRef.current = COUNTDOWN_SECONDS;
           setSecondsLeft(COUNTDOWN_SECONDS);
+          refreshLists();
         }, SYNCING_MS);
         return;
       }
@@ -127,11 +156,15 @@ export function MatchesView() {
       clearInterval(tickId);
       clearTimeout(timeoutId);
     };
-  }, []);
+  }, [tab]);
 
   const visibleMatches = matches.slice(0, visibleCount);
   const remaining = Math.max(matches.length - visibleCount, 0);
-  const liveCount = MOCK_MATCHES.filter((m) => m.status === "live").length;
+  const liveCount = livePayload?.matches?.length ?? 0;
+
+  if (isLoading && !data) {
+    return <AppPageSkeleton variant="list" />;
+  }
 
   return (
     <>
@@ -172,6 +205,18 @@ export function MatchesView() {
             </div>
           </div>
         </div>
+
+        {error ? (
+          <div className="mb-4 flex flex-col gap-2 rounded-xl border border-destructive/35 bg-destructive/5 px-4 py-3 text-sm">
+            <span className="text-destructive">
+              Не удалось загрузить матчи. Проверьте API_SPORTS_KEY или попробуйте
+              позже.
+            </span>
+            <Button type="button" variant="outline" size="sm" className="w-fit" onClick={() => refreshLists()}>
+              Обновить
+            </Button>
+          </div>
+        ) : null}
 
         <Tabs
           value={tab}
