@@ -60,6 +60,28 @@ function startOfDayLocal(d: Date): Date {
 const MS_DAY = 86400000;
 const MS_HOUR = 3600000;
 
+function localeDateShort(d: Date): string {
+  return d.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
+/** Интервал по «глубине» в часах для слотов d1 (6 ч каждый, последний — до сейчас). */
+function d1SlotIntervalLabel(
+  fromMs: number,
+  toMsExclusive: number,
+  tNow: number,
+  isLastSlot: boolean
+): string {
+  const hStart = Math.round((tNow - fromMs) / MS_HOUR);
+  if (isLastSlot) {
+    return `${hStart} ч – сейчас`;
+  }
+  const hEnd = Math.round((tNow - toMsExclusive) / MS_HOUR);
+  return `${hStart}–${hEnd} ч назад`;
+}
+
 /** Заголовок и подпись блока графика в зависимости от вкладки. */
 export function statisticsChartCopy(tab: StatsWindowTab): {
   heading: string;
@@ -69,22 +91,22 @@ export function statisticsChartCopy(tab: StatsWindowTab): {
     case "d1":
       return {
         heading: "Динамика за сутки",
-        hint: "Ось: слоты по 6 часов (от −24 ч до текущего момента).",
+        hint: "Слоты по 6 ч; в подписи — интервал «часов назад» относительно сейчас.",
       };
     case "d7":
       return {
         heading: "Динамика по дням",
-        hint: "Ось: календарные дни в выбранной неделе.",
+        hint: "Каждый отрезок — календарные сутки (от 00:00 до полуночи следующего дня).",
       };
     case "d30":
       return {
         heading: "Динамика по интервалам",
-        hint: "Ось: конец каждого 5-дневного отрезка в окне 30 дней.",
+        hint: "Отрезки по 5 дней; подпись — диапазон дат периода.",
       };
     case "d90":
       return {
         heading: "Динамика по интервалам",
-        hint: "Ось: конец каждого 9-дневного отрезка в окне 90 дней.",
+        hint: "Отрезки по 9 дней; подпись — диапазон дат периода.",
       };
   }
 }
@@ -120,7 +142,7 @@ export function buildStatisticsChartSeries(
       const b = windowStart + (k + 1) * slice;
       const subset = subsetInRange(a, b);
       const { pct, total } = computeWindowAccuracy(subset);
-      const label = k === n - 1 ? "сейчас" : `−${(n - 1 - k) * 6}ч`;
+      const label = d1SlotIntervalLabel(a, b, tNow, k === n - 1);
       out.push({ sortKey: a, label, pct, total });
     }
     return out;
@@ -143,10 +165,9 @@ export function buildStatisticsChartSeries(
       const b = d1.getTime();
       const subset = subsetInRange(a, b);
       const { pct, total } = computeWindowAccuracy(subset);
-      const label = d0.toLocaleDateString("ru-RU", {
-        day: "numeric",
-        month: "short",
-      });
+      const left = localeDateShort(d0);
+      const right = localeDateShort(d1);
+      const label = left === right ? left : `${left} – ${right}`;
       out.push({ sortKey: a, label, pct, total });
     }
     return out;
@@ -168,11 +189,12 @@ export function buildStatisticsChartSeries(
         k === num - 1 ? tNow + 1 : a + bucketDays * MS_DAY;
       const subset = subsetInRange(a, bExcl);
       const { pct, total } = computeWindowAccuracy(subset);
-      const labelAt = new Date(Math.min(bExcl - MS_HOUR, tNow));
-      const label = labelAt.toLocaleDateString("ru-RU", {
-        day: "numeric",
-        month: "short",
-      });
+      const endMs = Math.min(bExcl - 1, tNow);
+      const da = new Date(a);
+      const de = new Date(endMs);
+      const left = localeDateShort(da);
+      const right = localeDateShort(de);
+      const label = left === right ? left : `${left} – ${right}`;
       out.push({ sortKey: a, label, pct, total });
     }
     return out;
@@ -193,11 +215,12 @@ export function buildStatisticsChartSeries(
     const bExcl = k === num - 1 ? tNow + 1 : a + bucketDays * MS_DAY;
     const subset = subsetInRange(a, bExcl);
     const { pct, total } = computeWindowAccuracy(subset);
-    const labelAt = new Date(Math.min(bExcl - MS_HOUR, tNow));
-    const label = labelAt.toLocaleDateString("ru-RU", {
-      day: "numeric",
-      month: "short",
-    });
+    const endMs = Math.min(bExcl - 1, tNow);
+    const da = new Date(a);
+    const de = new Date(endMs);
+    const left = localeDateShort(da);
+    const right = localeDateShort(de);
+    const label = left === right ? left : `${left} – ${right}`;
     out.push({ sortKey: a, label, pct, total });
   }
   return out;

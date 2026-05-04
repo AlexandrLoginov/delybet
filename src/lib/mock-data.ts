@@ -898,9 +898,48 @@ function wrongPrediction(
   return candidates[salt % candidates.length]!;
 }
 
+/**
+ * Фиксированные индексы ошибочных прогнозов: ровно `wrongCount` штук, «размазаны»
+ * по всей выборке. Иначе при сортировке по времени все верные оказываются «свежее»
+ * худших — и окна 1 день / неделя дают нереалистичные ~100% и плоский график.
+ */
+function mockHistoryWrongMatchIndices(
+  total: number,
+  wrongCount: number
+): ReadonlySet<number> {
+  const tagged = Array.from({ length: total }, (_, i) => ({
+    i,
+    h: Math.imul(i ^ 0x9e3779b9, 2654435761) >>> 0,
+  }));
+  tagged.sort((a, b) => a.h - b.h);
+  return new Set(tagged.slice(0, wrongCount).map((t) => t.i));
+}
+
+function actualOutcomeRoll(i: number, sport: SportSlug): "HOME" | "DRAW" | "AWAY" {
+  const salt =
+    sport === "football"
+      ? 11
+      : sport === "basketball"
+        ? 17
+        : sport === "tennis"
+          ? 23
+          : 29;
+  const roll = (i * 7919 + salt * 97) % 1000;
+  if (sport === "football") {
+    if (roll < 235) return "DRAW";
+    if (roll < 592) return "HOME";
+    return "AWAY";
+  }
+  return roll < 504 ? "HOME" : "AWAY";
+}
+
 function buildGeneratedHistory(): HistoryMatch[] {
   const rows: HistoryMatch[] = [];
   const sports: SportSlug[] = ["football", "basketball", "tennis", "volleyball"];
+  const wrongIndices = mockHistoryWrongMatchIndices(
+    MOCK_HISTORY_TOTAL,
+    MOCK_HISTORY_TOTAL - MOCK_HISTORY_CORRECT
+  );
 
   for (let i = 0; i < MOCK_HISTORY_TOTAL; i++) {
     const sport = sports[i % 4]!;
@@ -919,17 +958,9 @@ function buildGeneratedHistory(): HistoryMatch[] {
     const home = pool[hi]!;
     const away = pool[ai]!;
 
-    const mod = Math.floor(i / 4) % 6;
-    let actual: "HOME" | "DRAW" | "AWAY";
-    if (sport === "football") {
-      if (mod === 0) actual = "DRAW";
-      else if (mod <= 3) actual = "HOME";
-      else actual = "AWAY";
-    } else {
-      actual = mod % 2 === 0 ? "HOME" : "AWAY";
-    }
+    const actual = actualOutcomeRoll(i, sport);
 
-    const isCorrect = i < MOCK_HISTORY_CORRECT;
+    const isCorrect = !wrongIndices.has(i);
     const predicted = isCorrect
       ? actual
       : wrongPrediction(actual, sport, i);
@@ -959,12 +990,14 @@ function buildGeneratedHistory(): HistoryMatch[] {
         ? { league: "ATP 1000", country: "Мир", round: `${(i % 4) + 1} / 8` }
         : { league: "VNL", country: "Мир", round: "Групповой этап" };
 
-    /** Равномерно за ~90 суток (статистика по окнам 1/7/30/90 дн. и графики). */
+    /** Равномерно за ~90 суток + джиттер — внутри суток и интервалов разная плотность матчей. */
     const spanHours = 90 * 24 - 4;
+    const jitter = (((i * 193) % 97) + ((i * 31) % 41)) * 0.14;
     const hoursBack =
       2 +
       (i / Math.max(1, MOCK_HISTORY_TOTAL - 1)) * spanHours +
-      (i % 23) * 0.08;
+      (i % 23) * 0.11 +
+      jitter;
     const kickoffISO = hoursAgo(hoursBack + 2);
     const finishedISO = hoursAgo(hoursBack);
 
