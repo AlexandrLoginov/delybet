@@ -57,30 +57,150 @@ function startOfDayLocal(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-/** Точность по календарным дням (для графика тренда), дни по возрастанию. */
-export function dailyAccuracyBuckets(matches: HistoryMatch[]): Array<{
-  sortKey: number;
-  label: string;
-  pct: number;
-  total: number;
-}> {
-  const map = new Map<number, HistoryMatch[]>();
-  for (const m of matches) {
-    const d = startOfDayLocal(new Date(m.finishedISO));
-    const t = d.getTime();
-    if (!map.has(t)) map.set(t, []);
-    map.get(t)!.push(m);
+const MS_DAY = 86400000;
+const MS_HOUR = 3600000;
+
+/** Заголовок и подпись блока графика в зависимости от вкладки. */
+export function statisticsChartCopy(tab: StatsWindowTab): {
+  heading: string;
+  hint: string;
+} {
+  switch (tab) {
+    case "d1":
+      return {
+        heading: "Динамика за сутки",
+        hint: "Ось: слоты по 6 часов (от −24 ч до текущего момента).",
+      };
+    case "d7":
+      return {
+        heading: "Динамика по дням",
+        hint: "Ось: календарные дни в выбранной неделе.",
+      };
+    case "d30":
+      return {
+        heading: "Динамика по интервалам",
+        hint: "Ось: конец каждого 5-дневного отрезка в окне 30 дней.",
+      };
+    case "d90":
+      return {
+        heading: "Динамика по интервалам",
+        hint: "Ось: конец каждого 9-дневного отрезка в окне 90 дней.",
+      };
   }
-  return [...map.entries()]
-    .map(([sortKey, items]) => {
-      const { pct, total } = computeWindowAccuracy(items);
-      const label = new Date(sortKey).toLocaleDateString("ru-RU", {
+}
+
+/**
+ * Ряд для графика: подписи и шаг зависят от вкладки (сутки — часы, 30/90 — интервалы).
+ */
+export function buildStatisticsChartSeries(
+  windowMatches: HistoryMatch[],
+  tab: StatsWindowTab,
+  now: Date
+): Array<{ sortKey: number; label: string; pct: number; total: number }> {
+  const tNow = now.getTime();
+
+  const subsetInRange = (fromMs: number, toMsExclusive: number) =>
+    windowMatches.filter((m) => {
+      const t = new Date(m.finishedISO).getTime();
+      return t >= fromMs && t < toMsExclusive;
+    });
+
+  if (tab === "d1") {
+    const n = 4;
+    const slice = MS_DAY / n;
+    const windowStart = tNow - MS_DAY;
+    const out: Array<{
+      sortKey: number;
+      label: string;
+      pct: number;
+      total: number;
+    }> = [];
+    for (let k = 0; k < n; k++) {
+      const a = windowStart + k * slice;
+      const b = windowStart + (k + 1) * slice;
+      const subset = subsetInRange(a, b);
+      const { pct, total } = computeWindowAccuracy(subset);
+      const label = k === n - 1 ? "сейчас" : `−${(n - 1 - k) * 6}ч`;
+      out.push({ sortKey: a, label, pct, total });
+    }
+    return out;
+  }
+
+  if (tab === "d7") {
+    const endDay = startOfDayLocal(now);
+    const out: Array<{
+      sortKey: number;
+      label: string;
+      pct: number;
+      total: number;
+    }> = [];
+    for (let k = 0; k < 7; k++) {
+      const d0 = new Date(endDay);
+      d0.setDate(endDay.getDate() - 6 + k);
+      const d1 = new Date(d0);
+      d1.setDate(d0.getDate() + 1);
+      const a = d0.getTime();
+      const b = d1.getTime();
+      const subset = subsetInRange(a, b);
+      const { pct, total } = computeWindowAccuracy(subset);
+      const label = d0.toLocaleDateString("ru-RU", {
         day: "numeric",
         month: "short",
       });
-      return { sortKey, label, pct, total };
-    })
-    .sort((a, b) => a.sortKey - b.sortKey);
+      out.push({ sortKey: a, label, pct, total });
+    }
+    return out;
+  }
+
+  if (tab === "d30") {
+    const bucketDays = 5;
+    const windowStart = tNow - 30 * MS_DAY;
+    const num = Math.ceil(30 / bucketDays);
+    const out: Array<{
+      sortKey: number;
+      label: string;
+      pct: number;
+      total: number;
+    }> = [];
+    for (let k = 0; k < num; k++) {
+      const a = windowStart + k * bucketDays * MS_DAY;
+      const bExcl =
+        k === num - 1 ? tNow + 1 : a + bucketDays * MS_DAY;
+      const subset = subsetInRange(a, bExcl);
+      const { pct, total } = computeWindowAccuracy(subset);
+      const labelAt = new Date(Math.min(bExcl - MS_HOUR, tNow));
+      const label = labelAt.toLocaleDateString("ru-RU", {
+        day: "numeric",
+        month: "short",
+      });
+      out.push({ sortKey: a, label, pct, total });
+    }
+    return out;
+  }
+
+  /* d90 */
+  const bucketDays = 9;
+  const windowStart = tNow - 90 * MS_DAY;
+  const num = Math.ceil(90 / bucketDays);
+  const out: Array<{
+    sortKey: number;
+    label: string;
+    pct: number;
+    total: number;
+  }> = [];
+  for (let k = 0; k < num; k++) {
+    const a = windowStart + k * bucketDays * MS_DAY;
+    const bExcl = k === num - 1 ? tNow + 1 : a + bucketDays * MS_DAY;
+    const subset = subsetInRange(a, bExcl);
+    const { pct, total } = computeWindowAccuracy(subset);
+    const labelAt = new Date(Math.min(bExcl - MS_HOUR, tNow));
+    const label = labelAt.toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "short",
+    });
+    out.push({ sortKey: a, label, pct, total });
+  }
+  return out;
 }
 
 export function sportBreakdownForMatches(matches: HistoryMatch[]): Array<{

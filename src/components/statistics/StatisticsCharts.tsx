@@ -18,10 +18,14 @@ export type DailyPoint = { label: string; pct: number; total: number };
 
 export function StatisticsCharts({
   activeTab,
+  chartHeading,
+  chartHint,
   compareItems,
   dailySeries,
 }: {
   activeTab: StatsWindowTab;
+  chartHeading: string;
+  chartHint: string;
   compareItems: CompareBarItem[];
   dailySeries: DailyPoint[];
 }) {
@@ -38,7 +42,8 @@ export function StatisticsCharts({
             Сравнение окон
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Демо-сводка точности по периодам; подсвечено выбранное окно.
+            Доля верных прогнозов по завершённым матчам в базе; подсвечено
+            выбранное окно.
           </p>
           <div
             className="mt-4 grid grid-cols-4 gap-2"
@@ -98,11 +103,9 @@ export function StatisticsCharts({
 
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Динамика по дням
+            {chartHeading}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Точность по календарным дням внутри выбранного окна.
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{chartHint}</p>
           {dailySeries.length === 0 ? (
             <div className="mt-4 rounded-lg border border-dashed bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
               Нет матчей за этот период
@@ -135,6 +138,12 @@ function SingleDayBar({ point }: { point: DailyPoint }) {
       </div>
     </div>
   );
+}
+
+function shouldShowXLabel(i: number, len: number): boolean {
+  if (len <= 6) return true;
+  if (i === 0 || i === len - 1) return true;
+  return i % 2 === 0;
 }
 
 function DailyLineChart({ points }: { points: DailyPoint[] }) {
@@ -196,20 +205,22 @@ function DailyLineChart({ points }: { points: DailyPoint[] }) {
           strokeWidth={2}
         />
       ))}
-      {coords.map((c, i) => (
-        <text
-          key={`t-${c.label}-${i}`}
-          x={c.x}
-          y={h - 6}
-          textAnchor={
-            i === 0 ? "start" : i === coords.length - 1 ? "end" : "middle"
-          }
-          fill="hsl(var(--muted-foreground))"
-          className="text-[8px] font-medium sm:text-[9px]"
-        >
-          {c.label}
-        </text>
-      ))}
+      {coords.map((c, i) =>
+        shouldShowXLabel(i, coords.length) ? (
+          <text
+            key={`t-${c.label}-${i}`}
+            x={c.x}
+            y={h - 6}
+            textAnchor={
+              i === 0 ? "start" : i === coords.length - 1 ? "end" : "middle"
+            }
+            fill="hsl(var(--muted-foreground))"
+            className="text-[8px] font-medium sm:text-[9px]"
+          >
+            {c.label}
+          </text>
+        ) : null
+      )}
     </svg>
   );
 }

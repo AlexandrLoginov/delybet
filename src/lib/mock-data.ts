@@ -959,7 +959,12 @@ function buildGeneratedHistory(): HistoryMatch[] {
         ? { league: "ATP 1000", country: "Мир", round: `${(i % 4) + 1} / 8` }
         : { league: "VNL", country: "Мир", round: "Групповой этап" };
 
-    const hoursBack = 6 + i * 0.22;
+    /** Равномерно за ~90 суток (статистика по окнам 1/7/30/90 дн. и графики). */
+    const spanHours = 90 * 24 - 4;
+    const hoursBack =
+      2 +
+      (i / Math.max(1, MOCK_HISTORY_TOTAL - 1)) * spanHours +
+      (i % 23) * 0.08;
     const kickoffISO = hoursAgo(hoursBack + 2);
     const finishedISO = hoursAgo(hoursBack);
 

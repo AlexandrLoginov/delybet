@@ -16,28 +16,18 @@ import { StatisticsCharts } from "@/components/statistics/StatisticsCharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UpgradeModal } from "@/components/paywall/UpgradeModal";
-import { HISTORY_UI_DEMO_AGGREGATES } from "@/lib/history-demo-aggregates";
 import {
   STATS_TAB_LABEL,
   STATS_TAB_ORDER,
   type StatsWindowTab,
+  buildStatisticsChartSeries,
   computeWindowAccuracy,
-  dailyAccuracyBuckets,
   filterHistoryByWindow,
   sportBreakdownForMatches,
+  statisticsChartCopy,
 } from "@/lib/statistics-period";
 import { MOCK_HISTORY } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-
-const AGG_FOR_TAB: Record<
-  StatsWindowTab,
-  keyof typeof HISTORY_UI_DEMO_AGGREGATES
-> = {
-  d1: "today",
-  d7: "week",
-  d30: "month",
-  d90: "threeMonths",
-};
 
 const CHART_SHORT_LABEL: Record<StatsWindowTab, string> = {
   d1: "1 дн.",
@@ -87,21 +77,18 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
     return best;
   }, [sportBreakdown]);
 
-  const dailySeries = useMemo(
-    () =>
-      dailyAccuracyBuckets(filteredMatches).map(({ label, pct, total }) => ({
-        label,
-        pct,
-        total,
-      })),
-    [filteredMatches]
+  const chartSeries = useMemo(
+    () => buildStatisticsChartSeries(filteredMatches, tab, now),
+    [filteredMatches, tab, now]
   );
+
+  const chartCopy = useMemo(() => statisticsChartCopy(tab), [tab]);
 
   const compareItems = useMemo(
     () =>
       STATS_TAB_ORDER.map((t) => {
-        const agg = HISTORY_UI_DEMO_AGGREGATES[AGG_FOR_TAB[t]];
-        const pct = Math.round((agg.correct / agg.total) * 100);
+        const subset = filterHistoryByWindow(MOCK_HISTORY, t, now);
+        const { pct } = computeWindowAccuracy(subset);
         return {
           tab: t,
           label: CHART_SHORT_LABEL[t],
@@ -109,7 +96,7 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
           locked: t === "d90" && !isPro,
         };
       }),
-    [isPro]
+    [isPro, now]
   );
 
   return (
@@ -162,8 +149,10 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
         <div className="mt-4">
           <StatisticsCharts
             activeTab={tab}
+            chartHeading={chartCopy.heading}
+            chartHint={chartCopy.hint}
             compareItems={compareItems}
-            dailySeries={dailySeries}
+            dailySeries={chartSeries}
           />
         </div>
 

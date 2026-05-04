@@ -204,7 +204,7 @@ export function MatchAnalysisView({
         ) : null}
 
         <section className="mt-8 space-y-3">
-          <h2 className="text-base font-semibold tracking-tight px-1">
+          <h2 className="px-1 text-base font-semibold tracking-tight text-foreground">
             Развёрнутый анализ
           </h2>
 
@@ -228,17 +228,11 @@ export function MatchAnalysisView({
               </CardContent>
             </Card>
           ) : (
-            <PaywallOverlay>
-              <div className="space-y-4 p-5">
-                <p className="text-sm leading-relaxed text-foreground/85">
-                  {analysis.detailedAnalysis}
-                </p>
-                <KeyFactorsList
-                  factors={analysis.keyFactors}
-                  homeName={match.home.shortName}
-                  awayName={match.away.shortName}
-                />
-              </div>
+            <PaywallOverlay
+              title="Развёрнутый анализ — в Pro"
+              description="Полный текст рассуждений модели, ключевые факторы и связка с новостями — после подключения подписки."
+            >
+              <DetailedAnalysisSkeletonStack />
             </PaywallOverlay>
           )}
         </section>
@@ -250,6 +244,35 @@ export function MatchAnalysisView({
         </p>
       </main>
     </>
+  );
+}
+
+/** Скелет под paywall (как «Сценарии ИИ»): один каркас вместо размытого текста. */
+function DetailedAnalysisSkeletonStack() {
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="space-y-4 p-5" aria-hidden>
+        <div className="space-y-2.5">
+          <div className="h-3 w-full rounded-md bg-muted" />
+          <div className="h-3 w-full rounded-md bg-muted/85" />
+          <div className="h-3 w-[92%] rounded-md bg-muted/70" />
+          <div className="h-3 w-[78%] rounded-md bg-muted/55" />
+        </div>
+        <Separator />
+        <div className="space-y-3">
+          <div className="h-2.5 w-36 rounded-md bg-muted" />
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-3 rounded-md bg-muted/50"
+                style={{ width: `${100 - i * 6}%` }}
+              />
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
