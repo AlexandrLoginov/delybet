@@ -3,7 +3,7 @@ import { rawMatchToMatch } from "@/lib/match-mapper";
 import { getMatchById } from "@/lib/sports-api";
 import type { Match } from "@/types/match";
 
-function useMocksData(): boolean {
+function mocksDataEnabled(): boolean {
   return (
     process.env.NEXT_PUBLIC_USE_MOCKS === "true" || !process.env.API_SPORTS_KEY
   );
@@ -11,7 +11,7 @@ function useMocksData(): boolean {
 
 /** Загрузка матча для страницы анализа: моки или fixture API-Football по числовому id. */
 export async function resolveMatch(id: string): Promise<Match | null> {
-  if (useMocksData()) {
+  if (mocksDataEnabled()) {
     return getMockMatchById(id) ?? null;
   }
 

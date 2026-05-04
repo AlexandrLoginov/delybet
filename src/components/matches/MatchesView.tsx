@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowClockwise, Trophy } from "@phosphor-icons/react";
 import useSWR from "swr";
 
@@ -67,7 +67,7 @@ export function MatchesView() {
     { refreshInterval: 60_000 }
   );
 
-  const tabMatches = data?.matches ?? [];
+  const tabMatches = useMemo(() => data?.matches ?? [], [data]);
 
   const allEventsCount = tabMatches.length;
 
@@ -123,10 +123,10 @@ export function MatchesView() {
     setVisibleCount(PAGE_SIZE);
   }, [sport, tab]);
 
-  const refreshLists = () => {
+  const refreshLists = useCallback(() => {
     void mutateMatches();
     void mutateLive();
-  };
+  }, [mutateMatches, mutateLive]);
 
   useEffect(() => {
     const syncingRef = { current: false };
@@ -156,7 +156,7 @@ export function MatchesView() {
       clearInterval(tickId);
       clearTimeout(timeoutId);
     };
-  }, [tab]);
+  }, [tab, refreshLists]);
 
   const visibleMatches = matches.slice(0, visibleCount);
   const remaining = Math.max(matches.length - visibleCount, 0);

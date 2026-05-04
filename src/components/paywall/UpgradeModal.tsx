@@ -14,17 +14,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
+import { PRO_MARKETING_BULLETS } from "@/lib/subscription-features";
 
 interface UpgradeModalProps {
   trigger?: ReactNode;
   defaultOpen?: boolean;
 }
-
-const FEATURES = [
-  "Безлимит анализов матчей в день",
-  "Развёрнутая аргументация ИИ",
-  "Ключевые факторы и влияние новостей",
-];
 
 const PACKAGES_OPEN_DELAY_MS = 260;
 
@@ -72,12 +67,12 @@ export function UpgradeModal({ trigger, defaultOpen = false }: UpgradeModalProps
                 Получи полный анализ ИИ
               </DrawerTitle>
               <DrawerDescription className="text-left">
-                7 дней бесплатно, потом 499 ₽/мес. Отмена в один клик.
+                400 ₽/мес. Отмена в один клик.
               </DrawerDescription>
             </DrawerHeader>
 
             <ul className="space-y-2 py-4">
-              {FEATURES.map((f) => (
+              {PRO_MARKETING_BULLETS.map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm">
                   <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success-muted text-success">
                     <CheckCircle className="h-2.5 w-2.5" weight="fill" />

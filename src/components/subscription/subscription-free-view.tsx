@@ -13,17 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { UpgradeModal } from "@/components/paywall/UpgradeModal";
 import { SubscriptionDailyUsage } from "@/components/subscription/SubscriptionDailyUsage";
+import { SUBSCRIPTION_FEATURE_ROWS } from "@/lib/subscription-features";
 import { cn } from "@/lib/utils";
-
-const FEATURES = [
-  { label: "Анализы предстоящих матчей", free: "1 в день", pro: "Без лимита" },
-  { label: "Анализы Live", free: "1 в день", pro: "Без лимита" },
-  { label: "Краткое ИИ‑резюме", free: true, pro: true },
-  { label: "Развёрнутая аргументация", free: false, pro: true },
-  { label: "Ключевые факторы матча", free: false, pro: true },
-  { label: "Влияние новостей", free: false, pro: true },
-  { label: "Статистика прогнозов", free: "30 дней", pro: "90 дней" },
-];
 
 export function SubscriptionFreeView() {
   return (
@@ -85,7 +76,7 @@ export function SubscriptionFreeView() {
               <span className="text-center text-foreground">Pro</span>
             </div>
             <ul className="divide-y divide-border">
-              {FEATURES.map((f) => (
+              {SUBSCRIPTION_FEATURE_ROWS.map((f) => (
                 <li
                   key={f.label}
                   className="grid grid-cols-[1fr_88px_88px] items-center gap-2 px-4 py-2.5 text-sm"
