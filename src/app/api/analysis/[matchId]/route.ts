@@ -1,6 +1,10 @@
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+
 import { analyzeMatch } from "@/lib/ai-analysis";
+import { SESSION_COOKIE, verifySession } from "@/lib/auth-session";
 import { getMockAnalysis } from "@/lib/mock-data";
+import { checkSubscription } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +15,24 @@ export async function GET(
   try {
     const { matchId } = params;
     const sport = req.nextUrl.searchParams.get("sport") ?? "football";
-    const isPro = req.nextUrl.searchParams.get("pro") === "true";
+
+    const cookieStore = cookies();
+    const sessionToken = cookieStore.get(SESSION_COOKIE)?.value ?? null;
+    const sessionUserId = sessionToken ? verifySession(sessionToken) : null;
+
+    let dbPro = false;
+    if (sessionUserId) {
+      dbPro = await checkSubscription(sessionUserId);
+    }
+
+    const devToolsBypass =
+      process.env.NODE_ENV === "development" &&
+      process.env.NEXT_PUBLIC_ENABLE_DEV_TOOLS === "true";
+    const wantsClientPro =
+      req.nextUrl.searchParams.get("pro") === "true";
+
+    const isPro =
+      dbPro || (devToolsBypass && wantsClientPro);
 
     const useMock =
       !process.env.ANTHROPIC_API_KEY ||
@@ -36,7 +57,7 @@ export async function GET(
           scenarios: undefined,
         },
         isPro: false,
-        upgradeUrl: "/upgrade",
+        upgradeUrl: "/subscription",
       });
     }
 

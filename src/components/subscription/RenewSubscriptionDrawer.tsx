@@ -28,9 +28,14 @@ interface RenewSubscriptionDrawerProps {
   defaultOpen?: boolean;
   /**
    * subscribe — первое оформление Pro (например с профиля)
-   * renew — продление уже активной подписки
+   * renew — уже есть Pro: редирект в Stripe Customer Portal
    */
   intent?: "subscribe" | "renew";
+  /**
+   * По умолчанию: renew → portal, subscribe → checkout через Stripe.
+   * Можно переопределить явно.
+   */
+  billingAction?: "checkout" | "portal";
   /** Контролируемое открытие (например второй шаг из UpgradeModal без trigger) */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -39,9 +44,9 @@ interface RenewSubscriptionDrawerProps {
 const INTENT_COPY = {
   renew: {
     eyebrow: "Продление Pro",
-    title: "Выбери срок продления",
+    title: "Управление подпиской",
     description:
-      "Чем дольше период — тем ниже цена за месяц. Оплата разовая за выбранный срок.",
+      "Оплата, счета, смена карты и отмена — через защищённый кабинет Stripe.",
     packagesLabel: "Пакеты продления",
     packagesAria: "Пакеты продления",
   },
@@ -59,6 +64,7 @@ export function RenewSubscriptionDrawer({
   trigger,
   defaultOpen = false,
   intent = "renew",
+  billingAction,
   open: controlledOpen,
   onOpenChange,
 }: RenewSubscriptionDrawerProps) {
@@ -69,14 +75,67 @@ export function RenewSubscriptionDrawer({
     if (!isControlled) setInternalOpen(next);
     onOpenChange?.(next);
   }
+
+  const resolvedBilling: "checkout" | "portal" =
+    billingAction ?? (intent === "renew" ? "portal" : "checkout");
+
   const [selected, setSelected] = useState<string>(
     () => RENEWAL_PACKAGES[0]?.id ?? "1m"
   );
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const pkg = RENEWAL_PACKAGES.find((p) => p.id === selected) ?? RENEWAL_PACKAGES[0];
   const fullWithoutDiscount = renewalFullPriceWithoutDiscount(pkg.months);
   const eqMonthly = renewalEquivalentMonthlyRub(pkg.totalRub, pkg.months);
   const copy = INTENT_COPY[intent];
+
+  async function submitPayment() {
+    setError(null);
+    setBusy(true);
+    try {
+      if (resolvedBilling === "portal") {
+        const res = await fetch("/api/stripe/portal", {
+          method: "POST",
+          credentials: "include",
+        });
+        const data = (await res.json()) as { url?: string; error?: string };
+        if (!res.ok || !data.url) {
+          setError(
+            data.error === "NO_STRIPE_CUSTOMER"
+              ? "Сначала оформи Pro — запись в Stripe ещё не создана."
+              : (data.error ?? "Не удалось открыть кабинет оплаты")
+          );
+          return;
+        }
+        window.location.href = data.url;
+        return;
+      }
+
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packageId: selected }),
+      });
+      const data = (await res.json()) as { url?: string; message?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setError(
+          data.message ??
+            data.error ??
+            (res.status === 401
+              ? "Откройте приложение через Telegram Mini App и попробуйте снова."
+              : "Оплата временно недоступна.")
+        );
+        return;
+      }
+      window.location.href = data.url;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const showPackages = resolvedBilling === "checkout";
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
@@ -96,45 +155,71 @@ export function RenewSubscriptionDrawer({
             <DrawerDescription className="text-left">{copy.description}</DrawerDescription>
           </DrawerHeader>
 
-          <div className="space-y-2 py-4">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              {copy.packagesLabel}
+          {showPackages ? (
+            <div className="space-y-2 py-4">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                {copy.packagesLabel}
+              </p>
+              <ul
+                className="flex flex-col gap-2"
+                role="listbox"
+                aria-label={copy.packagesAria}
+              >
+                {RENEWAL_PACKAGES.map((p) => (
+                  <li key={p.id}>
+                    <PackageOption
+                      pkg={p}
+                      selected={selected === p.id}
+                      onSelect={() => setSelected(p.id)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="py-4 text-sm text-muted-foreground">
+              После перехода вы сможете продлить период, обновить способ оплаты или отменить
+              автопродление до конца оплаченного срока.
             </p>
-            <ul
-              className="flex flex-col gap-2"
-              role="listbox"
-              aria-label={copy.packagesAria}
-            >
-              {RENEWAL_PACKAGES.map((p) => (
-                <li key={p.id}>
-                  <PackageOption
-                    pkg={p}
-                    selected={selected === p.id}
-                    onSelect={() => setSelected(p.id)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
+
+          {error ? (
+            <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+              {error}
+            </p>
+          ) : null}
         </div>
 
         <DrawerFooter className="gap-2">
-          <div className="flex w-full flex-col gap-1 pb-1 text-center">
-            <span className="text-xs text-muted-foreground">
-              К оплате за выбранный период
-            </span>
-            <span className="text-xl font-semibold tabular-nums text-foreground">
-              {pkg.totalRub.toLocaleString("ru-RU")} ₽
-            </span>
-            <span className="text-[11px] text-muted-foreground">
-              ~{eqMonthly} ₽/мес · экономия к помесячной оплате{" "}
-              {fullWithoutDiscount - pkg.totalRub > 0
-                ? `${fullWithoutDiscount.toLocaleString("ru-RU")} ₽ → ${pkg.totalRub.toLocaleString("ru-RU")} ₽`
-                : "—"}
-            </span>
-          </div>
-          <Button size="lg" className="w-full" type="button">
-            Оплатить {pkg.totalRub.toLocaleString("ru-RU")} ₽
+          {showPackages ? (
+            <div className="flex w-full flex-col gap-1 pb-1 text-center">
+              <span className="text-xs text-muted-foreground">
+                К оплате за выбранный период
+              </span>
+              <span className="text-xl font-semibold tabular-nums text-foreground">
+                {pkg.totalRub.toLocaleString("ru-RU")} ₽
+              </span>
+              <span className="text-[11px] text-muted-foreground">
+                ~{eqMonthly} ₽/мес · экономия к помесячной оплате{" "}
+                {fullWithoutDiscount - pkg.totalRub > 0
+                  ? `${fullWithoutDiscount.toLocaleString("ru-RU")} ₽ → ${pkg.totalRub.toLocaleString("ru-RU")} ₽`
+                  : "—"}
+              </span>
+            </div>
+          ) : null}
+
+          <Button
+            size="lg"
+            className="w-full"
+            type="button"
+            disabled={busy}
+            onClick={submitPayment}
+          >
+            {busy
+              ? "Загрузка…"
+              : resolvedBilling === "portal"
+                ? "Открыть кабинет Stripe"
+                : `Оплатить ${pkg.totalRub.toLocaleString("ru-RU")} ₽`}
           </Button>
           <Button
             variant="ghost"

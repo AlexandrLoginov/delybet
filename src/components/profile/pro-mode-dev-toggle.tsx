@@ -7,6 +7,10 @@ import { cn } from "@/lib/utils";
 export function ProModeDevToggle() {
   const enabled = useDevProPreview();
 
+  if (process.env.NEXT_PUBLIC_ENABLE_DEV_TOOLS !== "true") {
+    return null;
+  }
+
   return (
     <div className="flex justify-center pb-1">
       <div

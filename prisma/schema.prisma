@@ -24,7 +24,7 @@ model Subscription {
   id                   String   @id @default(cuid())
   userId               String   @unique
   user                 User     @relation(fields: [userId], references: [id])
-  stripeCustomerId     String   @unique
+  stripeCustomerId     String?  @unique
   stripeSubscriptionId String?  @unique
   plan                 Plan     @default(FREE)
   status               String   @default("active") // active | canceled | past_due

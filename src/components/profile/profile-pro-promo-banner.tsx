@@ -5,11 +5,13 @@ import { Medal } from "@phosphor-icons/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
+import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 
 export function ProfileProPromoBanner() {
+  const { data: authMe } = useAuthMe();
   const devPro = useDevProPreview();
-  if (devPro) return null;
+  if (authMe?.isPro || devPro) return null;
 
   return (
     <Card className="overflow-hidden border-primary/40">

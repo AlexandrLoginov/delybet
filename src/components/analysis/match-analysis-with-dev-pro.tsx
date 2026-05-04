@@ -6,12 +6,13 @@ import { MatchAnalysisView } from "@/components/analysis/MatchAnalysisView";
 import { AppPageSkeleton } from "@/components/layout/app-page-skeleton";
 import { MatchFreePreviewGate } from "@/components/paywall/MatchFreePreviewGate";
 import { Button } from "@/components/ui/button";
-import { normalizeAnalysisPayload } from "@/lib/analysis-api-normalize";
+import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
+import { normalizeAnalysisPayload } from "@/lib/analysis-api-normalize";
 import type { Match } from "@/types/match";
 
 const fetcher = async (url: string) => {
-  const res = await fetch(url);
+  const res = await fetch(url, { credentials: "include" });
   const data = await res.json();
   if (!res.ok) {
     const msg =
@@ -28,8 +29,14 @@ export function MatchAnalysisWithDevPro({
   match: Match;
   urlIsPro: boolean;
 }) {
+  const { data: authMe } = useAuthMe();
   const devPro = useDevProPreview();
-  const isPro = urlIsPro || devPro;
+  const devTools =
+    process.env.NODE_ENV === "development" &&
+    process.env.NEXT_PUBLIC_ENABLE_DEV_TOOLS === "true";
+  const dbPro = authMe?.isPro === true;
+  const isPro =
+    dbPro || (devTools && (urlIsPro || devPro));
   const proParam = isPro ? "true" : "false";
 
   const swrKey = `/api/analysis/${match.id}?sport=${encodeURIComponent(match.sport)}&pro=${proParam}`;

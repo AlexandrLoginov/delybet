@@ -17,7 +17,13 @@ import {
   type TeamForm,
 } from "./sports-api";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+function getAnthropic(): Anthropic {
+  const key = process.env.ANTHROPIC_API_KEY?.trim();
+  if (!key) {
+    throw new Error("ANTHROPIC_API_KEY is not set");
+  }
+  return new Anthropic({ apiKey: key });
+}
 
 /** Идентификатор модели: `ANTHROPIC_MODEL` или встроенный дефолт для Anthropic Messages API. */
 function anthropicMessagesModelId(): string {
@@ -177,7 +183,7 @@ export async function analyzeMatch(
   // 3. Строим промпт
   const prompt = buildPrompt({ match, stats, homeForm, awayForm, news, isLive });
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropic().messages.create({
     model: anthropicMessagesModelId(),
     max_tokens: 1536,
     system: `Ты — эксперт по спортивной аналитике. Анализируй матчи объективно на основе данных.

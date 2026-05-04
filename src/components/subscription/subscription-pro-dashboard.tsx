@@ -1,11 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
+import { useMemo } from "react";
 import {
   CaretLeft,
   ClockClockwise,
-  ClockCounterClockwise,
   Medal,
 } from "@phosphor-icons/react";
 
@@ -14,45 +13,36 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
-import { PRO_SUBSCRIPTION_DEMO } from "@/lib/pro-subscription-demo";
-import { getCalendarDaysFromTo, getWholeDaysUntil } from "@/lib/format-days-left";
-import { cn } from "@/lib/utils";
-
-const SUBSCRIPTION_HISTORY_LIMIT = 5;
+import { useAuthMe } from "@/hooks/use-auth-me";
+import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
+import { getWholeDaysUntil } from "@/lib/format-days-left";
+import { RENEWAL_BASE_MONTHLY_RUB } from "@/lib/renewal-packages";
 
 export function SubscriptionProDashboard() {
-  /** Сначала новые периоды (текущая сверху), не более 5 записей */
-  const historyOrdered = useMemo(
-    () =>
-      [...PRO_SUBSCRIPTION_DEMO.history]
-        .sort(
-          (a, b) =>
-            new Date(b.periodStartISO).getTime() -
-            new Date(a.periodStartISO).getTime()
-        )
-        .slice(0, SUBSCRIPTION_HISTORY_LIMIT),
-    []
-  );
+  const { data: authMe } = useAuthMe();
+  const devProPreview = useDevProPreview();
 
-  const periodStart = new Date(PRO_SUBSCRIPTION_DEMO.currentPeriodStartISO);
-  const periodEnd = new Date(PRO_SUBSCRIPTION_DEMO.currentPeriodEndISO);
-  const daysLeft = getWholeDaysUntil(periodEnd);
+  const periodEnd = useMemo(() => {
+    const raw = authMe?.subscription?.currentPeriodEnd;
+    return raw ? new Date(raw) : null;
+  }, [authMe?.subscription?.currentPeriodEnd]);
 
-  const totalPeriodDays = Math.max(
-    1,
-    getCalendarDaysFromTo(periodStart, periodEnd)
-  );
+  const endDateLabel = periodEnd
+    ? periodEnd.toLocaleDateString("ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
 
-  const pctRemaining = Math.min(
-    100,
-    Math.max(0, (daysLeft / totalPeriodDays) * 100)
-  );
+  const daysLeft = periodEnd ? getWholeDaysUntil(periodEnd) : null;
 
-  const endDateLabel = periodEnd.toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const statusLabel =
+    authMe?.subscription?.status === "past_due"
+      ? "Просрочен платёж"
+      : authMe?.subscription?.status === "trialing"
+        ? "Пробный период"
+        : "Активна";
 
   return (
     <main className="mx-auto w-full max-w-2xl space-y-5 px-4 pb-8 pt-5">
@@ -78,7 +68,7 @@ export function SubscriptionProDashboard() {
                     DelyBet Pro
                   </h1>
                   <Badge variant="success" className="font-semibold">
-                    Активна
+                    {statusLabel}
                   </Badge>
                 </div>
                 <p className="mt-0.5 text-sm text-muted-foreground">
@@ -87,9 +77,14 @@ export function SubscriptionProDashboard() {
               </div>
             </div>
           </div>
+          {(devProPreview && authMe?.isPro !== true) && (
+            <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs leading-snug text-muted-foreground">
+              На экране включён локальный режим «Pro (тест)»: реальную подписку Stripe см. ниже после оплаты.
+            </p>
+          )}
           <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs leading-snug text-muted-foreground">
-            Автопродления пока нет: доступ оплачивается помесячно, каждый новый
-            период нужно оформить отдельно.
+            Оплаченный период продлевается автоматически, если не отменить заранее. Отмена не забирает уже
+            оплаченные дни — доступ сохранится до конца расчётного периода.
           </p>
         </CardContent>
       </Card>
@@ -98,103 +93,56 @@ export function SubscriptionProDashboard() {
         <CardContent className="space-y-4 p-5">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             <ClockClockwise className="h-4 w-4" weight="fill" />
-            Срок подписки
+            Текущий период
           </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Действует до</p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">
-              {endDateLabel}
+          {periodEnd && endDateLabel ? (
+            <>
+              <div>
+                <p className="text-sm text-muted-foreground">Действует до</p>
+                <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">
+                  {endDateLabel}
+                </p>
+              </div>
+              {daysLeft !== null && (
+                <p className="text-sm text-muted-foreground">
+                  Осталось дней (по календарю):{" "}
+                  <span className="font-medium tabular-nums text-foreground">
+                    {Math.max(0, daysLeft)}
+                  </span>
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Дата из Stripe синхронизируется после вебхука. Если оплата прошла недавно, обнови страницу через
+              минуту.
             </p>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span>Осталось в периоде</span>
-              <span className="tabular-nums text-foreground">
-                {Math.max(0, daysLeft)} из {totalPeriodDays} дней
-              </span>
-            </div>
-            <div
-              className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
-              role="progressbar"
-              aria-valuenow={Math.round(pctRemaining)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="Доля оставшихся дней текущего периода"
-            >
-              <div
-                className={cn(
-                  "h-full rounded-full transition-[width]",
-                  daysLeft <= 3 ? "bg-destructive/80" : "bg-success"
-                )}
-                style={{ width: `${pctRemaining}%` }}
-              />
-            </div>
-            <p className="text-[11px] leading-snug text-muted-foreground">
-              Шкала показывает, какая часть оплаченного периода ещё впереди.
-            </p>
-          </div>
+          )}
 
           <Separator />
+
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="text-sm text-muted-foreground">
-              Стоимость месяца при следующей оплате
+              Ориентир помесячной ставки после акций
             </span>
             <span className="text-base font-semibold tabular-nums">
-              {PRO_SUBSCRIPTION_DEMO.nextChargeRub} ₽
+              {RENEWAL_BASE_MONTHLY_RUB} ₽
             </span>
           </div>
+
           <RenewSubscriptionDrawer
+            intent="renew"
             trigger={
               <Button type="button" size="lg" className="mt-1 w-full">
-                Продлить подписку
+                Управление и продление в Stripe
               </Button>
             }
           />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="space-y-3 p-5">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            <ClockCounterClockwise className="h-4 w-4" weight="fill" />
-            История подписок
-          </div>
-          <ul className="divide-y divide-border rounded-lg border border-border bg-background">
-            {historyOrdered.map((row) => (
-              <li
-                key={row.id}
-                className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <span className="text-sm font-medium text-foreground/90">
-                  {row.periodLabel}
-                </span>
-                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                  <span className="tabular-num text-sm text-muted-foreground">
-                    {row.amountRub} ₽
-                  </span>
-                  <Badge
-                    variant={
-                      row.status === "Текущая"
-                        ? "success"
-                        : row.status === "Отменена"
-                          ? "destructive"
-                          : "muted"
-                    }
-                    className="font-medium"
-                  >
-                    {row.status}
-                  </Badge>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
       <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-        Вопросы по счёту или возврату — через «Помощь и поддержку» в профиле,
-        мы ответим в рабочее время.
+        Вопросы по счёту или возврату — через «Помощь и поддержку» в профиле, мы ответим в рабочее время.
       </p>
     </main>
   );

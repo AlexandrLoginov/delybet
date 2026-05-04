@@ -78,12 +78,20 @@ function useTelegramSessionState(): TelegramSessionState {
           const res = await fetch("/api/telegram/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ initData }),
           });
 
           if (cancelled) return;
 
           if (res.ok) {
+            await fetch("/api/auth/session", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ initData }),
+            });
+
             const data = (await res.json()) as {
               user?: TelegramWebAppUser;
               authDate?: number;

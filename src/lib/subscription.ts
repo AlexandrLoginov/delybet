@@ -16,7 +16,16 @@ export async function checkSubscription(userId: string): Promise<boolean> {
 
   if (!sub) return false;
   if (sub.plan !== "PRO") return false;
-  if (sub.status !== "active") return false;
+
+  const status = sub.status;
+  if (
+    status !== "active" &&
+    status !== "trialing" &&
+    status !== "past_due"
+  ) {
+    return false;
+  }
+
   if (sub.currentPeriodEnd && sub.currentPeriodEnd < new Date()) return false;
 
   return true;
