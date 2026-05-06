@@ -1,8 +1,10 @@
+"use client";
+
 import { LockSimple } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { UpgradeModal } from "@/components/paywall/UpgradeModal";
+import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
 
 interface PaywallOverlayProps {
   children: ReactNode;
@@ -33,7 +35,9 @@ export function PaywallOverlay({
           <p className="max-w-sm text-xs text-muted-foreground">{description}</p>
         </div>
         {upgradeButton ? (
-          <UpgradeModal
+          <RenewSubscriptionDrawer
+            intent="subscribe"
+            billingAction="checkout"
             trigger={
               <Button size="sm" className="gap-1.5 px-5 shadow-lg">
                 <LockSimple className="h-3.5 w-3.5" weight="fill" />

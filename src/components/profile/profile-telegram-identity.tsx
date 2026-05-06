@@ -1,6 +1,10 @@
 "use client";
 
+import { GearFine } from "@phosphor-icons/react";
+import Link from "next/link";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProfilePlanBadge } from "@/components/profile/profile-plan-badge";
@@ -10,6 +14,7 @@ import {
   displayNameFromTelegramUser,
   initialsFromTelegramUser,
 } from "@/lib/telegram/telegram-user-display";
+import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 
 export function ProfileTelegramIdentity() {
@@ -75,6 +80,20 @@ export function ProfileTelegramIdentity() {
                 </div>
               ) : null}
             </div>
+            {isProfileAdminTelegramUsername(user.username) ? (
+              <Button
+                asChild
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 w-full gap-1.5 rounded-lg border-border text-xs font-medium sm:w-auto"
+              >
+                <Link href="/admin">
+                  <GearFine className="h-3.5 w-3.5 shrink-0" weight="fill" />
+                  Админка
+                </Link>
+              </Button>
+            ) : null}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs text-muted-foreground">Тариф</span>
               <ProfilePlanBadge />

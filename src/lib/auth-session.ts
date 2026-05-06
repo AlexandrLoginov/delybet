@@ -11,11 +11,26 @@ function sessionSecret(): string | null {
   return s && s.length >= 16 ? s : null;
 }
 
-export function signSession(userId: string): string | null {
+export type SessionPayload = {
+  sub: string;
+  exp: number;
+  /** @username Telegram в нижнем регистре (без @), если был при входе. */
+  tg?: string;
+};
+
+export function signSession(
+  userId: string,
+  telegramUsername?: string | null
+): string | null {
   const secret = sessionSecret();
   if (!secret) return null;
   const exp = Math.floor(Date.now() / 1000) + MAX_AGE_SEC;
-  const payload = JSON.stringify({ sub: userId, exp });
+  const trimmed = telegramUsername?.trim();
+  const tg =
+    trimmed && trimmed.length > 0 ? trimmed.toLowerCase() : undefined;
+  const payload = JSON.stringify(
+    tg !== undefined ? { sub: userId, exp, tg } : { sub: userId, exp }
+  );
   const payloadB64 = Buffer.from(payload, "utf8").toString("base64url");
   const sig = createHmac("sha256", secret)
     .update(payloadB64)
@@ -23,7 +38,7 @@ export function signSession(userId: string): string | null {
   return `${payloadB64}.${sig}`;
 }
 
-export function verifySession(token: string): string | null {
+export function verifySessionPayload(token: string): SessionPayload | null {
   const secret = sessionSecret();
   if (!secret) return null;
 
@@ -53,16 +68,31 @@ export function verifySession(token: string): string | null {
   }
 
   if (!data || typeof data !== "object") return null;
-  const row = data as { sub?: unknown; exp?: unknown };
+  const row = data as { sub?: unknown; exp?: unknown; tg?: unknown };
   if (typeof row.sub !== "string" || typeof row.exp !== "number") return null;
   if (row.exp < Math.floor(Date.now() / 1000)) return null;
 
-  return row.sub;
+  const tg =
+    typeof row.tg === "string" && row.tg.length > 0 ? row.tg : undefined;
+
+  return tg !== undefined ? { sub: row.sub, exp: row.exp, tg } : { sub: row.sub, exp: row.exp };
+}
+
+export function verifySession(token: string): string | null {
+  const payload = verifySessionPayload(token);
+  return payload?.sub ?? null;
 }
 
 export function getSessionUserIdFromRequest(req: NextRequest): string | null {
   const raw = req.cookies.get(SESSION_COOKIE)?.value;
   return raw ? verifySession(raw) : null;
+}
+
+export function getSessionPayloadFromRequest(
+  req: NextRequest
+): SessionPayload | null {
+  const raw = req.cookies.get(SESSION_COOKIE)?.value;
+  return raw ? verifySessionPayload(raw) : null;
 }
 
 export function sessionCookieMaxAgeSec(): typeof MAX_AGE_SEC {

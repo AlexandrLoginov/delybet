@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { UpgradeModal } from "@/components/paywall/UpgradeModal";
+import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
 import {
   freePreviewKindForMatch,
   getFreeRedeemedMatchId,
@@ -29,7 +29,9 @@ function FreePreviewBlocked() {
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-        <UpgradeModal
+        <RenewSubscriptionDrawer
+          intent="subscribe"
+          billingAction="checkout"
           trigger={
             <Button className="gap-1.5">
               <Medal className="h-3.5 w-3.5" weight="fill" />

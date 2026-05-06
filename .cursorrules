@@ -25,7 +25,7 @@ DelyBet — сервис ИИ-анализа спортивных матчей.
 ## Подписка
 - `isPro: false` → показывай только `summary` и `probabilities`
 - `isPro: true` → показывай полный анализ: `detailedAnalysis`, `keyFactors`, `newsImpact`
-- При лимите (402) → показывай `UpgradeModal`, не редиректь
+- При лимите (402) → показывай оффер подписки (`RenewSubscriptionDrawer` / экран `/subscription`), не редиректь
 
 ## Конвенции кода
 - Именуй файлы: kebab-case для route.ts, PascalCase для компонентов

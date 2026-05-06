@@ -57,7 +57,7 @@ delybet/
 │   │   │   ├── StatsBars.tsx
 │   │   │   └── NewsItem.tsx
 │   │   ├── paywall/
-│   │   │   └── UpgradeModal.tsx
+│   │   │   └── PaywallOverlay.tsx
 │   │   └── ui/
 │   │       ├── Tabs.tsx
 │   │       └── SportFilter.tsx

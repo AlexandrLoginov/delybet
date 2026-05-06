@@ -7,13 +7,17 @@ import {
   Medal,
   Megaphone,
   Moon,
+  Sparkle,
 } from "@phosphor-icons/react/ssr";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { DarkThemeSwitch } from "@/components/theme/dark-theme-switch";
 import { ProfileTelegramIdentity } from "@/components/profile/profile-telegram-identity";
 import { ProfileProPromoBanner } from "@/components/profile/profile-pro-promo-banner";
-import { ProModeDevToggle } from "@/components/profile/pro-mode-dev-toggle";
+import {
+  ProfileTariffPreviewControl,
+  ProfileTariffPreviewGate,
+} from "@/components/profile/pro-mode-dev-toggle";
 
 export const metadata = {
   title: "Профиль · DelyBet",
@@ -59,6 +63,14 @@ export default function ProfilePage() {
                 hint="Текущий план и переход на DelyBet Pro"
                 href="/subscription"
               />
+              <ProfileTariffPreviewGate>
+                <SettingRow
+                  icon={Sparkle}
+                  label="Тариф в приложении"
+                  hint="Переключение между интерфейсом Free и Pro (предпросмотр)"
+                  action={<ProfileTariffPreviewControl />}
+                />
+              </ProfileTariffPreviewGate>
               <SettingRowExternal
                 icon={Megaphone}
                 label="Telegram-канал"
@@ -75,12 +87,9 @@ export default function ProfilePage() {
           </Card>
         </section>
 
-        <div className="space-y-3">
-          <p className="text-center text-[11px] text-muted-foreground">
-            DelyBet · v1.0.0
-          </p>
-          <ProModeDevToggle />
-        </div>
+        <p className="text-center text-[11px] text-muted-foreground">
+          DelyBet · v1.0.0
+        </p>
       </main>
     </>
   );

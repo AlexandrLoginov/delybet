@@ -36,7 +36,7 @@ interface RenewSubscriptionDrawerProps {
    * Можно переопределить явно.
    */
   billingAction?: "checkout" | "portal";
-  /** Контролируемое открытие (например второй шаг из UpgradeModal без trigger) */
+  /** Контролируемое открытие без trigger */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }

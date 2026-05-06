@@ -2,9 +2,14 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { analyzeMatch } from "@/lib/ai-analysis";
-import { SESSION_COOKIE, verifySession } from "@/lib/auth-session";
+import {
+  SESSION_COOKIE,
+  verifySessionPayload,
+} from "@/lib/auth-session";
+import { UI_PREVIEW_PRO_COOKIE } from "@/lib/ui-preview-pro-cookie";
 import { getMockAnalysis } from "@/lib/mock-data";
 import { checkSubscription } from "@/lib/subscription";
+import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +23,10 @@ export async function GET(
 
     const cookieStore = cookies();
     const sessionToken = cookieStore.get(SESSION_COOKIE)?.value ?? null;
-    const sessionUserId = sessionToken ? verifySession(sessionToken) : null;
+    const sessionPayload = sessionToken
+      ? verifySessionPayload(sessionToken)
+      : null;
+    const sessionUserId = sessionPayload?.sub ?? null;
 
     let dbPro = false;
     if (sessionUserId) {
@@ -31,8 +39,17 @@ export async function GET(
     const wantsClientPro =
       req.nextUrl.searchParams.get("pro") === "true";
 
+    const uiPreviewCookie =
+      cookieStore.get(UI_PREVIEW_PRO_COOKIE)?.value === "1";
+    /** Предпросмотр из профиля (разрешённый @username + сессия с tg + кука). */
+    const uiPreviewPro =
+      Boolean(sessionUserId) &&
+      uiPreviewCookie &&
+      wantsClientPro &&
+      isProfileAdminTelegramUsername(sessionPayload?.tg);
+
     const isPro =
-      dbPro || (devToolsBypass && wantsClientPro);
+      dbPro || uiPreviewPro || (devToolsBypass && wantsClientPro);
 
     const useMock =
       !process.env.ANTHROPIC_API_KEY ||

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { LockSimple, MapPin } from "@phosphor-icons/react";
 
@@ -6,7 +8,7 @@ import { LiveBadge } from "@/components/matches/LiveBadge";
 import { TeamLogo } from "@/components/matches/TeamLogo";
 import { FormPills } from "@/components/matches/FormPills";
 import { AiPickStrip } from "@/components/matches/AiPickStrip";
-import { UpgradeModal } from "@/components/paywall/UpgradeModal";
+import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
 import { formatKickoff, formatTimeUntil, cn } from "@/lib/utils";
 import { freePreviewKindForMatch, redeemFreePreview } from "@/lib/freemium";
 import type { FormResult, Match } from "@/types/match";
@@ -56,7 +58,9 @@ export function MatchCard({
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center bg-card/55 backdrop-blur-[1px]">
-        <UpgradeModal
+        <RenewSubscriptionDrawer
+          intent="subscribe"
+          billingAction="checkout"
           trigger={
             <Button size="sm" className="gap-1.5 shadow-lg">
               <LockSimple className="h-3.5 w-3.5" weight="fill" />

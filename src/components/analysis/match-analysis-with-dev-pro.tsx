@@ -35,8 +35,7 @@ export function MatchAnalysisWithDevPro({
     process.env.NODE_ENV === "development" &&
     process.env.NEXT_PUBLIC_ENABLE_DEV_TOOLS === "true";
   const dbPro = authMe?.isPro === true;
-  const isPro =
-    dbPro || (devTools && (urlIsPro || devPro));
+  const isPro = dbPro || devPro || (devTools && urlIsPro);
   const proParam = isPro ? "true" : "false";
 
   const swrKey = `/api/analysis/${match.id}?sport=${encodeURIComponent(match.sport)}&pro=${proParam}`;

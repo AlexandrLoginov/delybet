@@ -10,12 +10,12 @@ import {
   Target,
   TrendUp,
 } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { StatisticsCharts } from "@/components/statistics/StatisticsCharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UpgradeModal } from "@/components/paywall/UpgradeModal";
 import {
   STATS_TAB_LABEL,
   STATS_TAB_ORDER,
@@ -123,25 +123,21 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
             {isPro ? (
               <TabsTrigger value="d90">{STATS_TAB_LABEL.d90}</TabsTrigger>
             ) : (
-              <UpgradeModal
-                trigger={
-                  <button
-                    type="button"
-                    className={cn(
-                      tabTriggerClass,
-                      "gap-0.5 text-muted-foreground hover:bg-background/60 hover:text-foreground"
-                    )}
-                    aria-label="90 дней — только в DelyBet Pro"
-                  >
-                    <LockSimple
-                      className="h-2.5 w-2.5 shrink-0 opacity-70"
-                      weight="fill"
-                      aria-hidden
-                    />
-                    <span>{STATS_TAB_LABEL.d90}</span>
-                  </button>
-                }
-              />
+              <Link
+                href="/subscription"
+                className={cn(
+                  tabTriggerClass,
+                  "gap-0.5 text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                )}
+                aria-label="90 дней — оформить DelyBet Pro"
+              >
+                <LockSimple
+                  className="h-2.5 w-2.5 shrink-0 opacity-70"
+                  weight="fill"
+                  aria-hidden
+                />
+                <span>{STATS_TAB_LABEL.d90}</span>
+              </Link>
             )}
           </TabsList>
         </Tabs>

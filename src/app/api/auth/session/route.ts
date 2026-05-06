@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await upsertUserFromTelegram(telegramUser);
-    const token = signSession(user.id);
+    const token = signSession(user.id, telegramUser.username);
 
     if (!token) {
       return NextResponse.json(

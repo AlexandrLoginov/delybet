@@ -167,41 +167,21 @@ export function MatchAnalysisView({
           />
         </div>
 
-        {isPro ? (
-          <div className="mt-6 space-y-3">
-            <h2 className="px-1 text-base font-semibold tracking-tight">
-              Ключевые факторы
-            </h2>
-            <Tabs defaultValue="stats">
-              <TabsList className="grid h-auto w-full grid-cols-3 gap-1">
-                <TabsTrigger value="stats">Статистика</TabsTrigger>
-                <TabsTrigger value="form">Форма</TabsTrigger>
-                <TabsTrigger value="news">Новости</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="stats">
-                <Card>
-                  <CardContent className="p-5">
-                    <StatsBars
-                      stats={analysis.stats}
-                      homeName={match.home.name}
-                      awayName={match.away.name}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="form" className="space-y-4">
-                <FormChips team={match.home.name} entries={analysis.homeForm} />
-                <FormChips team={match.away.name} entries={analysis.awayForm} />
-              </TabsContent>
-
-              <TabsContent value="news">
-                <NewsImpactList items={analysis.newsImpact} />
-              </TabsContent>
-            </Tabs>
-          </div>
-        ) : null}
+        <section className="mt-6 space-y-3">
+          <h2 className="px-1 text-base font-semibold tracking-tight">
+            Ключевые факторы
+          </h2>
+          {isPro ? (
+            <MatchDetailTabs analysis={analysis} match={match} />
+          ) : (
+            <PaywallOverlay
+              title="Детали матча — в Pro"
+              description="Статистика матча, форма команд и разбор новостей с влиянием на прогноз — после подключения подписки."
+            >
+              <MatchDetailTabs analysis={analysis} match={match} />
+            </PaywallOverlay>
+          )}
+        </section>
 
         <section className="mt-8 space-y-3">
           <h2 className="px-1 text-base font-semibold tracking-tight text-foreground">
@@ -244,6 +224,45 @@ export function MatchAnalysisView({
         </p>
       </main>
     </>
+  );
+}
+
+function MatchDetailTabs({
+  analysis,
+  match,
+}: {
+  analysis: FullAnalysis;
+  match: Match;
+}) {
+  return (
+    <Tabs defaultValue="stats">
+      <TabsList className="grid h-auto w-full grid-cols-3 gap-1">
+        <TabsTrigger value="stats">Статистика</TabsTrigger>
+        <TabsTrigger value="form">Форма</TabsTrigger>
+        <TabsTrigger value="news">Новости</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="stats">
+        <Card>
+          <CardContent className="p-5">
+            <StatsBars
+              stats={analysis.stats}
+              homeName={match.home.name}
+              awayName={match.away.name}
+            />
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="form" className="space-y-4">
+        <FormChips team={match.home.name} entries={analysis.homeForm} />
+        <FormChips team={match.away.name} entries={analysis.awayForm} />
+      </TabsContent>
+
+      <TabsContent value="news">
+        <NewsImpactList items={analysis.newsImpact} />
+      </TabsContent>
+    </Tabs>
   );
 }
 

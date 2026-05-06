@@ -9,6 +9,7 @@ import { MatchCard } from "@/components/matches/MatchCard";
 import { SportFilter } from "@/components/matches/SportFilter";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import {
@@ -45,7 +46,9 @@ export function MatchesView() {
   const [analysisSyncing, setAnalysisSyncing] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
   const secondsRef = useRef(COUNTDOWN_SECONDS);
+  const { data: authMe } = useAuthMe();
   const devPro = useDevProPreview();
+  const unlockAllPro = Boolean(authMe?.isPro) || devPro;
   const freePreviewSlots = useFreePreviewRedeemedIds();
   const redeemedFreeMatchId =
     tab === "live" ? freePreviewSlots.live : freePreviewSlots.upcoming;
@@ -248,7 +251,7 @@ export function MatchesView() {
               matches={visibleMatches}
               eligibleIds={eligibleIds}
               redeemedFreeMatchId={redeemedFreeMatchId}
-              unlockAllPro={devPro}
+              unlockAllPro={unlockAllPro}
             />
 
             {remaining > 0 && (

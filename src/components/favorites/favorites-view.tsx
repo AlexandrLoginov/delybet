@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/drawer";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import {
@@ -124,7 +125,9 @@ function FavoritesGroupedList({
 export function FavoritesView() {
   const [tab, setTab] = useState<"upcoming" | "live">("upcoming");
   const [clearOpen, setClearOpen] = useState(false);
+  const { data: authMe } = useAuthMe();
   const devPro = useDevProPreview();
+  const unlockAllPro = Boolean(authMe?.isPro) || devPro;
   const favoriteKey = useSyncExternalStore(
     subscribeFavoritesChange,
     getFavoriteMatchesSnapshot,
@@ -296,7 +299,7 @@ export function FavoritesView() {
                 matches={upcomingOrdered}
                 eligibleIds={eligibleIdsUpcoming}
                 redeemedFreeMatchId={freePreviewSlots.upcoming}
-                unlockAllPro={devPro}
+                unlockAllPro={unlockAllPro}
               />
             )}
           </TabsContent>
@@ -311,7 +314,7 @@ export function FavoritesView() {
                 matches={liveOrdered}
                 eligibleIds={eligibleIdsLive}
                 redeemedFreeMatchId={freePreviewSlots.live}
-                unlockAllPro={devPro}
+                unlockAllPro={unlockAllPro}
               />
             )}
           </TabsContent>

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   CaretLeft,
@@ -11,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { UpgradeModal } from "@/components/paywall/UpgradeModal";
+import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
 import { SubscriptionDailyUsage } from "@/components/subscription/SubscriptionDailyUsage";
 import { SUBSCRIPTION_FEATURE_ROWS } from "@/lib/subscription-features";
 import { cn } from "@/lib/utils";
@@ -89,7 +91,9 @@ export function SubscriptionFreeView() {
             </ul>
           </div>
 
-          <UpgradeModal
+          <RenewSubscriptionDrawer
+            intent="subscribe"
+            billingAction="checkout"
             trigger={
               <Button size="lg" className="w-full">
                 Перейти на PRO
