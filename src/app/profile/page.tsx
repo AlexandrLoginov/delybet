@@ -7,7 +7,6 @@ import {
   Medal,
   Megaphone,
   Moon,
-  Sparkle,
 } from "@phosphor-icons/react/ssr";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -87,13 +86,16 @@ export default function ProfilePage() {
               Предпросмотр
             </h2>
             <Card>
-              <CardContent className="p-0">
-                <SettingRow
-                  icon={Sparkle}
-                  label="Тариф в приложении"
-                  hint="Переключение между интерфейсом Free и Pro (предпросмотр)"
-                  action={<ProfileTariffPreviewControl />}
-                />
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium">Тариф в приложении</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      Переключение между интерфейсом Free и Pro
+                    </div>
+                  </div>
+                  <ProfileTariffPreviewControl />
+                </div>
               </CardContent>
             </Card>
           </section>
