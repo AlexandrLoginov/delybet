@@ -107,10 +107,6 @@ export function AdminScreen() {
     dedupingInterval: 3000,
   });
 
-  if (state.status === "loading") {
-    return <AppPageSkeleton variant="profile" />;
-  }
-
   const users = usersData?.users ?? [];
   const q = query.trim().toLowerCase();
   const filteredUsers = !q
@@ -175,6 +171,10 @@ export function AdminScreen() {
     } finally {
       setBusyAction(null);
     }
+  }
+
+  if (state.status === "loading") {
+    return <AppPageSkeleton variant="profile" />;
   }
 
   if (!allowed) {
