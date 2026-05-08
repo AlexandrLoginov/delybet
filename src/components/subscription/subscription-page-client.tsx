@@ -6,9 +6,11 @@ import { AppPageSkeleton } from "@/components/layout/app-page-skeleton";
 import { SubscriptionFreeView } from "@/components/subscription/subscription-free-view";
 import { SubscriptionProDashboard } from "@/components/subscription/subscription-pro-dashboard";
 import { useAuthMe } from "@/hooks/use-auth-me";
+import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 
 export function SubscriptionPageClient() {
   const { data, isLoading, error } = useAuthMe();
+  const devProPreview = useDevProPreview();
   const search = useSearchParams();
   const checkout = search.get("checkout");
 
@@ -25,7 +27,7 @@ export function SubscriptionPageClient() {
     return <AppPageSkeleton variant="profile" />;
   }
 
-  const isPro = data?.isPro === true;
+  const isPro = data?.isPro === true || devProPreview;
 
   return (
     <div className="space-y-4">
