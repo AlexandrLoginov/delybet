@@ -63,14 +63,6 @@ export default function ProfilePage() {
                 hint="Текущий план и переход на DelyBet Pro"
                 href="/subscription"
               />
-              <ProfileTariffPreviewGate>
-                <SettingRow
-                  icon={Sparkle}
-                  label="Тариф в приложении"
-                  hint="Переключение между интерфейсом Free и Pro (предпросмотр)"
-                  action={<ProfileTariffPreviewControl />}
-                />
-              </ProfileTariffPreviewGate>
               <SettingRowExternal
                 icon={Megaphone}
                 label="Telegram-канал"
@@ -86,6 +78,24 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </section>
+
+        <ProfileTariffPreviewGate>
+          <section className="space-y-3">
+            <h2 className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Предпросмотр
+            </h2>
+            <Card>
+              <CardContent className="p-0">
+                <SettingRow
+                  icon={Sparkle}
+                  label="Тариф в приложении"
+                  hint="Переключение между интерфейсом Free и Pro (предпросмотр)"
+                  action={<ProfileTariffPreviewControl />}
+                />
+              </CardContent>
+            </Card>
+          </section>
+        </ProfileTariffPreviewGate>
 
         <p className="text-center text-[11px] text-muted-foreground">
           DelyBet · v1.0.0
