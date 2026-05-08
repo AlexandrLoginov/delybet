@@ -16,11 +16,25 @@ import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscrip
 import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { getWholeDaysUntil } from "@/lib/format-days-left";
+import { PRO_SUBSCRIPTION_DEMO } from "@/lib/pro-subscription-demo";
 import { RENEWAL_BASE_MONTHLY_RUB } from "@/lib/renewal-packages";
+
+const SUBSCRIPTION_HISTORY_LIMIT = 5;
 
 export function SubscriptionProDashboard() {
   const { data: authMe } = useAuthMe();
   const devProPreview = useDevProPreview();
+  const historyOrdered = useMemo(
+    () =>
+      [...PRO_SUBSCRIPTION_DEMO.history]
+        .sort(
+          (a, b) =>
+            new Date(b.periodStartISO).getTime() -
+            new Date(a.periodStartISO).getTime()
+        )
+        .slice(0, SUBSCRIPTION_HISTORY_LIMIT),
+    []
+  );
 
   const periodEnd = useMemo(() => {
     const raw = authMe?.subscription?.currentPeriodEnd;
@@ -138,6 +152,43 @@ export function SubscriptionProDashboard() {
               </Button>
             }
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-3 p-5">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            История подписок
+          </div>
+          <ul className="divide-y divide-border rounded-lg border border-border bg-background">
+            {historyOrdered.map((row) => (
+              <li
+                key={row.id}
+                className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="text-sm font-medium text-foreground/90">
+                  {row.periodLabel}
+                </span>
+                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                  <span className="tabular-nums text-sm text-muted-foreground">
+                    {row.amountRub} ₽
+                  </span>
+                  <Badge
+                    variant={
+                      row.status === "Текущая"
+                        ? "success"
+                        : row.status === "Отменена"
+                          ? "destructive"
+                          : "muted"
+                    }
+                    className="font-medium"
+                  >
+                    {row.status}
+                  </Badge>
+                </div>
+              </li>
+            ))}
+          </ul>
         </CardContent>
       </Card>
 
