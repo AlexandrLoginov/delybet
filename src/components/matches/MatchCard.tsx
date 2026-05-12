@@ -80,58 +80,69 @@ function MatchCardBody({ match }: { match: Match }) {
 
   return (
     <div className="relative">
-      <div className="grid grid-cols-[76px_1fr] items-start gap-4 px-5 pt-3.5 pb-3">
-        <div className="flex flex-col items-center justify-center gap-1 self-stretch border-r border-border pr-4">
-          {isLive ? (
-            <LiveBadge minute={match.elapsedMinutes} />
-          ) : (
-            <>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {day}
+      <div className="px-5 pt-3.5 pb-3">
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="truncate font-medium text-foreground/70">
+                {match.league}
               </span>
-              <span className="tabular-num text-sm font-semibold text-foreground">
-                {time}
+              <span aria-hidden className="shrink-0">
+                ·
               </span>
-              {until && (
-                <span className="text-[10px] text-muted-foreground">{until}</span>
-              )}
-            </>
-          )}
-        </div>
-
-        <div className="min-w-0">
-          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <span className="truncate font-medium text-foreground/70">
-              {match.league}
-            </span>
-            <span aria-hidden>·</span>
-            <span className="truncate">{match.round}</span>
+              <span className="min-w-0 truncate">{match.round}</span>
+            </div>
           </div>
 
-          <TeamRow
-            team={match.home}
-            form={match.lastFiveHome}
-            score={isLive ? match.scoreHome : undefined}
-            highlighted={
-              isLive && (match.scoreHome ?? 0) > (match.scoreAway ?? 0)
-            }
-          />
-          <TeamRow
-            team={match.away}
-            form={match.lastFiveAway}
-            score={isLive ? match.scoreAway : undefined}
-            highlighted={
-              isLive && (match.scoreAway ?? 0) > (match.scoreHome ?? 0)
-            }
-          />
-
-          {!isLive && match.venue && (
-            <div className="mt-2 flex items-center gap-1 text-[10px] text-muted-foreground">
-              <MapPin className="h-2.5 w-2.5 shrink-0" weight="fill" />
-              <span className="truncate">{match.venue}</span>
-            </div>
-          )}
+          <div className="shrink-0">
+            {isLive ? (
+              <LiveBadge minute={match.elapsedMinutes} />
+            ) : (
+              <div className="flex flex-col items-end gap-0.5 text-right">
+                <span className="tabular-num text-sm font-semibold leading-none text-foreground">
+                  {time}
+                </span>
+                <span className="text-[10px] leading-tight text-muted-foreground">
+                  <span className="font-semibold uppercase tracking-wider">
+                    {day}
+                  </span>
+                  {until ? (
+                    <>
+                      <span aria-hidden className="mx-0.5">
+                        ·
+                      </span>
+                      <span>{until}</span>
+                    </>
+                  ) : null}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
+
+        <TeamRow
+          team={match.home}
+          form={match.lastFiveHome}
+          score={isLive ? match.scoreHome : undefined}
+          highlighted={
+            isLive && (match.scoreHome ?? 0) > (match.scoreAway ?? 0)
+          }
+        />
+        <TeamRow
+          team={match.away}
+          form={match.lastFiveAway}
+          score={isLive ? match.scoreAway : undefined}
+          highlighted={
+            isLive && (match.scoreAway ?? 0) > (match.scoreHome ?? 0)
+          }
+        />
+
+        {!isLive && match.venue && (
+          <div className="mt-2 flex items-center gap-1 text-[10px] text-muted-foreground">
+            <MapPin className="h-2.5 w-2.5 shrink-0" weight="fill" />
+            <span className="truncate">{match.venue}</span>
+          </div>
+        )}
       </div>
 
       {match.aiPick && (

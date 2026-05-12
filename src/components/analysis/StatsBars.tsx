@@ -7,6 +7,20 @@ interface StatsBarsProps {
 }
 
 export function StatsBars({ stats, homeName, awayName }: StatsBarsProps) {
+  if (stats.length === 0) {
+    return (
+      <div className="space-y-3 text-center text-sm text-muted-foreground">
+        <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+          <span className="truncate">{homeName}</span>
+          <span className="truncate text-right">{awayName}</span>
+        </div>
+        <p className="rounded-lg border border-dashed bg-muted/20 px-4 py-6 leading-relaxed">
+          Статистика матча появится после старта игры. До этого смотрите форму и новости во вкладках выше.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">

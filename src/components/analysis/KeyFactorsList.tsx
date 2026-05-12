@@ -14,6 +14,14 @@ export function KeyFactorsList({
   homeName,
   awayName,
 }: KeyFactorsListProps) {
+  if (factors.length === 0) {
+    return (
+      <p className="rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
+        Список факторов не пришёл от модели или не распознан. Обновите анализ позже.
+      </p>
+    );
+  }
+
   return (
     <ul className="divide-y divide-border rounded-lg border bg-background">
       {factors.map((f, i) => {

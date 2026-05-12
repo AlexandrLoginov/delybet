@@ -7,7 +7,7 @@ import Anthropic from "@anthropic-ai/sdk";
 
 import type { FormEntry, FullAnalysis, MatchStatsView } from "@/types/analysis";
 
-import { getCached, setCached } from "./cache";
+import { getCached, setCached, CacheKeys } from "./cache";
 import {
   getMatchById,
   getMatchNews,
@@ -88,6 +88,38 @@ function parsePercentValue(raw: string | number): number {
   return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 50;
 }
 
+/** Текст из ответа модели (иногда числа вместо строк). */
+function stringFromUnknown(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "string") return v.trim();
+  if (typeof v === "number" && Number.isFinite(v)) return String(v);
+  if (typeof v === "boolean") return v ? "да" : "нет";
+  return "";
+}
+
+/** До старта матча API часто не отдаёт statistics — показываем сравнимые агрегаты по форме. */
+function formAggregatesToViews(home: TeamForm, away: TeamForm): MatchStatsView[] {
+  const homeWins = home.lastFive.filter((r) => r === "W").length;
+  const awayWins = away.lastFive.filter((r) => r === "W").length;
+  return [
+    {
+      label: "Забито (5 последних игр)",
+      home: home.goalsScored,
+      away: away.goalsScored,
+    },
+    {
+      label: "Пропущено (5 последних игр)",
+      home: home.goalsConceded,
+      away: away.goalsConceded,
+    },
+    {
+      label: "Побед в последних 5",
+      home: homeWins,
+      away: awayWins,
+    },
+  ];
+}
+
 function matchStatsToViews(stats: MatchStats | null): MatchStatsView[] {
   if (!stats) return [];
   return [
@@ -129,6 +161,12 @@ function toFullAnalysis(
   homeForm: TeamForm,
   awayForm: TeamForm
 ): FullAnalysis {
+  const matchStats = matchStatsToViews(stats);
+  const statsViews =
+    matchStats.length > 0
+      ? matchStats
+      : formAggregatesToViews(homeForm, awayForm);
+
   return {
     matchId: core.matchId,
     generatedAt: core.generatedAt,
@@ -141,7 +179,7 @@ function toFullAnalysis(
     detailedAnalysis: core.detailedAnalysis,
     keyFactors: core.keyFactors,
     newsImpact: core.newsImpact as FullAnalysis["newsImpact"],
-    stats: matchStatsToViews(stats),
+    stats: statsViews,
     homeForm: teamFormToEntries(homeForm),
     awayForm: teamFormToEntries(awayForm),
   };
@@ -154,7 +192,7 @@ export async function analyzeMatch(
   sport: string = "football",
   _isPro: boolean = false
 ): Promise<FullAnalysis> {
-  const cacheKey = `analysis:${sport}:${matchId}`;
+  const cacheKey = CacheKeys.analysis(sport, matchId);
 
   // 1. Проверяем кэш
   const cached = await getCached<FullAnalysis>(cacheKey);
@@ -300,6 +338,14 @@ function parseAnalysisResponse(raw: string, matchId: string, isLive: boolean): A
   const ttlMinutes = isLive ? 2 : 15;
   const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000).toISOString();
 
+  const summaryText =
+    stringFromUnknown(parsed.summary) || "Анализ временно недоступен";
+  let detailedText = stringFromUnknown(parsed.detailedAnalysis);
+  if (!detailedText) {
+    detailedText =
+      "Развёрнутый текст не был возвращён моделью. Ориентируйтесь на краткий вывод в карточке матча, вероятности и сценарии ниже — после обновления анализа блок может заполниться.";
+  }
+
   return {
     matchId,
     generatedAt: new Date().toISOString(),
@@ -307,9 +353,9 @@ function parseAnalysisResponse(raw: string, matchId: string, isLive: boolean): A
     isLive,
     probabilities: parsed.probabilities,
     recommendation: normalizeRecommendation(parsed.recommendation),
-    summary: parsed.summary,
-    detailedAnalysis: parsed.detailedAnalysis,
-    keyFactors: parsed.keyFactors ?? [],
+    summary: summaryText,
+    detailedAnalysis: detailedText,
+    keyFactors: normalizeKeyFactors(parsed.keyFactors),
     newsImpact: normalizeNewsImpact(parsed.newsImpact),
   };
 }
@@ -325,6 +371,45 @@ const SCENARIO_KINDS = new Set([
 
 const CONFIDENCE_LEVELS = new Set(["HIGH", "MEDIUM", "LOW"]);
 
+function parseScenarioProbability(
+  raw: unknown
+): number | null | undefined {
+  if (raw === null) return null;
+  if (raw === undefined) return undefined;
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return Math.round(Math.min(100, Math.max(0, raw)));
+  }
+  if (typeof raw === "string") {
+    const n = parseInt(raw.replace(/[^\d]/g, ""), 10);
+    return Number.isFinite(n) ? Math.round(Math.min(100, Math.max(0, n))) : undefined;
+  }
+  return undefined;
+}
+
+function normalizeImpact(
+  raw: unknown
+): "POSITIVE_HOME" | "POSITIVE_AWAY" | "NEUTRAL" {
+  if (typeof raw !== "string") return "NEUTRAL";
+  const v = raw.trim().toUpperCase().replace(/-/g, "_");
+  if (v === "POSITIVE_HOME" || v === "POSITIVE_AWAY" || v === "NEUTRAL") {
+    return v;
+  }
+  return "NEUTRAL";
+}
+
+function normalizeKeyFactors(raw: unknown): AnalysisResult["keyFactors"] {
+  if (!Array.isArray(raw)) return [];
+  const out: AnalysisResult["keyFactors"] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const factor = stringFromUnknown(o.factor);
+    if (!factor) continue;
+    out.push({ factor, impact: normalizeImpact(o.impact) });
+  }
+  return out;
+}
+
 function normalizeRecommendation(raw: unknown): AnalysisResult["recommendation"] {
   if (!raw || typeof raw !== "object") {
     return {
@@ -335,13 +420,14 @@ function normalizeRecommendation(raw: unknown): AnalysisResult["recommendation"]
     };
   }
   const r = raw as Record<string, unknown>;
-  const outcome = typeof r.outcome === "string" ? r.outcome : "Нет данных";
+  let outcome = stringFromUnknown(r.outcome);
+  if (!outcome) outcome = "Нет данных";
   const confidence =
     typeof r.confidence === "string" && CONFIDENCE_LEVELS.has(r.confidence)
       ? (r.confidence as "HIGH" | "MEDIUM" | "LOW")
       : "LOW";
   const reasoning =
-    typeof r.reasoning === "string" ? r.reasoning : "";
+    typeof r.reasoning === "string" ? r.reasoning : stringFromUnknown(r.reasoning);
 
   const scenarios: NonNullable<AnalysisResult["recommendation"]["scenarios"]> =
     [];
@@ -349,25 +435,23 @@ function normalizeRecommendation(raw: unknown): AnalysisResult["recommendation"]
     for (const item of r.scenarios) {
       if (!item || typeof item !== "object") continue;
       const o = item as Record<string, unknown>;
-      const label = typeof o.label === "string" ? o.label.trim() : "";
-      const pick = typeof o.pick === "string" ? o.pick.trim() : "";
+      const label = stringFromUnknown(o.label);
+      const pick = stringFromUnknown(o.pick);
       if (!label || !pick) continue;
       const kindRaw = typeof o.kind === "string" ? o.kind.toUpperCase().trim() : "";
       const kind = SCENARIO_KINDS.has(kindRaw) ? kindRaw : undefined;
       let probability: number | null | undefined;
-      if (o.probability === null || o.probability === undefined) {
-        probability = o.probability === null ? null : undefined;
-      } else if (typeof o.probability === "number" && Number.isFinite(o.probability)) {
-        probability = Math.round(Math.min(100, Math.max(0, o.probability)));
+      if (o.probability === null) {
+        probability = null;
+      } else {
+        probability = parseScenarioProbability(o.probability);
       }
       let scConfidence: "HIGH" | "MEDIUM" | "LOW" | undefined;
       if (typeof o.confidence === "string" && CONFIDENCE_LEVELS.has(o.confidence)) {
         scConfidence = o.confidence as "HIGH" | "MEDIUM" | "LOW";
       }
-      const scReason =
-        typeof o.reasoning === "string" && o.reasoning.trim()
-          ? o.reasoning.trim()
-          : undefined;
+      const scReasonRaw = stringFromUnknown(o.reasoning);
+      const scReason = scReasonRaw || undefined;
       scenarios.push({
         kind,
         label,
@@ -377,6 +461,11 @@ function normalizeRecommendation(raw: unknown): AnalysisResult["recommendation"]
         reasoning: scReason ?? null,
       });
     }
+  }
+
+  if (scenarios.length === 0 && !stringFromUnknown(r.outcome)) {
+    outcome =
+      "Сценарии не распознаны из ответа модели; ориентируйтесь на вероятности и краткий вывод.";
   }
 
   return { outcome, confidence, reasoning, scenarios };

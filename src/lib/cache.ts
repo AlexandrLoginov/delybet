@@ -40,7 +40,7 @@ export async function deleteCached(key: string): Promise<void> {
 
 // Ключи кэша — централизованно
 export const CacheKeys = {
-  analysis: (sport: string, matchId: string) => `analysis:${sport}:${matchId}`,
+  analysis: (sport: string, matchId: string) => `analysis:v2:${sport}:${matchId}`,
   upcomingMatches: (sport: string) => `matches:upcoming:${sport}`,
   liveMatches: (sport: string) => `matches:live:${sport}`,
   dailyUsage: (userId: string, date: string) => `usage:${userId}:${date}`,
