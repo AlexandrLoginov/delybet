@@ -83,17 +83,26 @@ function storageKeyForKind(kind: FreePreviewKind): string {
 }
 
 /**
- * Единственный доступный без Pro матч во вкладке Live — самый ранний по kickoff
- * среди всех live в моках (независимо от фильтра вида спорта на экране).
+ * Один бесплатный слот Live: самый ранний kickoff среди переданных live-матчей.
+ * Используйте список с API; для избранного/моков передайте соответствующие матчи.
  */
-export function getFreeLivePreviewEligibleId(): string | null {
-  const live = MOCK_MATCHES.filter((m) => m.status === "live");
+export function getFreeLivePreviewEligibleIdFromMatches(
+  matches: Pick<Match, "id" | "status" | "kickoffISO">[]
+): string | null {
+  const live = matches.filter((m) => m.status === "live");
   if (!live.length) return null;
   const sorted = [...live].sort(
     (a, b) =>
       new Date(a.kickoffISO).getTime() - new Date(b.kickoffISO).getTime()
   );
   return sorted[0]?.id ?? null;
+}
+
+/**
+ * Единственный доступный без Pro матч во вкладке Live среди моков (избранное и т.п.).
+ */
+export function getFreeLivePreviewEligibleId(): string | null {
+  return getFreeLivePreviewEligibleIdFromMatches(MOCK_MATCHES);
 }
 
 /** По возрастанию kickoffISO: один id на каждый sport среди переданных матчей (вкладка «Предстоящие»). */
@@ -125,10 +134,18 @@ export function getTabMatchesFromMock(tab: "upcoming" | "live"): Match[] {
 }
 
 /** Совпадает со списком при фильтре «все виды спорта» для вкладки матча. */
-export function isMatchGloballyEligibleForFreePreview(match: Match): boolean {
+export function isMatchGloballyEligibleForFreePreview(
+  match: Match,
+  options?: { liveEligibleId?: string | null }
+): boolean {
   const kind = freePreviewKindForMatch(match);
   if (kind === "live") {
-    return match.id === getFreeLivePreviewEligibleId();
+    if (options?.liveEligibleId !== undefined) {
+      const liveId = options.liveEligibleId;
+      return liveId !== null && match.id === liveId;
+    }
+    const fallback = getFreeLivePreviewEligibleId();
+    return fallback !== null && match.id === fallback;
   }
   const eligible = computeEligibleMatchIds(getTabMatchesFromMock(kind));
   return eligible.has(match.id);

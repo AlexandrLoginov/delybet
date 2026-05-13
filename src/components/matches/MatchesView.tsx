@@ -14,7 +14,7 @@ import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import {
   computeEligibleMatchIds,
-  getFreeLivePreviewEligibleId,
+  getFreeLivePreviewEligibleIdFromMatches,
 } from "@/lib/freemium";
 import { SPORTS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
@@ -90,7 +90,7 @@ export function MatchesView() {
     });
 
     if (tab === "live") {
-      const freeLiveId = getFreeLivePreviewEligibleId();
+      const freeLiveId = getFreeLivePreviewEligibleIdFromMatches(filtered);
       if (!freeLiveId) return filtered;
       const idx = filtered.findIndex((m) => m.id === freeLiveId);
       if (idx <= 0) return filtered;
@@ -116,11 +116,15 @@ export function MatchesView() {
 
   const eligibleIds = useMemo(() => {
     if (tab === "live") {
-      const id = getFreeLivePreviewEligibleId();
+      const liveRows = tabMatches.filter((m) => {
+        if (sport !== "all" && m.sport !== sport) return false;
+        return m.status === "live";
+      });
+      const id = getFreeLivePreviewEligibleIdFromMatches(liveRows);
       return id ? new Set<string>([id]) : new Set<string>();
     }
     return computeEligibleMatchIds(matches);
-  }, [tab, matches]);
+  }, [tab, matches, tabMatches, sport]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);

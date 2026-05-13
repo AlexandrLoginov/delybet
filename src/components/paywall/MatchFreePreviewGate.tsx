@@ -50,15 +50,23 @@ function FreePreviewBlocked() {
 export function MatchFreePreviewGate({
   match,
   isPro,
+  liveFreeEligibleId,
   children,
 }: {
   match: Match;
   isPro: boolean;
+  /** Для live: id с API (`null` — слота нет); не передавать — логика моков для избранного и легаси. */
+  liveFreeEligibleId?: string | null;
   children: ReactNode;
 }) {
   if (isPro) return <>{children}</>;
 
-  const eligibleGlobally = isMatchGloballyEligibleForFreePreview(match);
+  const eligibleGlobally = isMatchGloballyEligibleForFreePreview(match, {
+    liveEligibleId:
+      match.status === "live" && liveFreeEligibleId !== undefined
+        ? liveFreeEligibleId
+        : undefined,
+  });
   const kind = freePreviewKindForMatch(match);
 
   if (typeof window !== "undefined") {

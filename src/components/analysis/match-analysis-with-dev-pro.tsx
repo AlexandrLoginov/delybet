@@ -10,6 +10,7 @@ import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { normalizeAnalysisPayload } from "@/lib/analysis-api-normalize";
 import { fillAnalysisDemoGaps } from "@/lib/analysis-demo-fill";
+import { getFreeLivePreviewEligibleIdFromMatches } from "@/lib/freemium";
 import type { Match } from "@/types/match";
 
 const fetcher = async (url: string) => {
@@ -21,6 +22,17 @@ const fetcher = async (url: string) => {
     throw new Error(msg);
   }
   return data;
+};
+
+const matchesFetcher = async (url: string) => {
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(
+      typeof data?.message === "string" ? data.message : "MATCHES_FAILED"
+    );
+  }
+  return data as { matches: Match[] };
 };
 
 export function MatchAnalysisWithDevPro({
@@ -46,9 +58,16 @@ export function MatchAnalysisWithDevPro({
     dedupingInterval: 60_000,
   });
 
-  if (isLoading || !data) {
-    return <AppPageSkeleton variant="detail" />;
-  }
+  const needLiveFreemiumList = match.status === "live" && !isPro;
+  const { data: liveListPayload, isLoading: liveListLoading, error: liveListError } =
+    useSWR(
+      needLiveFreemiumList ? "/api/matches?tab=live&sport=all" : null,
+      matchesFetcher,
+      { revalidateOnFocus: false, dedupingInterval: 60_000 }
+    );
+
+  const waitLiveList =
+    needLiveFreemiumList && liveListLoading && !liveListError;
 
   if (error) {
     return (
@@ -64,6 +83,10 @@ export function MatchAnalysisWithDevPro({
     );
   }
 
+  if (isLoading || !data || waitLiveList) {
+    return <AppPageSkeleton variant="detail" />;
+  }
+
   let analysis;
   try {
     analysis = fillAnalysisDemoGaps(match, normalizeAnalysisPayload(data));
@@ -75,8 +98,16 @@ export function MatchAnalysisWithDevPro({
     );
   }
 
+  const liveFreeEligibleId = needLiveFreemiumList
+    ? getFreeLivePreviewEligibleIdFromMatches(liveListPayload?.matches ?? [])
+    : undefined;
+
   return (
-    <MatchFreePreviewGate match={match} isPro={isPro}>
+    <MatchFreePreviewGate
+      match={match}
+      isPro={isPro}
+      liveFreeEligibleId={liveFreeEligibleId}
+    >
       <MatchAnalysisView match={match} analysis={analysis} isPro={isPro} />
     </MatchFreePreviewGate>
   );

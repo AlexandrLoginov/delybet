@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TeamLogo } from "@/components/matches/TeamLogo";
@@ -251,34 +251,40 @@ function MatchDetailTabs({
   analysis: FullAnalysis;
   match: Match;
 }) {
+  const [detailTab, setDetailTab] = useState("stats");
+
   return (
-    <Tabs defaultValue="stats">
+    <Tabs value={detailTab} onValueChange={setDetailTab}>
       <TabsList className="grid h-auto w-full grid-cols-3 gap-1">
         <TabsTrigger value="stats">Статистика</TabsTrigger>
         <TabsTrigger value="form">Форма</TabsTrigger>
         <TabsTrigger value="news">Новости</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="stats">
-        <Card>
-          <CardContent className="p-5">
-            <StatsBars
-              stats={analysis.stats}
-              homeName={match.home.name}
-              awayName={match.away.name}
-            />
-          </CardContent>
-        </Card>
-      </TabsContent>
+      <div className="mt-4">
+        {detailTab === "stats" ? (
+          <Card>
+            <CardContent className="p-5">
+              <StatsBars
+                stats={analysis.stats}
+                homeName={match.home.name}
+                awayName={match.away.name}
+              />
+            </CardContent>
+          </Card>
+        ) : null}
 
-      <TabsContent value="form" className="space-y-4">
-        <FormChips team={match.home.name} entries={analysis.homeForm} />
-        <FormChips team={match.away.name} entries={analysis.awayForm} />
-      </TabsContent>
+        {detailTab === "form" ? (
+          <div className="space-y-4">
+            <FormChips team={match.home.name} entries={analysis.homeForm} />
+            <FormChips team={match.away.name} entries={analysis.awayForm} />
+          </div>
+        ) : null}
 
-      <TabsContent value="news">
-        <NewsImpactList items={analysis.newsImpact} />
-      </TabsContent>
+        {detailTab === "news" ? (
+          <NewsImpactList items={analysis.newsImpact} />
+        ) : null}
+      </div>
     </Tabs>
   );
 }

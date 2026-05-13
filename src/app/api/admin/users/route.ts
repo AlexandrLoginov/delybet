@@ -9,10 +9,33 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+function buildAdminStats(
+  rows: {
+    subscription: {
+      plan: string;
+      status: string;
+      stripeCustomerId: string | null;
+    } | null;
+  }[]
+) {
+  return {
+    totalUsers: rows.length,
+    proUsers: rows.filter((u) => u.subscription?.plan === "PRO").length,
+    blockedUsers: rows.filter((u) => u.subscription?.status === "blocked").length,
+    stripeLinkedUsers: rows.filter((u) =>
+      Boolean(u.subscription?.stripeCustomerId)
+    ).length,
+  };
+}
+
 export async function GET(req: NextRequest) {
   try {
     const guard = requireAdminSession(req);
     if (!guard.ok) return guard.response;
+
+    const includeDemo =
+      req.nextUrl.searchParams.get("includeDemo") === "1" ||
+      req.nextUrl.searchParams.get("includeDemo") === "true";
 
     const users = await prisma.user.findMany({
       orderBy: { createdAt: "desc" },
@@ -64,19 +87,16 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const stats = {
-      totalUsers: result.length,
-      proUsers: result.filter((u) => u.subscription?.plan === "PRO").length,
-      blockedUsers: result.filter((u) => u.subscription?.isBlocked).length,
-      stripeLinkedUsers: result.filter(
-        (u) => Boolean(u.subscription?.stripeCustomerId)
-      ).length,
-    };
+    const merged =
+      includeDemo ? [...result, ...getAdminDesignPreviewUsers()] : result;
+
+    const stats = buildAdminStats(merged);
 
     return NextResponse.json({
-      users: result,
+      users: merged,
       stats,
       generatedAt: new Date().toISOString(),
+      ...(includeDemo ? { demoRowsAppended: true as const } : {}),
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "ADMIN_USERS_FAILED";

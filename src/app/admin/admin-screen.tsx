@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
+import { isAdminDesignPreviewUserId } from "@/lib/admin-demo-data";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 
 type AdminUser = {
@@ -45,8 +46,10 @@ type AdminUsersResponse = {
     stripeLinkedUsers: number;
   };
   generatedAt: string;
-  /** БД без пользователей — показан демо-набор для вёрстки */
+  /** БД без пользователей — только демо-набор */
   designPreview?: boolean;
+  /** К ответу из БД добавлены демо-строки в конец списка */
+  demoRowsAppended?: boolean;
 };
 
 type PaymentRow = {
@@ -104,13 +107,14 @@ export function AdminScreen() {
     error: usersError,
     isLoading: usersLoading,
     mutate: mutateUsers,
-  } = useSWR<AdminUsersResponse>(allowed ? "/api/admin/users" : null, jsonFetcher, {
+  } = useSWR<AdminUsersResponse>(allowed ? "/api/admin/users?includeDemo=1" : null, jsonFetcher, {
     revalidateOnFocus: true,
     dedupingInterval: 3000,
   });
 
   const users = usersData?.users ?? [];
   const designPreview = usersData?.designPreview === true;
+  const demoRowsAppended = usersData?.demoRowsAppended === true;
   const q = query.trim().toLowerCase();
   const filteredUsers = !q
     ? users
@@ -214,6 +218,16 @@ export function AdminScreen() {
         </Card>
       ) : null}
 
+      {demoRowsAppended && !designPreview ? (
+        <Card className="border-border bg-muted/20">
+          <CardContent className="p-3 text-sm text-muted-foreground">
+            В конец списка добавлены демо-пользователи для проверки вёрстки. Для
+            строк с меткой «Демо» действия отключены; реальные записи можно
+            редактировать как обычно.
+          </CardContent>
+        </Card>
+      ) : null}
+
       {usersError ? (
         <Card>
           <CardContent className="p-4 text-sm text-danger">
@@ -293,7 +307,14 @@ export function AdminScreen() {
                         onClick={() => setSelectedUserId(u.id)}
                         className="text-left"
                       >
-                        <div className="font-medium">{u.name ?? "Без имени"}</div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-medium">{u.name ?? "Без имени"}</span>
+                          {isAdminDesignPreviewUserId(u.id) ? (
+                            <Badge variant="muted" className="text-[10px]">
+                              Демо
+                            </Badge>
+                          ) : null}
+                        </div>
                         <div className="text-xs text-muted-foreground">{u.email}</div>
                       </button>
                     </td>
@@ -327,7 +348,11 @@ export function AdminScreen() {
                           variant="outline"
                           size="sm"
                           onClick={() => void performAction(u.id, "extend_pro")}
-                          disabled={busyAction !== null || designPreview}
+                          disabled={
+                            busyAction !== null ||
+                            designPreview ||
+                            isAdminDesignPreviewUserId(u.id)
+                          }
                         >
                           +30d
                         </Button>
@@ -337,7 +362,11 @@ export function AdminScreen() {
                             variant="outline"
                             size="sm"
                             onClick={() => void performAction(u.id, "unblock")}
-                            disabled={busyAction !== null || designPreview}
+                            disabled={
+                              busyAction !== null ||
+                              designPreview ||
+                              isAdminDesignPreviewUserId(u.id)
+                            }
                           >
                             Разблок
                           </Button>
@@ -347,7 +376,11 @@ export function AdminScreen() {
                             variant="outline"
                             size="sm"
                             onClick={() => void performAction(u.id, "block")}
-                            disabled={busyAction !== null || designPreview}
+                            disabled={
+                              busyAction !== null ||
+                              designPreview ||
+                              isAdminDesignPreviewUserId(u.id)
+                            }
                           >
                             Блок
                           </Button>

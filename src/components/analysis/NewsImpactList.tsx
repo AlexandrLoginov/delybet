@@ -40,13 +40,13 @@ export function NewsImpactList({ items }: NewsImpactListProps) {
 
   return (
     <>
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           <Radio className="h-4 w-4 text-foreground/80" weight="fill" />
           Связка с медиафоном
         </div>
 
-        <ul className="space-y-2">
+        <ul className="flex flex-col gap-2">
           {items.map((n, idx) => (
             <li key={`${idx}-${n.headline}`}>
               <button
@@ -81,7 +81,7 @@ export function NewsImpactList({ items }: NewsImpactListProps) {
                 </DrawerHeader>
 
                 {active.body ? (
-                  <div className="space-y-3 pb-2">
+                  <div className="space-y-3 pb-1">
                     {active.body
                       .split(/\n\n+/)
                       .map((p) => p.trim())
@@ -97,7 +97,7 @@ export function NewsImpactList({ items }: NewsImpactListProps) {
                   </div>
                 ) : null}
 
-                <div className="border-t border-border pt-5">
+                <div className="pt-1">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Влияние на матч
                   </p>

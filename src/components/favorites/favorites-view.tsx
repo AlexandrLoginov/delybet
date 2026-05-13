@@ -26,7 +26,7 @@ import {
 } from "@/lib/favorites";
 import {
   computeEligibleMatchIds,
-  getFreeLivePreviewEligibleId,
+  getFreeLivePreviewEligibleIdFromMatches,
 } from "@/lib/freemium";
 import { MOCK_MATCHES } from "@/lib/mock-data";
 import type { Match } from "@/types/match";
@@ -43,7 +43,7 @@ function groupByLeague(matches: Match[]) {
 }
 
 function orderFavoriteLive(list: Match[]): Match[] {
-  const freeLiveId = getFreeLivePreviewEligibleId();
+  const freeLiveId = getFreeLivePreviewEligibleIdFromMatches(list);
   if (!freeLiveId) return list;
   const idx = list.findIndex((m) => m.id === freeLiveId);
   if (idx <= 0) return list;
@@ -170,9 +170,9 @@ export function FavoritesView() {
   );
 
   const eligibleIdsLive = useMemo(() => {
-    const id = getFreeLivePreviewEligibleId();
+    const id = getFreeLivePreviewEligibleIdFromMatches(favoritesLive);
     return id ? new Set<string>([id]) : new Set<string>();
-  }, []);
+  }, [favoritesLive]);
 
   useEffect(() => {
     if (
