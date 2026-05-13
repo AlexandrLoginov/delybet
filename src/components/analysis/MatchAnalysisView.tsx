@@ -167,7 +167,7 @@ export function MatchAnalysisView({
           />
         </div>
 
-        <section className="mt-6 space-y-3">
+        <section className="mt-6 space-y-2">
           <h2 className="px-1 text-base font-semibold tracking-tight">
             Ключевые факторы
           </h2>
@@ -261,7 +261,7 @@ function MatchDetailTabs({
         <TabsTrigger value="news">Новости</TabsTrigger>
       </TabsList>
 
-      <div className="mt-4">
+      <div className="mt-2.5">
         {detailTab === "stats" ? (
           <Card>
             <CardContent className="p-5">

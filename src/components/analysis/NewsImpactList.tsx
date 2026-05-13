@@ -40,26 +40,28 @@ export function NewsImpactList({ items }: NewsImpactListProps) {
 
   return (
     <>
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          <Radio className="h-4 w-4 text-foreground/80" weight="fill" />
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <Radio className="h-3.5 w-3.5 shrink-0 text-foreground/80" weight="fill" />
           Связка с медиафоном
         </div>
 
-        <ul className="flex flex-col gap-2">
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
           {items.map((n, idx) => (
-            <li key={`${idx}-${n.headline}`}>
+            <li key={`${idx}-${n.headline}`} className="m-0 p-0">
               <button
                 type="button"
                 onClick={() => setActive(n)}
                 className={cn(
-                  "w-full rounded-lg border bg-background px-3 py-2.5 text-left transition-colors",
+                  "w-full rounded-lg border bg-background px-2.5 py-2 text-left transition-colors",
                   "hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 )}
               >
-                <div className="text-[11px] text-muted-foreground">{n.team}</div>
-                <div className="mt-1 text-sm font-medium text-foreground">{n.headline}</div>
-                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                <div className="text-[11px] leading-tight text-muted-foreground">{n.team}</div>
+                <div className="mt-0.5 text-sm font-medium leading-snug text-foreground">
+                  {n.headline}
+                </div>
+                <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted-foreground">
                   {(n.body?.trim() || n.impact).trim()}
                 </p>
               </button>

@@ -9,44 +9,43 @@
  * Sell:    #F6465D (SellRed)              — destructive / loss / probability away / live
  * Text:    #1E2329 / #EAECEF              — primary
  * Sub:     #707A8A / #B7BDC6              — secondary
- * Surfaces light: canvas #EFF2F6 · card #FFF · elevated #E8EDF4
+ * Surfaces light: #FFFFFF / #FAFAFA / #F5F5F5
  * Surfaces dark:  #181A20 / #1E2329 / #2B3139
  * Line:    #EAECEF / #2B3139
  */
 
 @layer base {
   :root {
-    /* Светлая тема: тонированный canvas + белые карточки — больше глубины, не «вымытая» */
-    --background: 220 18% 95%; /* canvas ~#eef1f6 */
-    --foreground: 222 24% 11%; /* основной текст чуть плотнее */
+    --background: 0 0% 100%; /* #FFFFFF */
+    --foreground: 213 16% 14%; /* #1E2329 */
 
     --card: 0 0% 100%;
-    --card-foreground: 222 24% 11%;
+    --card-foreground: 213 16% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 24% 11%;
+    --popover-foreground: 213 16% 14%;
 
-    --primary: 49 97% 60%; /* #FCD535 — как в dark */
-    --primary-foreground: 220 22% 16%;
+    --primary: 49 97% 60%; /* #FCD535 BinanceYellow */
+    --primary-foreground: 220 22% 16%; /* #202630 */
 
-    --secondary: 220 16% 91%; /* плашки / вторичные кнопки */
-    --secondary-foreground: 222 24% 11%;
+    --secondary: 0 0% 96%; /* #F5F5F5 */
+    --secondary-foreground: 213 16% 14%;
 
-    --muted: 220 14% 93%;
-    --muted-foreground: 220 12% 38%; /* вторичный текст темнее — читабельнее */
+    --muted: 0 0% 96%;
+    --muted-foreground: 217 10% 49%; /* #707A8A */
 
-    --accent: 220 18% 92%;
-    --accent-foreground: 222 24% 11%;
+    --accent: 0 0% 98%; /* #FAFAFA */
+    --accent-foreground: 213 16% 14%;
 
-    --destructive: 351 91% 62%;
+    --destructive: 351 91% 62%; /* #F6465D */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 156 87% 43%;
+    --success: 156 87% 43%; /* #0ECB81 */
     --success-foreground: 0 0% 100%;
-    --success-muted: 156 55% 91%;
+    --success-muted: 156 70% 92%;
 
-    --border: 220 14% 84%; /* границы заметнее */
-    --input: 220 14% 84%;
+    --border: 213 14% 93%; /* #EAECEF */
+    --input: 213 14% 93%;
     --ring: 49 97% 60%;
 
     --radius: 0.5rem;
