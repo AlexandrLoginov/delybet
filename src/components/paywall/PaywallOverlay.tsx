@@ -17,7 +17,7 @@ interface PaywallOverlayProps {
 export function PaywallOverlay({
   children,
   title = "Полный анализ — в Pro",
-  description = "Открой обоснование рекомендации, ключевые факторы и влияние новостей.",
+  description = "Открой обоснование рекомендации и ключевые факторы матча.",
   upgradeButton = true,
 }: PaywallOverlayProps) {
   return (

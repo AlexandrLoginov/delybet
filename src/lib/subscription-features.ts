@@ -11,7 +11,6 @@ export const SUBSCRIPTION_FEATURE_ROWS: SubscriptionFeatureRow[] = [
   { label: "Краткое ИИ‑резюме", free: true, pro: true },
   { label: "Развёрнутая аргументация", free: false, pro: true },
   { label: "Ключевые факторы матча", free: false, pro: true },
-  { label: "Влияние новостей", free: false, pro: true },
   { label: "Статистика прогнозов", free: "30 дней", pro: "90 дней" },
 ];
 

@@ -20,7 +20,6 @@ import { RecommendationCard } from "@/components/analysis/RecommendationCard";
 import { KeyFactorsList } from "@/components/analysis/KeyFactorsList";
 import { StatsBars } from "@/components/analysis/StatsBars";
 import { FormChips } from "@/components/analysis/FormChips";
-import { NewsImpactList } from "@/components/analysis/NewsImpactList";
 import { PaywallOverlay } from "@/components/paywall/PaywallOverlay";
 import {
   FAVORITES_CHANGE_EVENT,
@@ -176,7 +175,7 @@ export function MatchAnalysisView({
           ) : (
             <PaywallOverlay
               title="Детали матча — в Pro"
-              description="Статистика матча, форма команд и разбор новостей с влиянием на прогноз — после подключения подписки."
+              description="Статистика матча и форма команд — после подключения подписки."
             >
               <MatchDetailTabs analysis={analysis} match={match} />
             </PaywallOverlay>
@@ -210,7 +209,7 @@ export function MatchAnalysisView({
           ) : (
             <PaywallOverlay
               title="Развёрнутый анализ — в Pro"
-              description="Полный текст рассуждений модели, ключевые факторы и связка с новостями — после подключения подписки."
+              description="Полный текст рассуждений модели и ключевые факторы — после подключения подписки."
             >
               <Card className="overflow-hidden">
                 <CardContent className="space-y-4 p-5">
@@ -259,10 +258,9 @@ function MatchDetailTabs({
       onValueChange={setDetailTab}
       className="flex h-fit w-full max-w-full flex-col gap-2"
     >
-      <TabsList className="grid h-auto w-full shrink-0 grid-cols-3 gap-1">
+      <TabsList className="grid h-auto w-full shrink-0 grid-cols-2 gap-1">
         <TabsTrigger value="stats">Статистика</TabsTrigger>
         <TabsTrigger value="form">Форма</TabsTrigger>
-        <TabsTrigger value="news">Новости</TabsTrigger>
       </TabsList>
 
       <div className="min-h-0 w-full max-w-full shrink-0">
@@ -283,10 +281,6 @@ function MatchDetailTabs({
             <FormChips team={match.home.name} entries={analysis.homeForm} />
             <FormChips team={match.away.name} entries={analysis.awayForm} />
           </div>
-        ) : null}
-
-        {detailTab === "news" ? (
-          <NewsImpactList items={analysis.newsImpact} />
         ) : null}
       </div>
     </Tabs>

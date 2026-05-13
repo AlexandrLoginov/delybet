@@ -15,7 +15,7 @@ export function StatsBars({ stats, homeName, awayName }: StatsBarsProps) {
           <span className="truncate text-right">{awayName}</span>
         </div>
         <p className="rounded-lg border border-dashed bg-muted/20 px-4 py-6 leading-relaxed">
-          Статистика матча появится после старта игры. До этого смотрите форму и новости во вкладках выше.
+          Статистика матча появится после старта игры. До этого смотрите форму во вкладке выше.
         </p>
       </div>
     );
