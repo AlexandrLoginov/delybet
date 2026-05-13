@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireAdminSession } from "@/lib/admin-access";
+import {
+  getAdminDesignPreviewPayments,
+  getAdminDesignPreviewUserById,
+  isAdminDesignPreviewUserId,
+} from "@/lib/admin-demo-data";
 import { prisma } from "@/lib/prisma";
 import { PRO_SUBSCRIPTION_DEMO } from "@/lib/pro-subscription-demo";
 import { getStripe } from "@/lib/stripe-client";
@@ -27,6 +32,17 @@ export async function GET(
     const userId = params.userId;
     if (!userId) {
       return NextResponse.json({ error: "INVALID_USER_ID" }, { status: 400 });
+    }
+
+    if (isAdminDesignPreviewUserId(userId)) {
+      const previewUser = getAdminDesignPreviewUserById(userId);
+      if (!previewUser) {
+        return NextResponse.json({ error: "USER_NOT_FOUND" }, { status: 404 });
+      }
+      return NextResponse.json({
+        user: previewUser,
+        payments: getAdminDesignPreviewPayments(userId),
+      });
     }
 
     const user = await prisma.user.findUnique({

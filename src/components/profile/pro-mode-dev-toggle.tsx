@@ -17,7 +17,7 @@ function syncPreviewCookie(enabled: boolean): void {
   });
 }
 
-/** Обёртка: строка «Тариф в приложении» только для разрешённого Telegram @username. */
+/** Показывает переключатель Free/Pro только для разрешённого Telegram @username. */
 export function ProfileTariffPreviewGate({
   children,
 }: {
@@ -33,7 +33,7 @@ export function ProfileTariffPreviewGate({
   return <>{children}</>;
 }
 
-/** Строка настроек: подписи Free / Pro и переключатель предпросмотра интерфейса. */
+/** Подписи Free / Pro и переключатель предпросмотра интерфейса. */
 export function ProfileTariffPreviewControl() {
   const previewPro = useDevProPreview();
 

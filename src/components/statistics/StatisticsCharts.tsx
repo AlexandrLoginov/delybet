@@ -312,7 +312,7 @@ function DailyLineChart({ points }: { points: DailyPoint[] }) {
           </text>
         ))}
       </svg>
-      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="mt-3 grid grid-cols-2 gap-2">
         {points.map((p, i) => (
           <SeriesPointPlaque
             key={`${p.label}-${i}`}

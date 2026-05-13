@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireAdminSession } from "@/lib/admin-access";
+import {
+  getAdminDesignPreviewStats,
+  getAdminDesignPreviewUsers,
+} from "@/lib/admin-demo-data";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +53,16 @@ export async function GET(req: NextRequest) {
           }
         : null,
     }));
+
+    if (result.length === 0) {
+      const demoUsers = getAdminDesignPreviewUsers();
+      return NextResponse.json({
+        users: demoUsers,
+        stats: getAdminDesignPreviewStats(demoUsers),
+        generatedAt: new Date().toISOString(),
+        designPreview: true,
+      });
+    }
 
     const stats = {
       totalUsers: result.length,

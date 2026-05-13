@@ -55,7 +55,7 @@ export function SubscriptionProDashboard() {
     authMe?.subscription?.status === "past_due"
       ? "Просрочен платёж"
       : authMe?.subscription?.status === "trialing"
-        ? "Пробный период"
+        ? "Оформление подписки"
         : "Активна";
 
   return (

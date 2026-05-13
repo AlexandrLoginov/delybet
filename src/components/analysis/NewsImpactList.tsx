@@ -60,7 +60,7 @@ export function NewsImpactList({ items }: NewsImpactListProps) {
                 <div className="text-[11px] text-muted-foreground">{n.team}</div>
                 <div className="mt-1 text-sm font-medium text-foreground">{n.headline}</div>
                 <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                  {n.impact}
+                  {(n.body?.trim() || n.impact).trim()}
                 </p>
               </button>
             </li>
@@ -70,7 +70,7 @@ export function NewsImpactList({ items }: NewsImpactListProps) {
 
       <Drawer open={active !== null} onOpenChange={(o) => !o && setActive(null)}>
         <DrawerContent>
-          <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6">
+          <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6 pb-10">
             {active && (
               <>
                 <DrawerHeader className="px-0 pt-0">
@@ -81,10 +81,23 @@ export function NewsImpactList({ items }: NewsImpactListProps) {
                 </DrawerHeader>
 
                 {active.body ? (
-                  <p className="pb-4 text-sm leading-relaxed text-foreground">{active.body}</p>
+                  <div className="space-y-3 pb-2">
+                    {active.body
+                      .split(/\n\n+/)
+                      .map((p) => p.trim())
+                      .filter(Boolean)
+                      .map((para, i) => (
+                        <p
+                          key={i}
+                          className="text-sm leading-relaxed text-foreground/90"
+                        >
+                          {para}
+                        </p>
+                      ))}
+                  </div>
                 ) : null}
 
-                <div className="border-t border-border pt-4">
+                <div className="border-t border-border pt-5">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Влияние на матч
                   </p>

@@ -60,7 +60,7 @@ export function SubscriptionFreeView() {
                 DelyBet Pro
               </span>
               <div className="text-xs text-muted-foreground">
-                7 дней бесплатно, далее 499 ₽/мес
+                От 499 ₽/мес — пакеты на 1–12 месяцев со скидкой за длительный период
               </div>
             </div>
             <Badge variant="pro" className="gap-1">

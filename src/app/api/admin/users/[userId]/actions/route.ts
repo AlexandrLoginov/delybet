@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireAdminSession } from "@/lib/admin-access";
+import { isAdminDesignPreviewUserId } from "@/lib/admin-demo-data";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +29,13 @@ export async function POST(
     const userId = params.userId;
     if (!userId) {
       return NextResponse.json({ error: "INVALID_USER_ID" }, { status: 400 });
+    }
+
+    if (isAdminDesignPreviewUserId(userId)) {
+      return NextResponse.json(
+        { error: "DEMO_PREVIEW_READ_ONLY" },
+        { status: 400 }
+      );
     }
 
     const body = (await req.json()) as AdminActionBody;

@@ -81,29 +81,10 @@ export default function ProfilePage() {
         </section>
 
         <ProfileTariffPreviewGate>
-          <section className="space-y-3">
-            <h2 className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Предпросмотр
-            </h2>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium">Тариф в приложении</div>
-                    <div className="text-[11px] text-muted-foreground">
-                      Переключение между интерфейсом Free и Pro
-                    </div>
-                  </div>
-                  <ProfileTariffPreviewControl />
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+          <div className="flex justify-end px-1 pt-1">
+            <ProfileTariffPreviewControl />
+          </div>
         </ProfileTariffPreviewGate>
-
-        <p className="text-center text-[11px] text-muted-foreground">
-          DelyBet · v1.0.0
-        </p>
       </main>
     </>
   );

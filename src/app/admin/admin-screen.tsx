@@ -45,6 +45,8 @@ type AdminUsersResponse = {
     stripeLinkedUsers: number;
   };
   generatedAt: string;
+  /** БД без пользователей — показан демо-набор для вёрстки */
+  designPreview?: boolean;
 };
 
 type PaymentRow = {
@@ -108,6 +110,7 @@ export function AdminScreen() {
   });
 
   const users = usersData?.users ?? [];
+  const designPreview = usersData?.designPreview === true;
   const q = query.trim().toLowerCase();
   const filteredUsers = !q
     ? users
@@ -200,6 +203,16 @@ export function AdminScreen() {
     <main className="mx-auto max-w-5xl space-y-4 px-4 pb-10 pt-6">
       <h1 className="text-[26px] font-semibold tracking-tight">Админка</h1>
       <p className="text-sm text-muted-foreground">Пользователи, подписки, оплаты и ручные действия.</p>
+
+      {designPreview ? (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-3 text-sm text-muted-foreground">
+            Показаны демо-пользователи и платежи: в базе ещё нет записей. Действия
+            «+30d / Блок» отключены. После появления реальных пользователей таблица
+            подставит их автоматически.
+          </CardContent>
+        </Card>
+      ) : null}
 
       {usersError ? (
         <Card>
@@ -314,7 +327,7 @@ export function AdminScreen() {
                           variant="outline"
                           size="sm"
                           onClick={() => void performAction(u.id, "extend_pro")}
-                          disabled={busyAction !== null}
+                          disabled={busyAction !== null || designPreview}
                         >
                           +30d
                         </Button>
@@ -324,7 +337,7 @@ export function AdminScreen() {
                             variant="outline"
                             size="sm"
                             onClick={() => void performAction(u.id, "unblock")}
-                            disabled={busyAction !== null}
+                            disabled={busyAction !== null || designPreview}
                           >
                             Разблок
                           </Button>
@@ -334,7 +347,7 @@ export function AdminScreen() {
                             variant="outline"
                             size="sm"
                             onClick={() => void performAction(u.id, "block")}
-                            disabled={busyAction !== null}
+                            disabled={busyAction !== null || designPreview}
                           >
                             Блок
                           </Button>
