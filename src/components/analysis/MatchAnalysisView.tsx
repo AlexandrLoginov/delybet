@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TeamLogo } from "@/components/matches/TeamLogo";
 import { LiveBadge } from "@/components/matches/LiveBadge";
+import { AnalysisForecastBlock } from "@/components/analysis/AnalysisForecastBlock";
 import { RecommendationCard } from "@/components/analysis/RecommendationCard";
 import { KeyFactorsList } from "@/components/analysis/KeyFactorsList";
 import { StatsBars } from "@/components/analysis/StatsBars";
@@ -159,6 +160,8 @@ export function MatchAnalysisView({
             </p>
           </CardContent>
         </Card>
+
+        <AnalysisForecastBlock match={match} analysis={analysis} />
 
         <div className="mt-4">
           <RecommendationCard

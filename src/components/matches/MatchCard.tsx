@@ -8,7 +8,6 @@ import { LiveBadge } from "@/components/matches/LiveBadge";
 import { TeamLogo } from "@/components/matches/TeamLogo";
 import { FormPills } from "@/components/matches/FormPills";
 import { AiPickStrip } from "@/components/matches/AiPickStrip";
-import { MatchCardAnalysisSnippet } from "@/components/matches/MatchCardAnalysisSnippet";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
 import { formatKickoff, formatTimeUntil, cn } from "@/lib/utils";
 import { freePreviewKindForMatch, redeemFreePreview } from "@/lib/freemium";
@@ -132,18 +131,14 @@ function MatchCardBody({ match }: { match: Match }) {
               <span className="truncate">{match.venue}</span>
             </div>
           )}
-
-          <MatchCardAnalysisSnippet match={match} />
         </div>
       </div>
 
-      <div className="border-t border-border">
-        <AiPickStrip
-          pick={match.aiPick}
-          sport={match.sport}
-          forceShow={!match.aiPick}
-        />
-      </div>
+      {match.aiPick && (
+        <div className="border-t border-border">
+          <AiPickStrip pick={match.aiPick} sport={match.sport} />
+        </div>
+      )}
     </div>
   );
 }
