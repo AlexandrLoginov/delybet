@@ -254,14 +254,18 @@ function MatchDetailTabs({
   const [detailTab, setDetailTab] = useState("stats");
 
   return (
-    <Tabs value={detailTab} onValueChange={setDetailTab}>
-      <TabsList className="grid h-auto w-full grid-cols-3 gap-1">
+    <Tabs
+      value={detailTab}
+      onValueChange={setDetailTab}
+      className="flex h-fit w-full max-w-full flex-col gap-2"
+    >
+      <TabsList className="grid h-auto w-full shrink-0 grid-cols-3 gap-1">
         <TabsTrigger value="stats">Статистика</TabsTrigger>
         <TabsTrigger value="form">Форма</TabsTrigger>
         <TabsTrigger value="news">Новости</TabsTrigger>
       </TabsList>
 
-      <div className="mt-2.5">
+      <div className="min-h-0 w-full max-w-full shrink-0">
         {detailTab === "stats" ? (
           <Card>
             <CardContent className="p-5">
