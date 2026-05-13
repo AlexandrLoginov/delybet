@@ -27,22 +27,6 @@ function scenarioKindShort(kind?: AnalysisRecommendationScenario["kind"]) {
   }
 }
 
-function ScenarioSkeletonStack() {
-  return (
-    <div className="space-y-3" aria-hidden>
-      {[1, 2, 3].map((i) => (
-        <Card key={i} className="overflow-hidden">
-          <CardContent className="space-y-2.5 p-4 sm:p-5">
-            <div className="h-3 w-28 rounded-md bg-muted" />
-            <div className="h-6 w-full max-w-[min(100%,14rem)] rounded-md bg-muted" />
-            <div className="h-3 w-full max-w-md rounded-md bg-muted/60" />
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
 function SingleScenarioCard({
   row,
   showReasoning,
@@ -104,6 +88,18 @@ export function RecommendationCard({
           },
         ];
 
+  const scenarioStack = (
+    <div className="space-y-3">
+      {rows.map((row, i) => (
+        <SingleScenarioCard
+          key={`${row.label}-${row.kind ?? "custom"}-${i}`}
+          row={row}
+          showReasoning={isPro}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <section className="space-y-3">
       <h2 className="px-1 text-base font-semibold tracking-tight text-foreground">
@@ -112,15 +108,7 @@ export function RecommendationCard({
 
       {isPro ? (
         <>
-          <div className="space-y-3">
-            {rows.map((row, i) => (
-              <SingleScenarioCard
-                key={`${row.label}-${row.kind ?? "custom"}-${i}`}
-                row={row}
-                showReasoning
-              />
-            ))}
-          </div>
+          {scenarioStack}
 
           {recommendation.reasoning ? (
             <Card className="overflow-hidden">
@@ -140,7 +128,7 @@ export function RecommendationCard({
           title="Сценарии ИИ — в Pro"
           description="Прогнозы модели по исходу, тоталам и другим рынкам с пояснениями доступны после подключения подписки."
         >
-          <ScenarioSkeletonStack />
+          {scenarioStack}
         </PaywallOverlay>
       )}
     </section>

@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TeamLogo } from "@/components/matches/TeamLogo";
 import { LiveBadge } from "@/components/matches/LiveBadge";
-import { AnalysisForecastBlock } from "@/components/analysis/AnalysisForecastBlock";
 import { RecommendationCard } from "@/components/analysis/RecommendationCard";
 import { KeyFactorsList } from "@/components/analysis/KeyFactorsList";
 import { StatsBars } from "@/components/analysis/StatsBars";
@@ -161,8 +160,6 @@ export function MatchAnalysisView({
           </CardContent>
         </Card>
 
-        <AnalysisForecastBlock match={match} analysis={analysis} />
-
         <div className="mt-4">
           <RecommendationCard
             recommendation={analysis.recommendation}
@@ -215,7 +212,24 @@ export function MatchAnalysisView({
               title="Развёрнутый анализ — в Pro"
               description="Полный текст рассуждений модели, ключевые факторы и связка с новостями — после подключения подписки."
             >
-              <DetailedAnalysisSkeletonStack />
+              <Card className="overflow-hidden">
+                <CardContent className="space-y-4 p-5">
+                  <p className="text-sm leading-relaxed text-foreground/85">
+                    {analysis.detailedAnalysis}
+                  </p>
+                  <Separator />
+                  <div className="space-y-2">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Ключевые факторы
+                    </div>
+                    <KeyFactorsList
+                      factors={analysis.keyFactors}
+                      homeName={match.home.shortName}
+                      awayName={match.away.shortName}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
             </PaywallOverlay>
           )}
         </section>
@@ -266,35 +280,6 @@ function MatchDetailTabs({
         <NewsImpactList items={analysis.newsImpact} />
       </TabsContent>
     </Tabs>
-  );
-}
-
-/** Скелет под paywall (как «Сценарии ИИ»): один каркас вместо размытого текста. */
-function DetailedAnalysisSkeletonStack() {
-  return (
-    <Card className="overflow-hidden">
-      <CardContent className="space-y-4 p-5" aria-hidden>
-        <div className="space-y-2.5">
-          <div className="h-3 w-full rounded-md bg-muted" />
-          <div className="h-3 w-full rounded-md bg-muted/85" />
-          <div className="h-3 w-[92%] rounded-md bg-muted/70" />
-          <div className="h-3 w-[78%] rounded-md bg-muted/55" />
-        </div>
-        <Separator />
-        <div className="space-y-3">
-          <div className="h-2.5 w-36 rounded-md bg-muted" />
-          <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-3 rounded-md bg-muted/50"
-                style={{ width: `${100 - i * 6}%` }}
-              />
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 

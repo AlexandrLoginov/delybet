@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { normalizeAnalysisPayload } from "@/lib/analysis-api-normalize";
+import { fillAnalysisDemoGaps } from "@/lib/analysis-demo-fill";
 import type { Match } from "@/types/match";
 
 const fetcher = async (url: string) => {
@@ -65,7 +66,7 @@ export function MatchAnalysisWithDevPro({
 
   let analysis;
   try {
-    analysis = normalizeAnalysisPayload(data);
+    analysis = fillAnalysisDemoGaps(match, normalizeAnalysisPayload(data));
   } catch {
     return (
       <main className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8 text-center text-sm text-muted-foreground">
