@@ -26,6 +26,7 @@ import {
   isFavoriteMatchId,
   toggleFavoriteMatchId,
 } from "@/lib/favorites";
+import { analysisBlockClass } from "@/lib/analysis-ui";
 import { cn, formatKickoff } from "@/lib/utils";
 import type { Match } from "@/types/match";
 import type { FullAnalysis } from "@/types/analysis";
@@ -96,7 +97,7 @@ export function MatchAnalysisView({
             {favorite ? "В избранном" : "В избранное"}
           </Button>
         </div>
-        <Card>
+        <Card className={analysisBlockClass}>
           <div className="flex items-center justify-between border-b px-5 py-3 text-xs">
             <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
               <span className="truncate font-medium text-foreground/80">
@@ -188,7 +189,7 @@ export function MatchAnalysisView({
           </h2>
 
           {isPro ? (
-            <Card>
+            <Card className={analysisBlockClass}>
               <CardContent className="space-y-4 p-5">
                 <p className="text-sm leading-relaxed text-foreground/85">
                   {analysis.detailedAnalysis}
@@ -211,7 +212,7 @@ export function MatchAnalysisView({
               title="Развёрнутый анализ — в Pro"
               description="Полный текст рассуждений модели и ключевые факторы — после подключения подписки."
             >
-              <Card className="overflow-hidden">
+              <Card className={cn(analysisBlockClass, "overflow-hidden")}>
                 <CardContent className="space-y-4 p-5">
                   <p className="text-sm leading-relaxed text-foreground/85">
                     {analysis.detailedAnalysis}
@@ -265,7 +266,7 @@ function MatchDetailTabs({
 
       <div className="min-h-0 w-full max-w-full shrink-0">
         {detailTab === "stats" ? (
-          <Card>
+          <Card className={analysisBlockClass}>
             <CardContent className="p-5">
               <StatsBars
                 stats={analysis.stats}

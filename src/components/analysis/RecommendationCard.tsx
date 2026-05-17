@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { PaywallOverlay } from "@/components/paywall/PaywallOverlay";
+import { analysisBlockClass } from "@/lib/analysis-ui";
+import { cn } from "@/lib/utils";
 import type {
   AnalysisRecommendation,
   AnalysisRecommendationScenario,
@@ -37,7 +39,7 @@ function SingleScenarioCard({
   const compact = scenarioKindShort(row.kind);
 
   return (
-    <Card className="overflow-hidden">
+    <Card className={cn(analysisBlockClass, "overflow-hidden")}>
       <CardContent className="space-y-2 p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-xs font-medium text-muted-foreground">
@@ -111,7 +113,7 @@ export function RecommendationCard({
           {scenarioStack}
 
           {recommendation.reasoning ? (
-            <Card className="overflow-hidden">
+            <Card className={cn(analysisBlockClass, "overflow-hidden")}>
               <CardContent className="space-y-1.5 p-4 sm:p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Общее резюме

@@ -1,5 +1,6 @@
 import { Equals, TrendDown, TrendUp } from "@phosphor-icons/react";
 
+import { analysisBlockClass } from "@/lib/analysis-ui";
 import { cn } from "@/lib/utils";
 import type { KeyFactor } from "@/types/analysis";
 
@@ -23,7 +24,7 @@ export function KeyFactorsList({
   }
 
   return (
-    <ul className="divide-y divide-border rounded-lg border bg-background">
+    <ul className={cn(analysisBlockClass, "divide-y divide-border rounded-lg shadow-none")}>
       {factors.map((f, i) => {
         const isHome = f.impact === "POSITIVE_HOME";
         const isAway = f.impact === "POSITIVE_AWAY";

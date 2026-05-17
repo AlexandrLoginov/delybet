@@ -129,7 +129,7 @@ export function StatisticsCharts({
                     className={cn(
                       "flex w-full flex-col justify-end rounded-md bg-muted/60 p-1",
                       active &&
-                        "ring-1 ring-foreground/25 ring-offset-2 ring-offset-card"
+                        "ring-1 ring-primary ring-offset-2 ring-offset-card"
                     )}
                     style={{ height: trackH }}
                   >
@@ -138,7 +138,7 @@ export function StatisticsCharts({
                         "w-full min-h-[4px] rounded-sm transition-all",
                         item.locked
                           ? "bg-muted-foreground/35"
-                          : "bg-foreground"
+                          : "bg-primary"
                       )}
                       style={{ height: barH }}
                     />
@@ -240,8 +240,8 @@ function DailyLineChart({ points }: { points: DailyPoint[] }) {
         <title>Динамика точности по дням</title>
         <defs>
           <linearGradient id="stats-area-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity="0.02" />
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.03" />
           </linearGradient>
         </defs>
         {yTicks.map((tick) => {
@@ -264,8 +264,7 @@ function DailyLineChart({ points }: { points: DailyPoint[] }) {
         <path
           d={lineD}
           fill="none"
-          stroke="hsl(var(--foreground))"
-          strokeOpacity={0.42}
+          stroke="hsl(var(--primary))"
           strokeWidth={2}
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -287,11 +286,8 @@ function DailyLineChart({ points }: { points: DailyPoint[] }) {
                 cy={c.y}
                 r={active ? 4.5 : 3.5}
                 fill="hsl(var(--card))"
-                stroke={
-                  active
-                    ? "hsl(var(--primary))"
-                    : "hsl(var(--muted-foreground))"
-                }
+                stroke="hsl(var(--primary))"
+                strokeOpacity={active ? 1 : 0.45}
                 strokeWidth={active ? 2.5 : 2}
                 className="pointer-events-none"
               />

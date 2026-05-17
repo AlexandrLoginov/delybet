@@ -17,7 +17,7 @@ export function ProfileTelegramIdentity() {
 
   if (state.status === "loading") {
     return (
-      <Card>
+      <Card className="shadow-none">
         <CardContent className="px-5 py-4">
           <div className="flex min-h-[96px] items-start gap-4">
             <Skeleton className="h-14 w-14 shrink-0 rounded-full" aria-hidden />
@@ -39,7 +39,7 @@ export function ProfileTelegramIdentity() {
 
   if (state.status === "browser") {
     return (
-      <Card data-telegram-gate-exempt>
+      <Card className="shadow-none" data-telegram-gate-exempt>
         <CardContent className="space-y-4 p-5">
           <TelegramBrowserLoginExplanation />
           <TelegramOpenInTelegramButton />
@@ -53,7 +53,7 @@ export function ProfileTelegramIdentity() {
   const initials = initialsFromTelegramUser(user);
 
   return (
-    <Card>
+    <Card className="shadow-none">
       <CardContent className="px-5 py-4">
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14">

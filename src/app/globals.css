@@ -4,12 +4,12 @@
 
 /*
  * Палитра — на основе Binance design tokens.
- * Brand:   #FCD535 (BinanceYellow)        — primary CTA / pro / hot
+ * Brand light: синий primary · dark: #FCD535 (BinanceYellow)
  * Buy:     #0ECB81 (BuyGreen)             — success / win / probability home
  * Sell:    #F6465D (SellRed)              — destructive / loss / probability away / live
  * Text:    #1E2329 / #EAECEF              — primary
  * Sub:     #707A8A / #B7BDC6              — secondary
- * Surfaces light: #FFFFFF / #FAFAFA / #F5F5F5
+ * Surfaces light: #FFFFFF (base) · card #F5F5F5 · #FAFAFA
  * Surfaces dark:  #181A20 / #1E2329 / #2B3139
  * Line:    #EAECEF / #2B3139
  */
@@ -19,14 +19,14 @@
     --background: 0 0% 100%; /* #FFFFFF */
     --foreground: 213 16% 14%; /* #1E2329 */
 
-    --card: 0 0% 100%;
+    --card: 0 0% 96%; /* #F5F5F5 — лёгкая серая заливка карточек */
     --card-foreground: 213 16% 14%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 213 16% 14%;
 
-    --primary: 49 97% 60%; /* #FCD535 BinanceYellow */
-    --primary-foreground: 220 22% 16%; /* #202630 */
+    --primary: 221 83% 53%; /* ~#3B82F6 — акцент светлой темы */
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 96%; /* #F5F5F5 */
     --secondary-foreground: 213 16% 14%;
@@ -46,7 +46,7 @@
 
     --border: 213 14% 93%; /* #EAECEF */
     --input: 213 14% 93%;
-    --ring: 49 97% 60%;
+    --ring: 221 83% 53%;
 
     --radius: 0.5rem;
   }
@@ -104,7 +104,14 @@
 
   ::selection {
     background: hsl(var(--primary) / 0.35);
-    color: hsl(var(--primary-foreground));
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  /** Блоки на экране матча: в light — серая заливка (--card), в dark — поверхность карточки */
+  .analysis-block {
+    @apply rounded-xl border border-border bg-card text-card-foreground shadow-sm;
   }
 }
 

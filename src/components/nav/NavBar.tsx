@@ -83,18 +83,20 @@ export function NavBar() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center gap-1 pt-3 pb-0 text-[11px] font-medium transition-colors",
+                "group flex flex-col items-center gap-1 pt-3 pb-0 text-[11px] font-medium transition-colors",
                 active
                   ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground/80"
               )}
             >
               <span className="relative inline-flex">
                 <Icon
                   weight="fill"
                   className={cn(
-                    "h-[18px] w-[18px] transition-transform",
-                    active && "scale-110 text-primary"
+                    "h-[18px] w-[18px] shrink-0 transition-[transform,color]",
+                    active
+                      ? "scale-110 !text-primary"
+                      : "text-muted-foreground group-hover:text-foreground/80"
                   )}
                   aria-hidden
                 />

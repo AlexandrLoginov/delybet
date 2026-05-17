@@ -1,3 +1,4 @@
+import { analysisBlockClass } from "@/lib/analysis-ui";
 import { cn } from "@/lib/utils";
 import type { FormEntry } from "@/types/analysis";
 
@@ -38,7 +39,7 @@ export function FormChips({ team, entries }: FormChipsProps) {
           ))}
         </div>
       </div>
-      <ul className="divide-y divide-border rounded-lg border bg-card">
+      <ul className={cn(analysisBlockClass, "divide-y divide-border rounded-lg shadow-none")}>
         {entries.map((e, i) => (
           <li
             key={i}
