@@ -1,5 +1,8 @@
+"use client";
+
 import { Equals, TrendDown, TrendUp } from "@phosphor-icons/react";
 
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { analysisBlockClass } from "@/lib/analysis-ui";
 import { cn } from "@/lib/utils";
 import type { KeyFactor } from "@/types/analysis";
@@ -15,10 +18,11 @@ export function KeyFactorsList({
   homeName,
   awayName,
 }: KeyFactorsListProps) {
+  const { t } = useAppLocale();
   if (factors.length === 0) {
     return (
       <p className="rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-        Список факторов не пришёл от модели или не распознан. Обновите анализ позже.
+        {t("analysis.keyFactorsEmpty")}
       </p>
     );
   }
@@ -42,7 +46,7 @@ export function KeyFactorsList({
           ? `+ ${homeName}`
           : isAway
           ? `+ ${awayName}`
-          : "Нейтрально";
+          : t("analysis.neutralFactor");
 
         return (
           <li key={i} className="flex items-center gap-3 p-3">

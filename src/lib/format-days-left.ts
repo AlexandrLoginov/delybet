@@ -1,5 +1,8 @@
 /** Оставшиеся полные дни до даты (локальное время). */
 
+import { formatPluralDays } from "@/i18n";
+import type { AppLocaleCode } from "@/lib/locale";
+
 /** Сколько календарных дней от даты from до to (только даты, без времени). */
 export function getCalendarDaysFromTo(from: Date, to: Date): number {
   const a = new Date(from.getFullYear(), from.getMonth(), from.getDate());
@@ -21,11 +24,11 @@ export function getWholeDaysUntil(end: Date, now: Date = new Date()): number {
   return Math.round((startOfEndDay - startOfToday) / 86_400_000);
 }
 
+/** @deprecated Use {@link formatDaysLeft} with locale. */
 export function pluralRuDays(n: number): string {
-  const abs = Math.abs(n) % 100;
-  const d = abs % 10;
-  if (abs > 10 && abs < 20) return `${n} дней`;
-  if (d === 1) return `${n} день`;
-  if (d >= 2 && d <= 4) return `${n} дня`;
-  return `${n} дней`;
+  return formatDaysLeft("ru", n);
+}
+
+export function formatDaysLeft(locale: AppLocaleCode, n: number): string {
+  return formatPluralDays(locale, n);
 }

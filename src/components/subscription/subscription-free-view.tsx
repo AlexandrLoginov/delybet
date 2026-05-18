@@ -15,20 +15,22 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
 import { SubscriptionDailyUsage } from "@/components/subscription/SubscriptionDailyUsage";
+import { getMessages } from "@/i18n";
 import { useAppLocale } from "@/hooks/use-app-locale";
 import { RENEWAL_BASE_MONTHLY_RUB } from "@/lib/renewal-packages";
-import { SUBSCRIPTION_FEATURE_ROWS } from "@/lib/subscription-features";
 import { cn } from "@/lib/utils";
 
 export function SubscriptionFreeView() {
-  const { formatMonthlyFromRub } = useAppLocale();
+  const { locale, t, formatMonthlyFromRub } = useAppLocale();
+  const features = getMessages(locale).subscription.features;
+
   return (
     <main className="mx-auto w-full max-w-2xl space-y-6 px-4 pb-6 pt-5">
       <div className="mb-5">
         <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
           <Link href="/profile">
             <CaretLeft className="h-4 w-4 shrink-0" weight="fill" />
-            Профиль
+            {t("nav.profile")}
           </Link>
         </Button>
       </div>
@@ -36,13 +38,13 @@ export function SubscriptionFreeView() {
         <CardContent className="space-y-4 p-5">
           <div>
             <Badge variant="muted" className="px-1.5">
-              Текущий план
+              {t("subscription.currentPlan")}
             </Badge>
             <div className="mt-2 text-2xl font-semibold tracking-tight">
-              Free
+              {t("subscription.freePlan")}
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Базовый доступ — 1 анализ в день для предстоящих и Live матчей.
+              {t("subscription.dailyUsageTitle")}
             </p>
           </div>
 
@@ -60,11 +62,12 @@ export function SubscriptionFreeView() {
             </div>
             <div className="flex-1">
               <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">
-                DelyBet Pro
+                {t("subscription.proEyebrow")}
               </span>
               <div className="text-xs text-muted-foreground">
-                От {formatMonthlyFromRub(RENEWAL_BASE_MONTHLY_RUB, 1)} — пакеты на
-                1–12 месяцев со скидкой за длительный период
+                {t("subscription.proFromPrice", {
+                  price: formatMonthlyFromRub(RENEWAL_BASE_MONTHLY_RUB, 1),
+                })}
               </div>
             </div>
             <Badge variant="pro" className="gap-1">
@@ -77,12 +80,12 @@ export function SubscriptionFreeView() {
         <CardContent className="space-y-4 p-5">
           <div className="rounded-lg border bg-background">
             <div className="grid grid-cols-[1fr_88px_88px] items-center gap-2 border-b px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              <span>Возможность</span>
-              <span className="text-center">Free</span>
-              <span className="text-center text-foreground">Pro</span>
+              <span>{t("subscription.featureColumn")}</span>
+              <span className="text-center">{t("subscription.freePlan")}</span>
+              <span className="text-center text-foreground">{t("common.pro")}</span>
             </div>
             <ul className="divide-y divide-border">
-              {SUBSCRIPTION_FEATURE_ROWS.map((f) => (
+              {features.map((f) => (
                 <li
                   key={f.label}
                   className="grid grid-cols-[1fr_88px_88px] items-center gap-2 px-4 py-2.5 text-sm"
@@ -100,7 +103,7 @@ export function SubscriptionFreeView() {
             billingAction="checkout"
             trigger={
               <Button size="lg" className="w-full">
-                Перейти на PRO
+                {t("subscription.subscribeCta")}
               </Button>
             }
           />

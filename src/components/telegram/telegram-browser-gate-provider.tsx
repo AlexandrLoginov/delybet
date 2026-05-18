@@ -9,6 +9,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { TelegramBrowserLoginExplanation } from "@/components/telegram/telegram-browser-login-explanation";
 import { TelegramOpenInTelegramButton } from "@/components/telegram/telegram-open-in-telegram-button";
 import {
@@ -22,6 +23,7 @@ export function TelegramBrowserGateProvider({
 }: {
   children: ReactNode;
 }) {
+  const { t } = useAppLocale();
   const session = useTelegramSession();
   const [open, setOpen] = useState(false);
 
@@ -64,7 +66,7 @@ export function TelegramBrowserGateProvider({
             <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6 pb-4">
               <DrawerHeader className="px-0 pt-0">
                 <DrawerTitle className="pt-2 text-left">
-                  Вход через Telegram
+                  {t("telegram.gateTitle")}
                 </DrawerTitle>
                 <div className="pt-3 text-left">
                   <TelegramBrowserLoginExplanation />

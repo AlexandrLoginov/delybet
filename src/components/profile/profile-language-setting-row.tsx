@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 
 export function ProfileLanguageSettingRow() {
   const [open, setOpen] = useState(false);
-  const { locale, setLocale, current } = useAppLocale();
+  const { locale, setLocale, t } = useAppLocale();
 
   function selectLanguage(code: AppLocaleCode) {
     setLocale(code);
@@ -34,8 +34,8 @@ export function ProfileLanguageSettingRow() {
           <Globe className="h-4 w-4" weight="fill" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium">Язык</div>
-          <div className="text-[11px] text-muted-foreground">{current.label}</div>
+          <div className="text-sm font-medium">{t("profile.language")}</div>
+          <div className="text-[11px] text-muted-foreground">{t(`meta.locales.${locale}`)}</div>
         </div>
         <CaretRight
           className="h-4 w-4 shrink-0 text-muted-foreground"
@@ -46,12 +46,12 @@ export function ProfileLanguageSettingRow() {
 
       <DrawerContent>
         <DrawerHeader className="px-6 pb-2 pt-0 text-left">
-          <DrawerTitle>Язык интерфейса</DrawerTitle>
+          <DrawerTitle>{t("profile.languageSheetTitle")}</DrawerTitle>
         </DrawerHeader>
         <ul
           className="flex flex-col gap-1 px-4 pb-[max(20px,env(safe-area-inset-bottom,0px))]"
           role="listbox"
-          aria-label="Выбор языка"
+          aria-label={t("profile.languageSelectAria")}
         >
           {APP_LOCALES.map((item) => {
             const selected = locale === item.code;
@@ -80,7 +80,7 @@ export function ProfileLanguageSettingRow() {
                     />
                   </span>
                   <span className="min-w-0 flex-1 text-sm font-medium">
-                    {item.label}
+                    {t(`meta.locales.${item.code}`)}
                   </span>
                   {selected ? (
                     <Check

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 const SUPPORT_URL = process.env.NEXT_PUBLIC_SUPPORT_URL ?? "#";
 
 export function HeaderActions({ className }: { className?: string }) {
-  const { locale, setLocale } = useAppLocale();
+  const { locale, setLocale, t } = useAppLocale();
 
   const onLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLocale(e.target.value as AppLocaleCode);
@@ -20,7 +20,7 @@ export function HeaderActions({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <label htmlFor="header-lang" className="sr-only">
-        Язык интерфейса
+        {t("header.languageAria")}
       </label>
       <select
         id="header-lang"
@@ -39,7 +39,7 @@ export function HeaderActions({ className }: { className?: string }) {
         variant="outline"
         size="icon"
         className="h-8 w-8 shrink-0"
-        aria-label="Поддержка"
+        aria-label={t("header.supportAria")}
       >
         <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
           <Headphones className="h-4 w-4" weight="fill" aria-hidden />

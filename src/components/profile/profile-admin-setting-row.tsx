@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { CaretRight, GearFine } from "@phosphor-icons/react/ssr";
 
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 
 export function ProfileAdminSettingRow() {
+  const { t } = useAppLocale();
   const state = useTelegramSession();
 
   if (
@@ -25,9 +27,9 @@ export function ProfileAdminSettingRow() {
         <GearFine className="h-4 w-4" weight="fill" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-sm font-medium">Админка</div>
+        <div className="text-sm font-medium">{t("profile.admin")}</div>
         <div className="text-[11px] text-muted-foreground">
-          Управление доступом и служебными инструментами
+          {t("profile.adminHint")}
         </div>
       </div>
       <CaretRight

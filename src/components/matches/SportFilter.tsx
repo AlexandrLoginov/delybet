@@ -1,5 +1,6 @@
 "use client";
 
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 import { SPORTS } from "@/lib/mock-data";
 import type { SportSlug } from "@/types/match";
@@ -19,8 +20,9 @@ export function SportFilter({
   allEventsCount,
   countsBySport,
 }: SportFilterProps) {
+  const { t } = useAppLocale();
   const items: { slug: SportSlug | "all"; label: string; emoji: string }[] = [
-    { slug: "all", label: "Все", emoji: "" },
+    { slug: "all", label: t("matches.sportAll"), emoji: "" },
     ...SPORTS,
   ];
 
@@ -39,8 +41,8 @@ export function SportFilter({
             onClick={() => onChange(s.slug)}
             aria-label={
               isAll
-                ? `Все виды спорта, ${allEventsCount} событий`
-                : `${s.label}, ${sportCount ?? 0} событий`
+                ? `${t("matches.sportAll")}, ${allEventsCount}`
+                : `${s.label}, ${sportCount ?? 0}`
             }
             className={cn(
               "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors",

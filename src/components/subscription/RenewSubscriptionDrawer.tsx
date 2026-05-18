@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Medal } from "@phosphor-icons/react";
 
 import { Badge } from "@/components/ui/badge";
@@ -14,9 +14,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { getMessages } from "@/i18n";
 import { useAppLocale } from "@/hooks/use-app-locale";
-import { stripeChargeDisclaimer } from "@/lib/currency";
 import {
+  mergeRenewalPackages,
   RENEWAL_BASE_MONTHLY_RUB,
   RENEWAL_PACKAGES,
   renewalFullPriceWithoutDiscount,
@@ -27,39 +28,11 @@ import { cn } from "@/lib/utils";
 interface RenewSubscriptionDrawerProps {
   trigger?: ReactNode;
   defaultOpen?: boolean;
-  /**
-   * subscribe — первое оформление Pro (например с профиля)
-   * renew — уже есть Pro: редирект в Stripe Customer Portal
-   */
   intent?: "subscribe" | "renew";
-  /**
-   * По умолчанию: renew → portal, subscribe → checkout через Stripe.
-   * Можно переопределить явно.
-   */
   billingAction?: "checkout" | "portal";
-  /** Контролируемое открытие без trigger */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
-
-const INTENT_COPY = {
-  renew: {
-    eyebrow: "Продление Pro",
-    title: "Управление подпиской",
-    description:
-      "Оплата, счета, смена карты и отмена — через защищённый кабинет Stripe.",
-    packagesLabel: "Пакеты продления",
-    packagesAria: "Пакеты продления",
-  },
-  subscribe: {
-    eyebrow: "DelyBet Pro",
-    title: "Выбери пакет подписки",
-    description:
-      "Оформи доступ на месяц или на несколько месяцев — чем дольше период, тем ниже эквивалентная цена за месяц.",
-    packagesLabel: "Пакеты",
-    packagesAria: "Пакеты подписки Pro",
-  },
-} as const;
 
 export function RenewSubscriptionDrawer({
   trigger,
@@ -86,12 +59,40 @@ export function RenewSubscriptionDrawer({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { locale, formatFromRub, formatMonthlyFromRub } = useAppLocale();
+  const { locale, t, formatFromRub, formatMonthlyFromRub } = useAppLocale();
 
-  const pkg = RENEWAL_PACKAGES.find((p) => p.id === selected) ?? RENEWAL_PACKAGES[0];
+  const localizedPackages = useMemo(
+    () =>
+      mergeRenewalPackages(
+        RENEWAL_PACKAGES,
+        getMessages(locale).subscription.packages
+      ),
+    [locale]
+  );
+
+  const pkg =
+    localizedPackages.find((p) => p.id === selected) ?? localizedPackages[0];
   const fullWithoutDiscount = renewalFullPriceWithoutDiscount(pkg.months);
-  const copy = INTENT_COPY[intent];
-  const chargeNote = stripeChargeDisclaimer(locale);
+
+  const renew = intent === "renew";
+  const eyebrow = renew
+    ? t("subscription.renew.eyebrowRenew")
+    : t("subscription.renew.eyebrowSubscribe");
+  const title = renew
+    ? t("subscription.renew.titleRenew")
+    : t("subscription.renew.titleSubscribe");
+  const description = renew
+    ? t("subscription.renew.descRenew")
+    : t("subscription.renew.descSubscribe");
+  const packagesLabel = renew
+    ? t("subscription.renew.packagesLabelRenew")
+    : t("subscription.renew.packagesLabelSubscribe");
+  const packagesAria = renew
+    ? t("subscription.renew.packagesAriaRenew")
+    : t("subscription.renew.packagesAriaSubscribe");
+
+  const chargeNote =
+    locale === "ru" ? null : t("subscription.renew.stripeDisclaimer");
 
   async function submitPayment() {
     setError(null);
@@ -106,8 +107,8 @@ export function RenewSubscriptionDrawer({
         if (!res.ok || !data.url) {
           setError(
             data.error === "NO_STRIPE_CUSTOMER"
-              ? "Сначала оформи Pro — запись в Stripe ещё не создана."
-              : (data.error ?? "Не удалось открыть кабинет оплаты")
+              ? t("subscription.renew.noCustomer")
+              : (data.error ?? t("subscription.renew.portalFail"))
           );
           return;
         }
@@ -121,14 +122,18 @@ export function RenewSubscriptionDrawer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ packageId: selected }),
       });
-      const data = (await res.json()) as { url?: string; message?: string; error?: string };
+      const data = (await res.json()) as {
+        url?: string;
+        message?: string;
+        error?: string;
+      };
       if (!res.ok || !data.url) {
         setError(
           data.message ??
             data.error ??
             (res.status === 401
-              ? "Откройте приложение через Telegram Mini App и попробуйте снова."
-              : "Оплата временно недоступна.")
+              ? t("subscription.renew.unauthorized")
+              : t("subscription.renew.checkoutFail"))
         );
         return;
       }
@@ -151,24 +156,24 @@ export function RenewSubscriptionDrawer({
                 <Medal className="h-3.5 w-3.5" weight="fill" />
               </div>
               <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">
-                {copy.eyebrow}
+                {eyebrow}
               </span>
             </div>
-            <DrawerTitle className="pt-2 text-left">{copy.title}</DrawerTitle>
-            <DrawerDescription className="text-left">{copy.description}</DrawerDescription>
+            <DrawerTitle className="pt-2 text-left">{title}</DrawerTitle>
+            <DrawerDescription className="text-left">{description}</DrawerDescription>
           </DrawerHeader>
 
           {showPackages ? (
             <div className="space-y-2 py-4">
               <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                {copy.packagesLabel}
+                {packagesLabel}
               </p>
               <ul
                 className="flex flex-col gap-2"
                 role="listbox"
-                aria-label={copy.packagesAria}
+                aria-label={packagesAria}
               >
-                {RENEWAL_PACKAGES.map((p) => (
+                {localizedPackages.map((p) => (
                   <li key={p.id}>
                     <PackageOption
                       pkg={p}
@@ -183,8 +188,7 @@ export function RenewSubscriptionDrawer({
             </div>
           ) : (
             <p className="py-4 text-sm text-muted-foreground">
-              После перехода вы сможете продлить период, обновить способ оплаты или отменить
-              автопродление до конца оплаченного срока.
+              {t("subscription.renew.portalHint")}
             </p>
           )}
 
@@ -204,17 +208,17 @@ export function RenewSubscriptionDrawer({
           {showPackages ? (
             <div className="flex w-full flex-col gap-1 pb-1 text-center">
               <span className="text-xs text-muted-foreground">
-                К оплате за выбранный период
+                {t("subscription.renew.payLabel")}
               </span>
               <span className="text-xl font-semibold tabular-nums text-foreground">
                 {formatFromRub(pkg.totalRub)}
               </span>
               <span className="text-[11px] text-muted-foreground">
-                ~{formatMonthlyFromRub(pkg.totalRub, pkg.months)} · экономия к
-                помесячной оплате{" "}
+                ~{formatMonthlyFromRub(pkg.totalRub, pkg.months)} ·{" "}
+                {t("subscription.renew.savings")}{" "}
                 {fullWithoutDiscount - pkg.totalRub > 0
                   ? `${formatFromRub(fullWithoutDiscount)} → ${formatFromRub(pkg.totalRub)}`
-                  : "—"}
+                  : t("common.dash")}
               </span>
             </div>
           ) : null}
@@ -227,10 +231,12 @@ export function RenewSubscriptionDrawer({
             onClick={submitPayment}
           >
             {busy
-              ? "Загрузка…"
+              ? t("subscription.renew.loading")
               : resolvedBilling === "portal"
-                ? "Открыть кабинет Stripe"
-                : `Оплатить ${formatFromRub(pkg.totalRub)}`}
+                ? t("subscription.renew.portalButton")
+                : t("subscription.renew.payButton", {
+                    price: formatFromRub(pkg.totalRub),
+                  })}
           </Button>
           <Button
             variant="ghost"
@@ -238,7 +244,7 @@ export function RenewSubscriptionDrawer({
             type="button"
             onClick={() => handleOpenChange(false)}
           >
-            Закрыть
+            {t("common.close")}
           </Button>
         </DrawerFooter>
       </DrawerContent>

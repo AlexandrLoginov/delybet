@@ -17,6 +17,8 @@ import { AppPageSkeleton } from "@/components/layout/app-page-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAppLocale } from "@/hooks/use-app-locale";
+import { localeIntlTag } from "@/i18n";
 import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
 import { isAdminDesignPreviewUserId } from "@/lib/admin-demo-data";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
@@ -79,11 +81,11 @@ async function jsonFetcher<T>(url: string): Promise<T> {
   return data as T;
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, locale: string): string {
   if (!value) return "—";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("ru-RU", {
+  return d.toLocaleString(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -93,6 +95,7 @@ function formatDate(value: string | null): string {
 }
 
 export function AdminScreen() {
+  const { locale, t } = useAppLocale();
   const state = useTelegramSession();
   const allowed =
     state.status === "telegram" &&
@@ -174,7 +177,9 @@ export function AdminScreen() {
       await Promise.all([mutateUsers(), mutatePayments()]);
     } catch (e) {
       const message =
-        e instanceof Error ? e.message : "Не удалось выполнить действие";
+        e instanceof Error && e.message !== "ACTION_FAILED"
+          ? e.message
+          : t("admin.actionFailed");
       window.alert(message);
     } finally {
       setBusyAction(null);
@@ -193,12 +198,12 @@ export function AdminScreen() {
           weight="duotone"
           aria-hidden
         />
-        <h1 className="text-lg font-semibold">Нет доступа</h1>
+        <h1 className="text-lg font-semibold">{t("admin.noAccessTitle")}</h1>
         <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-          Раздел только для авторизованного служебного аккаунта в Telegram.
+          {t("admin.noAccessDesc")}
         </p>
         <Button asChild variant="outline">
-          <Link href="/profile">В профиль</Link>
+          <Link href="/profile">{t("admin.toProfile")}</Link>
         </Button>
       </main>
     );
@@ -209,16 +214,14 @@ export function AdminScreen() {
       <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
         <Link href="/profile">
           <CaretLeft className="h-4 w-4 shrink-0" weight="fill" />
-          Назад
+          {t("admin.back")}
         </Link>
       </Button>
 
       {designPreview ? (
         <Card className="border-primary/30 bg-primary/5">
           <CardContent className="p-3 text-sm text-muted-foreground">
-            Показаны демо-пользователи и платежи: в базе ещё нет записей. Действия
-            «+30d / Блок» отключены. После появления реальных пользователей таблица
-            подставит их автоматически.
+            {t("admin.demoEmpty")}
           </CardContent>
         </Card>
       ) : null}
@@ -226,9 +229,7 @@ export function AdminScreen() {
       {demoRowsAppended && !designPreview ? (
         <Card className="border-border bg-muted/20">
           <CardContent className="p-3 text-sm text-muted-foreground">
-            В конец списка добавлены демо-пользователи для проверки вёрстки. Для
-            строк с меткой «Демо» действия отключены; реальные записи можно
-            редактировать как обычно.
+            {t("admin.demoAppended")}
           </CardContent>
         </Card>
       ) : null}
@@ -236,7 +237,7 @@ export function AdminScreen() {
       {usersError ? (
         <Card>
           <CardContent className="p-4 text-sm text-danger">
-            Не удалось загрузить данные: {usersError.message}
+            {t("admin.loadError", { error: usersError.message })}
           </CardContent>
         </Card>
       ) : null}
@@ -244,22 +245,22 @@ export function AdminScreen() {
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={<UsersThree className="h-5 w-5" weight="fill" />}
-          label="Пользователи"
+          label={t("admin.users")}
           value={String(usersData?.stats.totalUsers ?? 0)}
         />
         <StatCard
           icon={<Sparkle className="h-5 w-5" weight="fill" />}
-          label="PRO"
+          label={t("admin.pro")}
           value={String(usersData?.stats.proUsers ?? 0)}
         />
         <StatCard
           icon={<LockKey className="h-5 w-5" weight="fill" />}
-          label="Заблокированы"
+          label={t("admin.blocked")}
           value={String(usersData?.stats.blockedUsers ?? 0)}
         />
         <StatCard
           icon={<CalendarDots className="h-5 w-5" weight="fill" />}
-          label="Связаны со Stripe"
+          label={t("admin.stripe")}
           value={String(usersData?.stats.stripeLinkedUsers ?? 0)}
         />
       </section>
@@ -270,7 +271,7 @@ export function AdminScreen() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Поиск: имя, telegramId, email, статус..."
+              placeholder={t("admin.searchPlaceholder")}
               className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
             <Button
@@ -279,7 +280,7 @@ export function AdminScreen() {
               onClick={() => void mutateUsers()}
               disabled={usersLoading}
             >
-              Обновить
+              {t("admin.refresh")}
             </Button>
           </div>
 
@@ -287,13 +288,13 @@ export function AdminScreen() {
             <table className="w-full min-w-[860px] text-sm">
               <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">Пользователь</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colUser")}</th>
                   <th className="px-3 py-2 text-left font-medium">Telegram ID</th>
-                  <th className="px-3 py-2 text-left font-medium">План</th>
-                  <th className="px-3 py-2 text-left font-medium">Статус</th>
-                  <th className="px-3 py-2 text-left font-medium">До</th>
-                  <th className="px-3 py-2 text-left font-medium">Stripe</th>
-                  <th className="px-3 py-2 text-left font-medium">Действия</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colPlan")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colStatus")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colDate")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colStripe")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colActions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -313,10 +314,10 @@ export function AdminScreen() {
                         className="text-left"
                       >
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-medium">{u.name ?? "Без имени"}</span>
+                          <span className="font-medium">{u.name ?? t("admin.noName")}</span>
                           {isAdminDesignPreviewUserId(u.id) ? (
                             <Badge variant="muted" className="text-[10px]">
-                              Демо
+                              {t("admin.demoBadge")}
                             </Badge>
                           ) : null}
                         </div>
@@ -342,7 +343,12 @@ export function AdminScreen() {
                         {u.subscription?.status ?? "no_subscription"}
                       </Badge>
                     </td>
-                    <td className="px-3 py-2">{formatDate(u.subscription?.currentPeriodEnd ?? null)}</td>
+                    <td className="px-3 py-2">
+                      {formatDate(
+                        u.subscription?.currentPeriodEnd ?? null,
+                        localeIntlTag(locale)
+                      )}
+                    </td>
                     <td className="px-3 py-2">
                       {u.subscription?.stripeCustomerId ? "connected" : "—"}
                     </td>
@@ -373,7 +379,7 @@ export function AdminScreen() {
                               isAdminDesignPreviewUserId(u.id)
                             }
                           >
-                            Разблок
+                            {t("admin.unblock")}
                           </Button>
                         ) : (
                           <Button
@@ -387,7 +393,7 @@ export function AdminScreen() {
                               isAdminDesignPreviewUserId(u.id)
                             }
                           >
-                            Блок
+                            {t("admin.block")}
                           </Button>
                         )}
                       </div>
@@ -397,7 +403,7 @@ export function AdminScreen() {
                 {!usersLoading && filteredUsers.length === 0 ? (
                   <tr>
                     <td className="px-3 py-6 text-center text-muted-foreground" colSpan={7}>
-                      Пользователи не найдены.
+                      {t("admin.usersNotFound")}
                     </td>
                   </tr>
                 ) : null}
@@ -411,7 +417,7 @@ export function AdminScreen() {
         <CardContent className="space-y-3 p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              История оплат
+              {t("admin.paymentsTitle")}
             </h2>
             {selectedUser ? (
               <div className="text-xs text-muted-foreground">
@@ -424,17 +430,19 @@ export function AdminScreen() {
             <table className="w-full min-w-[680px] text-sm">
               <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">Дата</th>
-                  <th className="px-3 py-2 text-left font-medium">Сумма</th>
-                  <th className="px-3 py-2 text-left font-medium">Статус</th>
-                  <th className="px-3 py-2 text-left font-medium">Источник</th>
-                  <th className="px-3 py-2 text-left font-medium">Описание</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colDate")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colAmount")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colStatus")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colSource")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("admin.colUser")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {paymentsData?.payments.map((p) => (
                   <tr key={p.id}>
-                    <td className="px-3 py-2">{formatDate(p.createdAt)}</td>
+                    <td className="px-3 py-2">
+                      {formatDate(p.createdAt, localeIntlTag(locale))}
+                    </td>
                     <td className="px-3 py-2 tabular-nums">{p.amountRub} ₽</td>
                     <td className="px-3 py-2">{p.status}</td>
                     <td className="px-3 py-2">
@@ -448,7 +456,7 @@ export function AdminScreen() {
                 {!paymentsLoading && (paymentsData?.payments.length ?? 0) === 0 ? (
                   <tr>
                     <td className="px-3 py-6 text-center text-muted-foreground" colSpan={5}>
-                      Нет платежей для выбранного пользователя.
+                      {t("admin.paymentsEmpty")}
                     </td>
                   </tr>
                 ) : null}
@@ -457,7 +465,7 @@ export function AdminScreen() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Если Stripe history недоступна, подставляется временный demo history для проверки UI.
+            {t("admin.stripeDemoHint")}
           </p>
         </CardContent>
       </Card>

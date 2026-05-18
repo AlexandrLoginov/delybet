@@ -5,21 +5,25 @@ import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
+import { useAppLocale } from "@/hooks/use-app-locale";
 
 interface PaywallOverlayProps {
   children: ReactNode;
   title?: string;
   description?: string;
-  /** Кнопка «Открыть в Pro» под текстом градиента (как на списке матчей). */
   upgradeButton?: boolean;
 }
 
 export function PaywallOverlay({
   children,
-  title = "Полный анализ — в Pro",
-  description = "Открой обоснование рекомендации и ключевые факторы матча.",
+  title,
+  description,
   upgradeButton = true,
 }: PaywallOverlayProps) {
+  const { t } = useAppLocale();
+  const resolvedTitle = title ?? t("paywall.title");
+  const resolvedDescription = description ?? t("paywall.description");
+
   return (
     <div className="relative h-fit w-full max-w-full self-start overflow-hidden rounded-xl border bg-card">
       <div
@@ -31,8 +35,8 @@ export function PaywallOverlay({
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 bg-gradient-to-t from-card via-card/95 to-transparent px-6 pb-6 pt-10 text-center">
         <div className="space-y-1">
-          <div className="text-sm font-semibold">{title}</div>
-          <p className="max-w-sm text-xs text-muted-foreground">{description}</p>
+          <div className="text-sm font-semibold">{resolvedTitle}</div>
+          <p className="max-w-sm text-xs text-muted-foreground">{resolvedDescription}</p>
         </div>
         {upgradeButton ? (
           <RenewSubscriptionDrawer
@@ -41,7 +45,7 @@ export function PaywallOverlay({
             trigger={
               <Button size="sm" className="gap-1.5 px-5 shadow-none dark:shadow-lg">
                 <LockSimple className="h-3.5 w-3.5" weight="fill" />
-                Открыть в Pro
+                {t("paywall.openPro")}
               </Button>
             }
           />

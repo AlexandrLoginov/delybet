@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/drawer";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
@@ -123,6 +124,7 @@ function FavoritesGroupedList({
 }
 
 export function FavoritesView() {
+  const { t } = useAppLocale();
   const [tab, setTab] = useState<"upcoming" | "live">("upcoming");
   const [clearOpen, setClearOpen] = useState(false);
   const { data: authMe } = useAuthMe();
@@ -194,9 +196,9 @@ export function FavoritesView() {
         <DrawerContent>
           <div className="max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain px-6">
             <DrawerHeader className="px-0 pt-0 pb-6">
-              <DrawerTitle className="pt-2 text-left">Подтвердите действие</DrawerTitle>
+              <DrawerTitle className="pt-2 text-left">{t("favorites.remove")}</DrawerTitle>
               <DrawerDescription className="text-left">
-                Вы уверены, что хотите очистить избранные матчи?
+                {t("favorites.emptyHint")}
               </DrawerDescription>
             </DrawerHeader>
           </div>
@@ -212,7 +214,7 @@ export function FavoritesView() {
                 setClearOpen(false);
               }}
             >
-              Очистить
+              {t("favorites.remove")}
             </Button>
             <Button
               type="button"
@@ -220,7 +222,7 @@ export function FavoritesView() {
               className="w-full"
               onClick={() => setClearOpen(false)}
             >
-              Отмена
+              {t("common.close")}
             </Button>
           </DrawerFooter>
         </DrawerContent>
@@ -229,7 +231,7 @@ export function FavoritesView() {
       <div className="mb-5">
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
-            Избранное
+            {t("favorites.title")}
           </h1>
           {favorites.length > 0 ? (
             <Button
@@ -237,7 +239,7 @@ export function FavoritesView() {
               variant="ghost"
               size="icon"
               className="mt-0.5 shrink-0 rounded-[8px] text-muted-foreground hover:text-foreground"
-              aria-label="Очистить избранное"
+              aria-label={t("favorites.remove")}
               onClick={() => setClearOpen(true)}
             >
               <Broom className="h-[18px] w-[18px]" weight="fill" />
@@ -245,7 +247,7 @@ export function FavoritesView() {
           ) : null}
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Матчи, которые ты сохранил на экране анализа
+          {t("favorites.subtitle")}
         </p>
       </div>
 
@@ -254,12 +256,10 @@ export function FavoritesView() {
           <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
             <Star className="h-4 w-4" weight="fill" />
           </div>
-          <div className="text-sm font-medium">Пока пусто</div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Открой анализ матча и нажми «В избранное» вверху экрана.
-          </p>
+          <div className="text-sm font-medium">{t("favorites.empty")}</div>
+          <p className="mt-1 text-xs text-muted-foreground">{t("favorites.emptyHint")}</p>
           <Button asChild size="sm" className="mt-5">
-            <Link href="/matches">На главную</Link>
+            <Link href="/matches">{t("nav.home")}</Link>
           </Button>
         </div>
       ) : (
@@ -270,13 +270,13 @@ export function FavoritesView() {
         >
           <TabsList className="grid h-auto w-full grid-cols-2 gap-1">
             <TabsTrigger value="upcoming">
-              Предстоящие
+              {t("matches.tabUpcoming")}
               <span className="inline-flex min-h-4 min-w-[1rem] items-center justify-center rounded-full bg-muted px-1 text-[10px] font-semibold tabular-nums leading-tight text-muted-foreground">
                 {favoritesUpcoming.length}
               </span>
             </TabsTrigger>
             <TabsTrigger value="live">
-              Live
+              {t("common.live")}
               <span
                 className={
                   favoritesLive.length > 0
@@ -292,7 +292,7 @@ export function FavoritesView() {
           <TabsContent value="upcoming" className="mt-6">
             {!upcomingOrdered.length ? (
               <div className="rounded-xl border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
-                В избранном нет предстоящих матчей
+                {t("matches.empty")}
               </div>
             ) : (
               <FavoritesGroupedList
@@ -307,7 +307,7 @@ export function FavoritesView() {
           <TabsContent value="live" className="mt-6">
             {!liveOrdered.length ? (
               <div className="rounded-xl border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
-                В избранном нет текущих live-матчей
+                {t("matches.empty")}
               </div>
             ) : (
               <FavoritesGroupedList

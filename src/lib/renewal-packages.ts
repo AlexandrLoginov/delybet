@@ -64,3 +64,20 @@ export function renewalEquivalentMonthlyRub(totalRub: number, months: number): n
   if (months < 1) return totalRub;
   return Math.round(totalRub / months);
 }
+
+/** Подписи пакетов из i18n; числа — из RENEWAL_PACKAGES. */
+export function mergeRenewalPackageLabels(
+  packages: RenewalPackage[],
+  labels: Record<
+    string,
+    { title: string; caption: string } | undefined
+  >
+): RenewalPackage[] {
+  return packages.map((p) => {
+    const l = labels[p.id];
+    if (!l) return p;
+    return { ...p, title: l.title, caption: l.caption };
+  });
+}
+
+export const mergeRenewalPackages = mergeRenewalPackageLabels;

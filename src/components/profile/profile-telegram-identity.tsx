@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ProfilePlanBadge } from "@/components/profile/profile-plan-badge";
 import { TelegramBrowserLoginExplanation } from "@/components/telegram/telegram-browser-login-explanation";
 import { TelegramOpenInTelegramButton } from "@/components/telegram/telegram-open-in-telegram-button";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import {
   displayNameFromTelegramUser,
   initialsFromTelegramUser,
@@ -13,6 +14,7 @@ import {
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 
 export function ProfileTelegramIdentity() {
+  const { t } = useAppLocale();
   const state = useTelegramSession();
 
   if (state.status === "loading") {
@@ -76,7 +78,7 @@ export function ProfileTelegramIdentity() {
               ) : null}
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground">Тариф</span>
+              <span className="text-xs text-muted-foreground">{t("profile.planLabel")}</span>
               <ProfilePlanBadge />
             </div>
           </div>

@@ -16,30 +16,25 @@ import { StatisticsCharts } from "@/components/statistics/StatisticsCharts";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getMessages } from "@/i18n";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import {
-  STATS_TAB_LABEL,
   STATS_TAB_ORDER,
   type StatsWindowTab,
   buildStatisticsChartSeries,
   computeWindowAccuracy,
   filterHistoryByWindow,
   sportBreakdownForMatches,
-  statisticsChartCopy,
+  statisticsChartCopyLocalized,
 } from "@/lib/statistics-period";
 import { MOCK_HISTORY } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-
-const CHART_SHORT_LABEL: Record<StatsWindowTab, string> = {
-  d1: "1 дн.",
-  d7: "7 дн.",
-  d30: "30 дн.",
-  d90: "90 дн.",
-};
 
 const tabTriggerClass =
   "inline-flex min-h-0 w-full items-center justify-center gap-1 whitespace-nowrap rounded-md px-1 py-2 text-[10px] font-medium leading-tight ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-xs sm:leading-tight";
 
 export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
+  const { locale, t } = useAppLocale();
   const [tab, setTab] = useState<StatsWindowTab>("d30");
 
   useEffect(() => {
@@ -82,21 +77,24 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
     [filteredMatches, tab, now]
   );
 
-  const chartCopy = useMemo(() => statisticsChartCopy(tab), [tab]);
+  const chartCopy = useMemo(
+    () => statisticsChartCopyLocalized(tab, t),
+    [tab, t]
+  );
 
   const compareItems = useMemo(
     () =>
-      STATS_TAB_ORDER.map((t) => {
-        const subset = filterHistoryByWindow(MOCK_HISTORY, t, now);
+      STATS_TAB_ORDER.map((windowTab) => {
+        const subset = filterHistoryByWindow(MOCK_HISTORY, windowTab, now);
         const { pct } = computeWindowAccuracy(subset);
         return {
-          tab: t,
-          label: CHART_SHORT_LABEL[t],
+          tab: windowTab,
+          label: t(`statistics.tabShort.${windowTab}`),
           pct,
-          locked: t === "d90" && !isPro,
+          locked: windowTab === "d90" && !isPro,
         };
       }),
-    [isPro, now]
+    [isPro, now, t]
   );
 
   return (
@@ -104,10 +102,10 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
       <main className="mx-auto w-full max-w-2xl px-4 pb-6 pt-5">
         <div className="mb-5">
           <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
-            Статистика
+            {t("statistics.title")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Показатели модели по завершённым матчам и разрезы по видам спорта
+            {t("statistics.subtitle")}
           </p>
         </div>
 
@@ -117,11 +115,11 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
           className="w-full"
         >
           <TabsList className="grid h-auto w-full grid-cols-4 gap-1">
-            <TabsTrigger value="d1">{STATS_TAB_LABEL.d1}</TabsTrigger>
-            <TabsTrigger value="d7">{STATS_TAB_LABEL.d7}</TabsTrigger>
-            <TabsTrigger value="d30">{STATS_TAB_LABEL.d30}</TabsTrigger>
+            <TabsTrigger value="d1">{t("statistics.tab.d1")}</TabsTrigger>
+            <TabsTrigger value="d7">{t("statistics.tab.d7")}</TabsTrigger>
+            <TabsTrigger value="d30">{t("statistics.tab.d30")}</TabsTrigger>
             {isPro ? (
-              <TabsTrigger value="d90">{STATS_TAB_LABEL.d90}</TabsTrigger>
+              <TabsTrigger value="d90">{t("statistics.tab.d90")}</TabsTrigger>
             ) : (
               <RenewSubscriptionDrawer
                 intent="subscribe"
@@ -133,14 +131,14 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
                       tabTriggerClass,
                       "gap-0.5 text-muted-foreground hover:bg-background/60 hover:text-foreground"
                     )}
-                    aria-label="90 дней — оформить DelyBet Pro"
+                    aria-label={t("statistics.lockAria")}
                   >
                     <LockSimple
                       className="h-2.5 w-2.5 shrink-0 opacity-70"
                       weight="fill"
                       aria-hidden
                     />
-                    <span>{STATS_TAB_LABEL.d90}</span>
+                    <span>{t("statistics.tab.d90")}</span>
                   </button>
                 }
               />
@@ -161,41 +159,48 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
         <div className="mt-4 grid grid-cols-2 gap-3">
           <StatTile
             icon={TrendUp}
-            label="Точность"
+            label={t("statistics.accuracy")}
             value={`${windowStats.pct}%`}
-            sub={`${windowStats.correct} из ${windowStats.total} · ${STATS_TAB_LABEL[tab]}`}
+            sub={t("statistics.matchCount", {
+              pct: windowStats.pct,
+              total: windowStats.total,
+            })}
             tone="primary"
           />
           <StatTile
             icon={CheckCircle}
-            label="Верных прогнозов"
+            label={t("statistics.correctPredictions")}
             value={String(windowStats.correct)}
-            sub={`в выборке ${windowStats.total} матч.`}
+            sub={t("statistics.correctSub", { total: windowStats.total })}
             tone="success"
           />
           <StatTile
             icon={Globe}
-            label="Лиг в окне"
-            value={windowStats.total ? String(leaguesInWindow) : "—"}
+            label={t("statistics.leagues")}
+            value={windowStats.total ? String(leaguesInWindow) : t("common.dash")}
             sub={
               windowStats.total
-                ? "уникальных турниров"
-                : "нет матчей в периоде"
+                ? t("statistics.leaguesSub")
+                : t("statistics.leaguesEmpty")
             }
             tone="muted"
           />
           <StatTile
             icon={Sparkle}
-            label="Лидер по точности"
+            label={t("statistics.leader")}
             value={
               bestSport && bestSport.total > 0
                 ? `${bestSport.emoji} ${bestSport.label}`
-                : "—"
+                : t("common.dash")
             }
             sub={
               bestSport && bestSport.total > 0
-                ? `${bestSport.pct}% · ${bestSport.correct}/${bestSport.total}`
-                : "нет данных"
+                ? t("statistics.leaderSub", {
+                    pct: bestSport.pct,
+                    correct: bestSport.correct,
+                    total: bestSport.total,
+                  })
+                : t("statistics.leaderEmpty")
             }
             tone="muted"
           />
@@ -208,11 +213,11 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
                 <Target className="h-3.5 w-3.5" weight="fill" />
               </div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Точность по видам спорта
+                {t("statistics.bySport")}
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              В рамках выбранного окна: {STATS_TAB_LABEL[tab].toLowerCase()}.
+              {t("statistics.bySportHint", { period: t(`statistics.tab.${tab}`) })}
             </p>
             <div className="space-y-3">
               {sportBreakdown.map((row) => (
@@ -244,26 +249,13 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
                 <Info className="h-3.5 w-3.5" weight="fill" />
               </div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Как считается точность
+                {t("statistics.methodology")}
               </div>
             </div>
             <ul className="list-disc space-y-2 pl-4 text-sm text-muted-foreground">
-              <li>
-                Учитываются только матчи со статусом «завершён» и известным
-                исходом 1X2.
-              </li>
-              <li>
-                Сравниваем итоговый прогноз модели с фактическим результатом
-                (победа хозяев, ничья, победа гостей).
-              </li>
-              <li>
-                Процент — доля верных прогнозов в выборке; чем больше матчей в
-                окне, тем устойчивее оценка.
-              </li>
-              <li>
-                Разрез по спорту и лигам помогает видеть, где модель
-                калибруется лучше всего.
-              </li>
+              {getMessages(locale).statistics.methodologyItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
             </ul>
           </CardContent>
         </Card>

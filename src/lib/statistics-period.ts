@@ -1,3 +1,4 @@
+import type { TranslateFn } from "@/i18n";
 import { inferPredictedOutcome } from "@/lib/history-prediction";
 import { SPORTS } from "@/lib/mock-data";
 import type { HistoryMatch, SportSlug } from "@/types/match";
@@ -82,7 +83,7 @@ function d1SlotIntervalLabel(
   return `${hStart}–${hEnd} ч назад`;
 }
 
-/** Заголовок и подпись блока графика в зависимости от вкладки. */
+/** Заголовок и подпись блока графика (legacy, ru). Prefer {@link statisticsChartCopyLocalized}. */
 export function statisticsChartCopy(tab: StatsWindowTab): {
   heading: string;
   hint: string;
@@ -109,6 +110,16 @@ export function statisticsChartCopy(tab: StatsWindowTab): {
         hint: "Отрезки по 9 дней; подпись — диапазон дат периода.",
       };
   }
+}
+
+export function statisticsChartCopyLocalized(
+  tab: StatsWindowTab,
+  t: TranslateFn
+): { heading: string; hint: string } {
+  return {
+    heading: t(`statistics.chart.${tab}.heading`),
+    hint: t(`statistics.chart.${tab}.hint`),
+  };
 }
 
 /**

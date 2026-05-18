@@ -16,41 +16,41 @@ import {
   getFavoriteMatchesSnapshot,
   subscribeFavoritesChange,
 } from "@/lib/favorites";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
   href: string;
-  label: string;
+  labelKey: "nav.home" | "nav.favorites" | "nav.statistics" | "nav.profile";
   icon: PhosphorIcon;
   match: (path: string) => boolean;
-  /** Показать индикатор рядом с иконкой при ненулевом `indicatorKey`. */
   indicatorWhen?: (key: string) => boolean;
 }
 
 const ITEMS: NavItem[] = [
   {
     href: "/matches",
-    label: "Главная",
+    labelKey: "nav.home",
     icon: Trophy,
     match: (p) =>
       p === "/" || p === "/matches" || p.startsWith("/match/"),
   },
   {
     href: "/favorites",
-    label: "Избранное",
+    labelKey: "nav.favorites",
     icon: Star,
     match: (p) => p.startsWith("/favorites"),
     indicatorWhen: (key) => key.length > 0,
   },
   {
     href: "/statistics",
-    label: "Статистика",
+    labelKey: "nav.statistics",
     icon: ChartBar,
     match: (p) => p.startsWith("/statistics"),
   },
   {
     href: "/profile",
-    label: "Профиль",
+    labelKey: "nav.profile",
     icon: UserCircle,
     match: (p) => p.startsWith("/profile"),
   },
@@ -58,6 +58,7 @@ const ITEMS: NavItem[] = [
 
 export function NavBar() {
   const pathname = usePathname() ?? "/";
+  const { t } = useAppLocale();
   const favoritesKey = useSyncExternalStore(
     subscribeFavoritesChange,
     getFavoriteMatchesSnapshot,
@@ -68,7 +69,7 @@ export function NavBar() {
     <nav
       data-telegram-gate-exempt
       className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/85 pb-[max(24px,env(safe-area-inset-bottom,0px))] backdrop-blur supports-[backdrop-filter]:bg-background/75"
-      aria-label="Главная навигация"
+      aria-label={t("nav.aria")}
     >
       <div className="mx-auto grid w-full max-w-2xl grid-cols-4">
         {ITEMS.map((item) => {
@@ -107,7 +108,7 @@ export function NavBar() {
                   />
                 ) : null}
               </span>
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}

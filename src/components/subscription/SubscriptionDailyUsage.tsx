@@ -1,9 +1,11 @@
 "use client";
 
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import { cn } from "@/lib/utils";
 
 export function SubscriptionDailyUsage() {
+  const { t } = useAppLocale();
   const { upcoming, live } = useFreePreviewRedeemedIds();
   const upcomingUsed = upcoming ? 1 : 0;
   const liveUsed = live ? 1 : 0;
@@ -11,11 +13,15 @@ export function SubscriptionDailyUsage() {
   return (
     <div className="space-y-3 text-xs">
       <p className="text-[13px] font-medium leading-tight text-foreground">
-        Доступно сегодня
+        {t("subscription.dailyUsageTitle")}
       </p>
       <div className="grid grid-cols-2 gap-3">
-        <UsageTile label="Предстоящие" used={upcomingUsed} limit={1} />
-        <UsageTile label="Live" used={liveUsed} limit={1} />
+        <UsageTile
+          label={t("subscription.dailyUpcoming")}
+          used={upcomingUsed}
+          limit={1}
+        />
+        <UsageTile label={t("subscription.dailyLive")} used={liveUsed} limit={1} />
       </div>
     </div>
   );

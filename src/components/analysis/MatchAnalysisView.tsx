@@ -26,6 +26,8 @@ import {
   isFavoriteMatchId,
   toggleFavoriteMatchId,
 } from "@/lib/favorites";
+import { useAppLocale } from "@/hooks/use-app-locale";
+import { localeIntlTag } from "@/i18n";
 import { analysisBlockClass } from "@/lib/analysis-ui";
 import { cn, formatKickoff } from "@/lib/utils";
 import type { Match } from "@/types/match";
@@ -42,6 +44,7 @@ export function MatchAnalysisView({
   analysis,
   isPro,
 }: MatchAnalysisViewProps) {
+  const { locale, t } = useAppLocale();
   const isLive = match.status === "live";
   const { day, time } = formatKickoff(match.kickoffISO);
   const [favorite, setFavorite] = useState(false);
@@ -69,7 +72,7 @@ export function MatchAnalysisView({
           >
             <Link href="/matches">
               <CaretLeft className="h-4 w-4 shrink-0" weight="fill" />
-              <span className="truncate">Матчи</span>
+              <span className="truncate">{t("common.matches")}</span>
             </Link>
           </Button>
           <Button
@@ -94,7 +97,7 @@ export function MatchAnalysisView({
               )}
               aria-hidden
             />
-            {favorite ? "В избранном" : "В избранное"}
+            {favorite ? t("analysis.favoriteRemove") : t("analysis.favoriteAdd")}
           </Button>
         </div>
         <Card className={analysisBlockClass}>
@@ -118,7 +121,7 @@ export function MatchAnalysisView({
 
           <CardContent className="space-y-5 p-5">
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-              <TeamColumn align="left" name={match.home.name} subtitle="Дом">
+              <TeamColumn align="left" name={match.home.name} subtitle={t("analysis.formHome")}>
                 <TeamLogo team={match.home} size="xl" />
               </TeamColumn>
 
@@ -131,7 +134,9 @@ export function MatchAnalysisView({
                       {match.scoreAway}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
-                      {match.elapsedMinutes}-я минута
+                      {t("analysis.liveMinute", {
+                        minute: match.elapsedMinutes ?? 0,
+                      })}
                     </div>
                   </>
                 ) : (
@@ -147,7 +152,7 @@ export function MatchAnalysisView({
                 )}
               </div>
 
-              <TeamColumn align="right" name={match.away.name} subtitle="Гости">
+              <TeamColumn align="right" name={match.away.name} subtitle={t("analysis.formAway")}>
                 <TeamLogo team={match.away} size="xl" />
               </TeamColumn>
             </div>
@@ -169,14 +174,14 @@ export function MatchAnalysisView({
 
         <section className="mt-6 space-y-2">
           <h2 className="px-1 text-base font-semibold tracking-tight">
-            Ключевые факторы
+            {t("analysis.keyFactors")}
           </h2>
           {isPro ? (
             <MatchDetailTabs analysis={analysis} match={match} />
           ) : (
             <PaywallOverlay
-              title="Детали матча — в Pro"
-              description="Статистика матча и форма команд — после подключения подписки."
+              title={t("analysis.matchDetailsTitle")}
+              description={t("analysis.matchDetailsDesc")}
             >
               <MatchDetailTabs analysis={analysis} match={match} />
             </PaywallOverlay>
@@ -185,7 +190,7 @@ export function MatchAnalysisView({
 
         <section className="mt-8 space-y-3">
           <h2 className="px-1 text-base font-semibold tracking-tight text-foreground">
-            Развёрнутый анализ
+            {t("analysis.recommendation")}
           </h2>
 
           {isPro ? (
@@ -197,7 +202,7 @@ export function MatchAnalysisView({
                 <Separator />
                 <div className="space-y-2">
                   <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Ключевые факторы
+                    {t("analysis.keyFactors")}
                   </div>
                   <KeyFactorsList
                     factors={analysis.keyFactors}
@@ -209,8 +214,8 @@ export function MatchAnalysisView({
             </Card>
           ) : (
             <PaywallOverlay
-              title="Развёрнутый анализ — в Pro"
-              description="Полный текст рассуждений модели и ключевые факторы — после подключения подписки."
+              title={t("analysis.fullAnalysisTitle")}
+              description={t("analysis.fullAnalysisDesc")}
             >
               <Card className={cn(analysisBlockClass, "overflow-hidden")}>
                 <CardContent className="space-y-4 p-5">
@@ -220,7 +225,7 @@ export function MatchAnalysisView({
                   <Separator />
                   <div className="space-y-2">
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Ключевые факторы
+                      {t("analysis.keyFactors")}
                     </div>
                     <KeyFactorsList
                       factors={analysis.keyFactors}
@@ -235,9 +240,15 @@ export function MatchAnalysisView({
         </section>
 
         <p className="mt-6 text-center text-[11px] text-muted-foreground">
-          Анализ обновлён {new Date(analysis.generatedAt).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+          {new Date(analysis.generatedAt).toLocaleTimeString(localeIntlTag(locale), {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
           {" · "}
-          истекает в {new Date(analysis.expiresAt).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+          {new Date(analysis.expiresAt).toLocaleTimeString(localeIntlTag(locale), {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
         </p>
       </main>
     </>
@@ -251,6 +262,7 @@ function MatchDetailTabs({
   analysis: FullAnalysis;
   match: Match;
 }) {
+  const { t } = useAppLocale();
   const [detailTab, setDetailTab] = useState("stats");
 
   return (
@@ -260,8 +272,8 @@ function MatchDetailTabs({
       className="flex h-fit w-full max-w-full flex-col gap-2"
     >
       <TabsList className="grid h-auto w-full shrink-0 grid-cols-2 gap-1">
-        <TabsTrigger value="stats">Статистика</TabsTrigger>
-        <TabsTrigger value="form">Форма</TabsTrigger>
+        <TabsTrigger value="stats">{t("analysis.tabStats")}</TabsTrigger>
+        <TabsTrigger value="form">{t("analysis.tabForm")}</TabsTrigger>
       </TabsList>
 
       <div className="min-h-0 w-full max-w-full shrink-0">

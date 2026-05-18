@@ -1,3 +1,6 @@
+"use client";
+
+import { useAppLocale } from "@/hooks/use-app-locale";
 import type { MatchStatsView } from "@/types/analysis";
 
 interface StatsBarsProps {
@@ -7,6 +10,7 @@ interface StatsBarsProps {
 }
 
 export function StatsBars({ stats, homeName, awayName }: StatsBarsProps) {
+  const { t } = useAppLocale();
   if (stats.length === 0) {
     return (
       <div className="space-y-3 text-center text-sm text-muted-foreground">
@@ -15,7 +19,7 @@ export function StatsBars({ stats, homeName, awayName }: StatsBarsProps) {
           <span className="truncate text-right">{awayName}</span>
         </div>
         <p className="rounded-lg border border-dashed bg-muted/20 px-4 py-6 leading-relaxed">
-          Статистика матча появится после старта игры. До этого смотрите форму во вкладке выше.
+          {t("analysis.statsEmpty")}
         </p>
       </div>
     );

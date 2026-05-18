@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LockSimple } from "@phosphor-icons/react";
 
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ function SeriesPointPlaque({
   active?: boolean;
   onClick?: () => void;
 }) {
+  const { t } = useAppLocale();
   const cls = cn(
     "w-full rounded-lg border border-border bg-card px-3 py-2 text-left text-sm transition-colors",
     onClick &&
@@ -51,7 +53,7 @@ function SeriesPointPlaque({
           {label}
         </div>
         <div className="mt-0.5 tabular-nums font-semibold text-foreground">
-          {pct}% · {total} матч.
+          {t("statistics.matchCount", { pct, total })}
         </div>
       </button>
     );
@@ -62,7 +64,7 @@ function SeriesPointPlaque({
         {label}
       </div>
       <div className="mt-0.5 tabular-nums font-semibold text-foreground">
-        {pct}% · {total} матч.
+        {t("statistics.matchCount", { pct, total })}
       </div>
     </div>
   );
@@ -81,6 +83,7 @@ export function StatisticsCharts({
   compareItems: CompareBarItem[];
   dailySeries: DailyPoint[];
 }) {
+  const { t } = useAppLocale();
   const compareMax = Math.max(
     50,
     ...compareItems.map((i) => i.pct)
@@ -91,16 +94,15 @@ export function StatisticsCharts({
       <CardContent className="space-y-5 p-5">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Сравнение окон
+            {t("statistics.compareTitle")}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Доля верных прогнозов по завершённым матчам в базе; подсвечено
-            выбранное окно.
+            {t("statistics.compareHint")}
           </p>
           <div
             className="mt-4 grid grid-cols-4 gap-2"
             role="img"
-            aria-label="Столбчатая диаграмма точности по периодам"
+            aria-label={t("statistics.compareTitle")}
           >
             {compareItems.map((item) => {
               const trackH = 88;
@@ -119,7 +121,7 @@ export function StatisticsCharts({
                       <LockSimple
                         className="mx-auto h-3.5 w-3.5 text-muted-foreground"
                         weight="fill"
-                        aria-label="Только в Pro"
+                        aria-label={t("statistics.onlyPro")}
                       />
                     ) : (
                       `${item.pct}%`
@@ -161,12 +163,12 @@ export function StatisticsCharts({
           <p className="mt-1 text-xs text-muted-foreground">{chartHint}</p>
           {dailySeries.length === 0 ? (
             <div className="mt-4 rounded-lg border border-dashed bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
-              Нет матчей за этот период
+              {t("statistics.emptyChart")}
             </div>
           ) : dailySeries.length === 1 ? (
             <SingleDayBar point={dailySeries[0]!} />
           ) : (
-            <DailyLineChart points={dailySeries} />
+            <DailyLineChart points={dailySeries} chartHeading={chartHeading} />
           )}
         </div>
       </CardContent>
@@ -188,7 +190,13 @@ function SingleDayBar({ point }: { point: DailyPoint }) {
   );
 }
 
-function DailyLineChart({ points }: { points: DailyPoint[] }) {
+function DailyLineChart({
+  points,
+  chartHeading,
+}: {
+  points: DailyPoint[];
+  chartHeading: string;
+}) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const w = 320;
   const h = 120;
@@ -235,9 +243,9 @@ function DailyLineChart({ points }: { points: DailyPoint[] }) {
         viewBox={`0 0 ${w} ${h}`}
         preserveAspectRatio="xMinYMid meet"
         role="img"
-        aria-label="График точности по дням"
+        aria-label={chartHeading}
       >
-        <title>Динамика точности по дням</title>
+        <title>{chartHeading}</title>
         <defs>
           <linearGradient id="stats-area-fill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.28" />

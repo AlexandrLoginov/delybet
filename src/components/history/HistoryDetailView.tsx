@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   CaretLeft,
@@ -11,6 +13,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TeamLogo } from "@/components/matches/TeamLogo";
+import { useAppLocale } from "@/hooks/use-app-locale";
+import { localeIntlTag } from "@/i18n";
 import { inferPredictedOutcome } from "@/lib/history-prediction";
 import { cn } from "@/lib/utils";
 import type { Confidence, HistoryMatch } from "@/types/match";
@@ -20,8 +24,9 @@ interface HistoryDetailViewProps {
 }
 
 export function HistoryDetailView({ match }: HistoryDetailViewProps) {
+  const { locale, t } = useAppLocale();
   const date = new Date(match.finishedISO);
-  const dateLabel = date.toLocaleDateString("ru-RU", {
+  const dateLabel = date.toLocaleDateString(localeIntlTag(locale), {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -32,10 +37,10 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
 
   const actualLabel =
     match.actualOutcome === "HOME"
-      ? `Победа ${match.home.name}`
+      ? t("history.winTeam", { team: match.home.name })
       : match.actualOutcome === "AWAY"
-        ? `Победа ${match.away.name}`
-        : "Ничья";
+        ? t("history.winTeam", { team: match.away.name })
+        : t("history.draw");
 
   const reasoningBlocks = match.prediction.reasoning.split(/\n\n+/).filter(Boolean);
 
@@ -46,7 +51,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
           <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
             <Link href="/statistics">
               <CaretLeft className="h-4 w-4" weight="fill" />
-              Статистика
+              {t("history.back")}
             </Link>
           </Button>
         </div>
@@ -67,13 +72,14 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
 
           <CardContent className="p-5">
             <p className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Результат матча
+              {t("history.matchResultTitle")}
             </p>
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
               <TeamColumn
                 align="left"
                 name={match.home.name}
                 won={match.actualOutcome === "HOME"}
+                winLabel={t("history.win")}
               >
                 <TeamLogo team={match.home} size="xl" />
               </TeamColumn>
@@ -101,7 +107,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
                   </span>
                 </div>
                 <Badge variant="muted" className="mt-1">
-                  Завершён
+                  {t("history.finished")}
                 </Badge>
               </div>
 
@@ -109,6 +115,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
                 align="right"
                 name={match.away.name}
                 won={match.actualOutcome === "AWAY"}
+                winLabel={t("history.win")}
               >
                 <TeamLogo team={match.away} size="xl" />
               </TeamColumn>
@@ -119,7 +126,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
         <Card className="mt-4 overflow-hidden">
           <div className="border-b px-5 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Сводка против прогноза
+              {t("history.vsPredictionTitle")}
             </p>
           </div>
           <CardContent className="p-5">
@@ -140,16 +147,16 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
                 )}
                 <div className="flex min-w-0 flex-col gap-1.5 text-center">
                   <p className="text-sm font-semibold text-foreground">
-                    {correct ? "ИИ угадал исход" : "ИИ не угадал исход"}
+                    {correct ? t("history.correct") : t("history.wrong")}
                   </p>
                   <p className="text-balance text-sm text-muted-foreground">
-                    Прогноз:&nbsp;
+                    {t("history.prediction")}:&nbsp;
                     <span className="break-words text-foreground">
                       {match.prediction.outcome}
                     </span>
                   </p>
                   <p className="text-balance text-xs text-muted-foreground">
-                    Факт:&nbsp;
+                    {t("history.actual")}:&nbsp;
                     <span className="text-foreground">{actualLabel}</span>
                   </p>
                 </div>
@@ -165,37 +172,42 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
                 <Target className="h-3.5 w-3.5" weight="fill" />
               </div>
               <div className="min-w-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Прогноз ИИ перед матчем
+                {t("history.aiForecastTitle")}
               </div>
             </div>
-            <HistoryConfidenceBadge confidence={match.prediction.confidence} />
+            <HistoryConfidenceBadge
+              confidence={match.prediction.confidence}
+              t={t}
+            />
           </div>
 
           <CardContent className="space-y-5 p-5">
             <div>
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Распределение вероятностей (прематч)
+                {t("history.probDistributionTitle")}
               </p>
               <HistoryProbStrip match={match} />
               <div className="mt-3 flex flex-wrap justify-between gap-x-4 gap-y-2 text-[11px] text-muted-foreground">
                 <span>
-                  Дом:&nbsp;
+                  {t("history.labelHome")}:&nbsp;
                   <span className="font-semibold tabular-nums text-foreground">
                     {match.prediction.probHome}%
                   </span>
                 </span>
                 {match.prediction.probDraw !== null ? (
                   <span>
-                    Ничья:&nbsp;
+                    {t("history.labelDraw")}:&nbsp;
                     <span className="font-semibold tabular-nums text-foreground">
                       {match.prediction.probDraw}%
                     </span>
                   </span>
                 ) : (
-                  <span className="text-muted-foreground/70">Без маркета ничьей</span>
+                  <span className="text-muted-foreground/70">
+                    {t("history.noDrawMarket")}
+                  </span>
                 )}
                 <span className="ml-auto md:ml-0">
-                  Гости:&nbsp;
+                  {t("history.labelAway")}:&nbsp;
                   <span className="font-semibold tabular-nums text-foreground">
                     {match.prediction.probAway}%
                   </span>
@@ -207,16 +219,18 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
 
             <div className="grid grid-cols-2 gap-3">
               <ResultTile
-                label={`${match.home.shortName} прогноз`}
+                label={t("history.teamForecast", { team: match.home.shortName })}
                 value={`${match.prediction.probHome}%`}
                 highlighted={predicted === "HOME"}
                 correct={correct && predicted === "HOME"}
+                aiBetLabel={t("history.aiBet")}
               />
               <ResultTile
-                label={`${match.away.shortName} прогноз`}
+                label={t("history.teamForecast", { team: match.away.shortName })}
                 value={`${match.prediction.probAway}%`}
                 highlighted={predicted === "AWAY"}
                 correct={correct && predicted === "AWAY"}
+                aiBetLabel={t("history.aiBet")}
               />
             </div>
 
@@ -224,7 +238,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
 
             <div className="space-y-2">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Прематчевое резюме
+                {t("history.prematchSummary")}
               </div>
               <p className="text-sm leading-relaxed text-foreground">
                 {match.prediction.summary}
@@ -235,7 +249,7 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
 
             <div className="space-y-3">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Структурное обоснование модели
+                {t("history.modelReasoning")}
               </div>
               <div className="space-y-3">
                 {reasoningBlocks.map((block, idx) => (
@@ -255,24 +269,30 @@ export function HistoryDetailView({ match }: HistoryDetailViewProps) {
   );
 }
 
-function HistoryConfidenceBadge({ confidence }: { confidence: Confidence }) {
+function HistoryConfidenceBadge({
+  confidence,
+  t,
+}: {
+  confidence: Confidence;
+  t: (key: string) => string;
+}) {
   switch (confidence) {
     case "HIGH":
       return (
         <Badge variant="success" className="shrink-0 px-2">
-          Высокая уверенность
+          {t("history.confidenceHigh")}
         </Badge>
       );
     case "LOW":
       return (
         <Badge variant="muted" className="shrink-0 border border-border px-2">
-          Сдержанная уверенность
+          {t("history.confidenceLow")}
         </Badge>
       );
     default:
       return (
         <Badge variant="outline" className="shrink-0 px-2">
-          Умеренная уверенность
+          {t("history.confidenceMedium")}
         </Badge>
       );
   }
@@ -309,11 +329,13 @@ function TeamColumn({
   align,
   name,
   won,
+  winLabel,
   children,
 }: {
   align: "left" | "right";
   name: string;
   won: boolean;
+  winLabel: string;
   children: React.ReactNode;
 }) {
   return (
@@ -335,7 +357,7 @@ function TeamColumn({
           {name}
         </div>
         <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
-          {won ? "Победа" : "—"}
+          {won ? winLabel : "—"}
         </div>
       </div>
     </div>
@@ -347,11 +369,13 @@ function ResultTile({
   value,
   highlighted,
   correct,
+  aiBetLabel,
 }: {
   label: string;
   value: string;
   highlighted: boolean;
   correct: boolean;
+  aiBetLabel: string;
 }) {
   return (
     <div
@@ -384,7 +408,7 @@ function ResultTile({
             ) : (
               <XCircle className="h-2.5 w-2.5" weight="fill" />
             )}
-            Ставка ИИ
+            {aiBetLabel}
           </Badge>
         )}
       </div>

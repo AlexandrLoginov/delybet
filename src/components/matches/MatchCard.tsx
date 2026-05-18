@@ -9,6 +9,7 @@ import { TeamLogo } from "@/components/matches/TeamLogo";
 import { FormPills } from "@/components/matches/FormPills";
 import { AiPickStrip } from "@/components/matches/AiPickStrip";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { formatKickoff, formatTimeUntil, cn } from "@/lib/utils";
 import { freePreviewKindForMatch, redeemFreePreview } from "@/lib/freemium";
 import type { FormResult, Match } from "@/types/match";
@@ -28,6 +29,7 @@ export function MatchCard({
   unlocked = true,
   consumeFreePreviewOnClick = false,
 }: MatchCardProps) {
+  const { t } = useAppLocale();
   const freeHref = `/match/${match.id}`;
 
   if (unlocked) {
@@ -40,7 +42,7 @@ export function MatchCard({
             redeemFreePreview(match.id, freePreviewKindForMatch(match));
           }
         }}
-        aria-label={`Анализ матча ${match.home.name} — ${match.away.name}`}
+        aria-label={`${match.home.name} — ${match.away.name}`}
         className={cn(cardClass, "hover:bg-accent/40")}
       >
         <MatchCardBody match={match} />
@@ -64,7 +66,7 @@ export function MatchCard({
           trigger={
             <Button size="sm" className="gap-1.5 shadow-none dark:shadow-lg">
               <LockSimple className="h-3.5 w-3.5" weight="fill" />
-              Открыть в Pro
+              {t("matches.openPro")}
             </Button>
           }
         />

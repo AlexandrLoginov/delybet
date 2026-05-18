@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { setDevProPreview } from "@/lib/dev-pro-preview-store";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
@@ -35,6 +36,7 @@ export function ProfileTariffPreviewGate({
 
 /** Подписи Free / Pro и переключатель предпросмотра интерфейса. */
 export function ProfileTariffPreviewControl() {
+  const { t } = useAppLocale();
   const previewPro = useDevProPreview();
 
   return (
@@ -48,17 +50,13 @@ export function ProfileTariffPreviewControl() {
           !previewPro ? "font-semibold text-foreground" : "text-muted-foreground"
         )}
       >
-        Free
+        {t("common.free")}
       </span>
       <button
         type="button"
         role="switch"
         aria-checked={previewPro}
-        aria-label={
-          previewPro
-            ? "Сейчас предпросмотр Pro, переключить на Free"
-            : "Сейчас Free, переключить на предпросмотр Pro"
-        }
+        aria-label={t("profile.devPreview")}
         onClick={() => {
           const next = !previewPro;
           setDevProPreview(next);
@@ -82,7 +80,7 @@ export function ProfileTariffPreviewControl() {
           previewPro ? "font-semibold text-foreground" : "text-muted-foreground"
         )}
       >
-        Pro
+        {t("common.pro")}
       </span>
     </div>
   );

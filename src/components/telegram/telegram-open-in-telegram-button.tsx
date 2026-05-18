@@ -1,4 +1,7 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { getTelegramBotOpenUrl } from "@/lib/telegram/telegram-bot-url";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +18,7 @@ export function TelegramOpenInTelegramButton({
 }: {
   className?: string;
 }) {
+  const { t } = useAppLocale();
   const href = getTelegramBotOpenUrl();
 
   return (
@@ -25,7 +29,7 @@ export function TelegramOpenInTelegramButton({
     >
       <a href={href} target="_blank" rel="noopener noreferrer">
         <TelegramLogoIcon className="h-4 w-4 shrink-0 opacity-95" />
-        Открыть в Telegram
+        {t("telegram.openApp")}
       </a>
     </Button>
   );

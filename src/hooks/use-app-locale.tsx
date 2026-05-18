@@ -1,7 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
+import { createTranslator, type TranslateFn } from "@/i18n";
 import {
   formatMonthlyPriceFromRub,
   formatPriceFromRub,
@@ -16,7 +25,19 @@ import {
 
 export const LOCALE_CHANGE_EVENT = "sportai-locale-change";
 
-export function useAppLocale() {
+type LocaleContextValue = {
+  locale: AppLocaleCode;
+  setLocale: (code: AppLocaleCode) => void;
+  hydrated: boolean;
+  current: ReturnType<typeof localeMeta>;
+  t: TranslateFn;
+  formatFromRub: (rub: number) => string;
+  formatMonthlyFromRub: (totalRub: number, months: number) => string;
+};
+
+const LocaleContext = createContext<LocaleContextValue | null>(null);
+
+function useAppLocaleState(): LocaleContextValue {
   const [locale, setLocaleState] = useState<AppLocaleCode>("ru");
   const [hydrated, setHydrated] = useState(false);
 
@@ -62,6 +83,8 @@ export function useAppLocale() {
     );
   }, []);
 
+  const t = useMemo(() => createTranslator(locale), [locale]);
+
   const formatFromRub = useCallback(
     (rub: number) => formatPriceFromRub(rub, locale),
     [locale]
@@ -78,7 +101,25 @@ export function useAppLocale() {
     setLocale,
     hydrated,
     current: localeMeta(locale),
+    t,
     formatFromRub,
     formatMonthlyFromRub,
   };
 }
+
+export function LocaleProvider({ children }: { children: ReactNode }) {
+  const value = useAppLocaleState();
+  return (
+    <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
+  );
+}
+
+export function useAppLocale(): LocaleContextValue {
+  const ctx = useContext(LocaleContext);
+  if (!ctx) {
+    throw new Error("useAppLocale must be used within LocaleProvider");
+  }
+  return ctx;
+}
+
+export type { TranslateFn };

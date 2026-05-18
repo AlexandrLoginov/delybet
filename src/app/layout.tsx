@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 
+import { LocaleProvider } from "@/hooks/use-app-locale";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { NavBar } from "@/components/nav/NavBar";
 import { TelegramBrowserGateProvider } from "@/components/telegram/telegram-browser-gate-provider";
@@ -50,12 +51,14 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TelegramSessionProvider>
-            <TelegramBrowserGateProvider>
-              <div className="min-h-screen pt-[96px] pb-[calc(49px+max(24px,env(safe-area-inset-bottom,0px)))]">
-                {children}
-              </div>
-              <NavBar />
-            </TelegramBrowserGateProvider>
+            <LocaleProvider>
+              <TelegramBrowserGateProvider>
+                <div className="min-h-screen pt-[96px] pb-[calc(49px+max(24px,env(safe-area-inset-bottom,0px)))]">
+                  {children}
+                </div>
+                <NavBar />
+              </TelegramBrowserGateProvider>
+            </LocaleProvider>
           </TelegramSessionProvider>
         </ThemeProvider>
       </body>

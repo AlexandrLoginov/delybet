@@ -9,6 +9,7 @@ import { MatchCard } from "@/components/matches/MatchCard";
 import { SportFilter } from "@/components/matches/SportFilter";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
@@ -40,6 +41,7 @@ function formatCountdown(totalSeconds: number) {
 }
 
 export function MatchesView() {
+  const { t } = useAppLocale();
   const [sport, setSport] = useState<SportSlug | "all">("all");
   const [tab, setTab] = useState<"upcoming" | "live">("upcoming");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -179,10 +181,10 @@ export function MatchesView() {
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
             <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
-              Матчи дня
+              {t("matches.title")}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              ИИ-анализ · обновление каждые 2 минуты
+              {t("matches.subtitle")}
             </p>
             <div
               className="mt-2 flex items-center gap-2 text-xs text-muted-foreground"
@@ -199,10 +201,10 @@ export function MatchesView() {
               />
               <span>
                 {analysisSyncing ? (
-                  "Обновляем ИИ-анализ…"
+                  t("matches.syncing")
                 ) : (
                   <>
-                    Обновление через:{" "}
+                    {t("matches.countdown")}{" "}
                     <span className="tabular-nums text-foreground">
                       {formatCountdown(secondsLeft)}
                     </span>
@@ -215,12 +217,9 @@ export function MatchesView() {
 
         {error ? (
           <div className="mb-4 flex flex-col gap-2 rounded-xl border border-destructive/35 bg-destructive/5 px-4 py-3 text-sm">
-            <span className="text-destructive">
-              Не удалось загрузить матчи. Проверьте API_SPORTS_KEY или попробуйте
-              позже.
-            </span>
+            <span className="text-destructive">{t("matches.loadError")}</span>
             <Button type="button" variant="outline" size="sm" className="w-fit" onClick={() => refreshLists()}>
-              Обновить
+              {t("common.refresh")}
             </Button>
           </div>
         ) : null}
@@ -230,9 +229,9 @@ export function MatchesView() {
           onValueChange={(v) => setTab(v as "upcoming" | "live")}
         >
           <TabsList className="grid h-auto w-full grid-cols-2 gap-1">
-            <TabsTrigger value="upcoming">Предстоящие</TabsTrigger>
+            <TabsTrigger value="upcoming">{t("matches.tabUpcoming")}</TabsTrigger>
             <TabsTrigger value="live">
-              Live
+              {t("common.live")}
               {liveCount > 0 && (
                 <span className="inline-flex min-h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive/15 px-1 text-[10px] font-semibold tabular-nums leading-tight text-destructive">
                   {liveCount}
@@ -256,6 +255,7 @@ export function MatchesView() {
               eligibleIds={eligibleIds}
               redeemedFreeMatchId={redeemedFreeMatchId}
               unlockAllPro={unlockAllPro}
+              emptyLabel={t("matches.empty")}
             />
 
             {remaining > 0 && (
@@ -268,7 +268,7 @@ export function MatchesView() {
                   }
                   className="gap-1.5"
                 >
-                  Показать ещё
+                  {t("matches.showMore")}
                   <span className="ml-0.5 tabular-nums text-muted-foreground">
                     {Math.min(remaining, PAGE_SIZE)}
                   </span>
@@ -287,11 +287,13 @@ function MatchList({
   eligibleIds,
   redeemedFreeMatchId,
   unlockAllPro,
+  emptyLabel,
 }: {
   matches: Match[];
   eligibleIds: Set<string>;
   redeemedFreeMatchId: string | null;
   unlockAllPro: boolean;
+  emptyLabel: string;
 }) {
   if (!matches.length) {
     return (
@@ -299,10 +301,7 @@ function MatchList({
         <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <Trophy className="h-4 w-4" weight="fill" />
         </div>
-        <div className="text-sm font-medium">Сейчас матчей нет</div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Попробуй сменить вкладку или фильтр.
-        </p>
+        <div className="text-sm font-medium">{emptyLabel}</div>
       </div>
     );
   }

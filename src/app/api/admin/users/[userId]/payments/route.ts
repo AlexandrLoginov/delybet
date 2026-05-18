@@ -95,7 +95,7 @@ export async function GET(
         amountRub: row.amountRub,
         status: row.status,
         source: "demo" as const,
-        description: row.periodLabel,
+        description: `${row.periodStartISO} — ${row.periodEndISO}`,
       }));
     }
 

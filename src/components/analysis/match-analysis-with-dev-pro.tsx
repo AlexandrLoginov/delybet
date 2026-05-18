@@ -6,6 +6,7 @@ import { MatchAnalysisView } from "@/components/analysis/MatchAnalysisView";
 import { AppPageSkeleton } from "@/components/layout/app-page-skeleton";
 import { MatchFreePreviewGate } from "@/components/paywall/MatchFreePreviewGate";
 import { Button } from "@/components/ui/button";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { normalizeAnalysisPayload } from "@/lib/analysis-api-normalize";
@@ -42,6 +43,7 @@ export function MatchAnalysisWithDevPro({
   match: Match;
   urlIsPro: boolean;
 }) {
+  const { t } = useAppLocale();
   const { data: authMe } = useAuthMe();
   const devPro = useDevProPreview();
   const devTools =
@@ -72,12 +74,10 @@ export function MatchAnalysisWithDevPro({
   if (error) {
     return (
       <main className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8 text-center">
-        <p className="text-sm text-muted-foreground">
-          Не удалось загрузить анализ. Проверьте ключи API и попробуйте снова.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("analysis.loadError")}</p>
         <p className="mt-2 text-xs text-destructive">{String(error.message)}</p>
         <Button type="button" className="mt-4" size="sm" onClick={() => mutate()}>
-          Повторить
+          {t("analysis.retry")}
         </Button>
       </main>
     );
@@ -93,7 +93,7 @@ export function MatchAnalysisWithDevPro({
   } catch {
     return (
       <main className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8 text-center text-sm text-muted-foreground">
-        Некорректный ответ анализа.
+        {t("analysis.invalidResponse")}
       </main>
     );
   }
