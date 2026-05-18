@@ -186,7 +186,7 @@ function ToggleStub() {
       role="switch"
       aria-checked="true"
     >
-      <span className="h-5 w-5 translate-x-4 rounded-full bg-white shadow" />
+      <span className="h-5 w-5 translate-x-4 rounded-full bg-white shadow-none dark:shadow" />
     </span>
   );
 }

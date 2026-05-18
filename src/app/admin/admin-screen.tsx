@@ -6,6 +6,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import {
   CalendarDots,
+  CaretLeft,
   LockKey,
   ShieldWarning,
   Sparkle,
@@ -204,9 +205,13 @@ export function AdminScreen() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl space-y-4 px-4 pb-10 pt-6">
-      <h1 className="text-[26px] font-semibold tracking-tight">Админка</h1>
-      <p className="text-sm text-muted-foreground">Пользователи, подписки, оплаты и ручные действия.</p>
+    <main className="mx-auto max-w-5xl space-y-4 px-4 pb-10 pt-5">
+      <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
+        <Link href="/profile">
+          <CaretLeft className="h-4 w-4 shrink-0" weight="fill" />
+          Назад
+        </Link>
+      </Button>
 
       {designPreview ? (
         <Card className="border-primary/30 bg-primary/5">

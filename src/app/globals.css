@@ -111,11 +111,24 @@
 @layer components {
   /** Блоки на экране матча: bg-card (белый в light, #1E2329 в dark) */
   .analysis-block {
-    @apply rounded-xl border border-border bg-card text-card-foreground shadow-sm;
+    @apply rounded-xl border border-border bg-card text-card-foreground shadow-none dark:shadow-sm;
   }
 }
 
 @layer utilities {
+  /** Светлая тема: без box-shadow и drop-shadow на всех страницах */
+  html:not(.dark) [class*="shadow"]:not([class*="shadow-none"]) {
+    --tw-shadow: 0 0 #0000 !important;
+    --tw-shadow-colored: 0 0 #0000 !important;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+    box-shadow: none !important;
+  }
+
+  html:not(.dark) [class*="drop-shadow"] {
+    filter: none !important;
+  }
+
   .tabular-num {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";

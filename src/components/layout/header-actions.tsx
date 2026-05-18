@@ -44,7 +44,7 @@ export function HeaderActions({ className }: { className?: string }) {
         id="header-lang"
         value={locale}
         onChange={onLocaleChange}
-        className="h-8 max-w-[8.5rem] cursor-pointer rounded-md border border-border bg-background px-2 text-xs font-medium text-foreground shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="h-8 max-w-[8.5rem] cursor-pointer rounded-md border border-border bg-background px-2 text-xs font-medium text-foreground shadow-none ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:shadow-sm"
       >
         {LOCALES.map((l) => (
           <option key={l.code} value={l.code}>

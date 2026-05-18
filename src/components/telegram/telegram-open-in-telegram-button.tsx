@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { TelegramLogoIcon } from "@/components/telegram/telegram-logo-icon";
 
 const telegramCtaButtonClassName = cn(
-  "w-full gap-2 rounded-[8px] border-0 bg-[#229ED9] font-semibold text-white shadow-sm",
+  "w-full gap-2 rounded-[8px] border-0 bg-[#229ED9] font-semibold text-white shadow-none dark:shadow-sm",
   "hover:bg-[#1f8bc4] hover:text-white",
   "focus-visible:ring-[#229ED9]"
 );

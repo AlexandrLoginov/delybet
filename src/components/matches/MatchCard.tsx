@@ -62,7 +62,7 @@ export function MatchCard({
           intent="subscribe"
           billingAction="checkout"
           trigger={
-            <Button size="sm" className="gap-1.5 shadow-lg">
+            <Button size="sm" className="gap-1.5 shadow-none dark:shadow-lg">
               <LockSimple className="h-3.5 w-3.5" weight="fill" />
               Открыть в Pro
             </Button>

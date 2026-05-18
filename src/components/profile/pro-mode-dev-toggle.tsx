@@ -71,7 +71,7 @@ export function ProfileTariffPreviewControl() {
       >
         <span
           className={cn(
-            "h-5 w-5 rounded-full bg-white shadow transition-transform",
+            "h-5 w-5 rounded-full bg-white shadow-none transition-transform dark:shadow",
             previewPro ? "translate-x-4" : "translate-x-0"
           )}
         />
