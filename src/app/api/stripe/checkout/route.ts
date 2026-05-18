@@ -45,14 +45,24 @@ export async function POST(req: NextRequest) {
     const stripe = getStripe();
     const base = appBaseUrl();
 
-    const userRow = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true },
-    });
+    const [userRow, subRow] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true },
+      }),
+      prisma.subscription.findUnique({
+        where: { userId },
+        select: { stripeCustomerId: true },
+      }),
+    ]);
+
+    const existingCustomer = subRow?.stripeCustomerId?.trim();
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      customer_email: userRow?.email ?? undefined,
+      ...(existingCustomer
+        ? { customer: existingCustomer }
+        : { customer_email: userRow?.email ?? undefined }),
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${base}/subscription?checkout=success`,
       cancel_url: `${base}/subscription?checkout=cancel`,

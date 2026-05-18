@@ -125,6 +125,18 @@ parseAnalysisResponse() — разбор JSON
 | Stripe | dashboard.stripe.com | STRIPE_* ключи |
 | Vercel | vercel.com | Деплой одной кнопкой |
 
+### Stripe — подключение
+
+1. Скопируй `.env.example` → `.env.local`, задай `NEXT_PUBLIC_APP_URL` (для редиректов после оплаты).
+2. В [Stripe Dashboard](https://dashboard.stripe.com) создай продукт **DelyBet Pro** и **4 recurring Price** в RUB (интервалы 1/3/6/12 месяцев; суммы как в `src/lib/renewal-packages.ts`).
+3. Пропиши `STRIPE_SECRET_KEY` и `STRIPE_PRICE_PRO_1M` … `STRIPE_PRICE_PRO_12M` (`price_…`).
+4. **Локально:** в отдельном терминале `npm run stripe:listen`, скопируй `whsec_…` в `STRIPE_WEBHOOK_SECRET`.
+5. **Прод:** Webhook endpoint `https://<домен>/api/stripe/webhook`, те же события (`checkout.session.completed`, `customer.subscription.*`).
+6. **Customer Portal:** Settings → Billing → включи отмену и управление подпиской.
+7. Проверка: `curl http://localhost:3000/api/stripe/status` → `checkoutReady: true`, `productionReady: true`.
+
+Поток: drawer «Оформить Pro» → `POST /api/stripe/checkout` → Stripe Checkout → webhook → `isPro` в `/api/auth/me`. Уже с Pro — `POST /api/stripe/portal`.
+
 ---
 
 ## Структура БД (краткая)

@@ -9,10 +9,12 @@ import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 
 export function SubscriptionPageClient() {
-  const { data, isLoading, error } = useAuthMe();
-  const devProPreview = useDevProPreview();
   const search = useSearchParams();
   const checkout = search.get("checkout");
+  const { data, isLoading, error } = useAuthMe({
+    pollUntilPro: checkout === "success",
+  });
+  const devProPreview = useDevProPreview();
 
   if (error) {
     return (

@@ -35,9 +35,21 @@ async function fetcher(url: string): Promise<AuthMeResponse> {
   return data as AuthMeResponse;
 }
 
-export function useAuthMe() {
+type UseAuthMeOptions = {
+  /** Опрос после Stripe Checkout, пока вебхук не выставил Pro */
+  pollUntilPro?: boolean;
+};
+
+export function useAuthMe(options?: UseAuthMeOptions) {
+  const pollUntilPro = options?.pollUntilPro === true;
+
   return useSWR<AuthMeResponse>("/api/auth/me", fetcher, {
     revalidateOnFocus: true,
-    dedupingInterval: 4000,
+    dedupingInterval: pollUntilPro ? 0 : 4000,
+    refreshInterval: (latest) => {
+      if (!pollUntilPro) return 0;
+      if (latest?.isPro) return 0;
+      return 3000;
+    },
   });
 }

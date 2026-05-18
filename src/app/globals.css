@@ -9,7 +9,7 @@
  * Sell:    #F6465D (SellRed)              — destructive / loss / probability away / live
  * Text:    #1E2329 / #EAECEF              — primary
  * Sub:     #707A8A / #B7BDC6              — secondary
- * Surfaces light: #FFFFFF (base) · card/muted #FAFAFA
+ * Surfaces light: #FFFFFF (base и карточки) · muted #F5F5F5 для чипов/табов
  * Surfaces dark:  #181A20 / #1E2329 / #2B3139
  * Line:    #EAECEF / #2B3139
  */
@@ -19,7 +19,7 @@
     --background: 0 0% 100%; /* #FFFFFF */
     --foreground: 213 16% 14%; /* #1E2329 */
 
-    --card: 0 0% 98%; /* ~#FAFAFA — лёгкая заливка (светлее прежнего #F5F5F5) */
+    --card: 0 0% 100%; /* #FFFFFF — карточки, плитки, блоки */
     --card-foreground: 213 16% 14%;
 
     --popover: 0 0% 100%;
@@ -28,13 +28,13 @@
     --primary: 218 68% 56%; /* мягкий синий акцент */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 98%;
+    --secondary: 0 0% 100%;
     --secondary-foreground: 213 16% 14%;
 
-    --muted: 0 0% 98%;
+    --muted: 0 0% 96%; /* #F5F5F5 — иконки, табы, прогресс внутри карточек */
     --muted-foreground: 217 10% 49%; /* #707A8A */
 
-    --accent: 0 0% 99%;
+    --accent: 0 0% 96%;
     --accent-foreground: 213 16% 14%;
 
     --destructive: 351 91% 62%; /* #F6465D */
@@ -109,7 +109,7 @@
 }
 
 @layer components {
-  /** Блоки на экране матча: в light — серая заливка (--card), в dark — поверхность карточки */
+  /** Блоки на экране матча: bg-card (белый в light, #1E2329 в dark) */
   .analysis-block {
     @apply rounded-xl border border-border bg-card text-card-foreground shadow-sm;
   }

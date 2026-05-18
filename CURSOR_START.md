@@ -100,8 +100,11 @@ ANTHROPIC_MODEL=""
 UPSTASH_REDIS_REST_URL="your-url"
 UPSTASH_REDIS_REST_TOKEN="your-token"
 
-# Payments
+# Payments (Hosted Checkout — publishable key не нужен)
 STRIPE_SECRET_KEY="sk_test_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+STRIPE_PRICE_PRO_1M="price_..."
+STRIPE_PRICE_PRO_3M="price_..."
+STRIPE_PRICE_PRO_6M="price_..."
+STRIPE_PRICE_PRO_12M="price_..."
 ```

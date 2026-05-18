@@ -9,7 +9,8 @@
     "start": "next start",
     "start:lan": "next start -H 0.0.0.0",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
