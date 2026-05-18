@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { getWholeDaysUntil } from "@/lib/format-days-left";
@@ -22,6 +23,7 @@ import { RENEWAL_BASE_MONTHLY_RUB } from "@/lib/renewal-packages";
 const SUBSCRIPTION_HISTORY_LIMIT = 5;
 
 export function SubscriptionProDashboard() {
+  const { formatFromRub } = useAppLocale();
   const { data: authMe } = useAuthMe();
   const devProPreview = useDevProPreview();
   const historyOrdered = useMemo(
@@ -140,7 +142,7 @@ export function SubscriptionProDashboard() {
               Ориентир помесячной ставки после акций
             </span>
             <span className="text-base font-semibold tabular-nums">
-              {RENEWAL_BASE_MONTHLY_RUB} ₽
+              {formatFromRub(RENEWAL_BASE_MONTHLY_RUB)}
             </span>
           </div>
 
@@ -171,7 +173,7 @@ export function SubscriptionProDashboard() {
                 </span>
                 <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                   <span className="tabular-nums text-sm text-muted-foreground">
-                    {row.amountRub} ₽
+                    {formatFromRub(row.amountRub)}
                   </span>
                   <Badge
                     variant={

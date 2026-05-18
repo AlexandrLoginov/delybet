@@ -14,10 +14,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { useAppLocale } from "@/hooks/use-app-locale";
+import { stripeChargeDisclaimer } from "@/lib/currency";
 import {
   RENEWAL_BASE_MONTHLY_RUB,
   RENEWAL_PACKAGES,
-  renewalEquivalentMonthlyRub,
   renewalFullPriceWithoutDiscount,
   type RenewalPackage,
 } from "@/lib/renewal-packages";
@@ -85,10 +86,12 @@ export function RenewSubscriptionDrawer({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { locale, formatFromRub, formatMonthlyFromRub } = useAppLocale();
+
   const pkg = RENEWAL_PACKAGES.find((p) => p.id === selected) ?? RENEWAL_PACKAGES[0];
   const fullWithoutDiscount = renewalFullPriceWithoutDiscount(pkg.months);
-  const eqMonthly = renewalEquivalentMonthlyRub(pkg.totalRub, pkg.months);
   const copy = INTENT_COPY[intent];
+  const chargeNote = stripeChargeDisclaimer(locale);
 
   async function submitPayment() {
     setError(null);
@@ -171,6 +174,8 @@ export function RenewSubscriptionDrawer({
                       pkg={p}
                       selected={selected === p.id}
                       onSelect={() => setSelected(p.id)}
+                      formatFromRub={formatFromRub}
+                      formatMonthlyFromRub={formatMonthlyFromRub}
                     />
                   </li>
                 ))}
@@ -188,6 +193,11 @@ export function RenewSubscriptionDrawer({
               {error}
             </p>
           ) : null}
+          {showPackages && chargeNote ? (
+            <p className="text-[11px] leading-snug text-muted-foreground">
+              {chargeNote}
+            </p>
+          ) : null}
         </div>
 
         <DrawerFooter className="gap-2">
@@ -197,12 +207,13 @@ export function RenewSubscriptionDrawer({
                 К оплате за выбранный период
               </span>
               <span className="text-xl font-semibold tabular-nums text-foreground">
-                {pkg.totalRub.toLocaleString("ru-RU")} ₽
+                {formatFromRub(pkg.totalRub)}
               </span>
               <span className="text-[11px] text-muted-foreground">
-                ~{eqMonthly} ₽/мес · экономия к помесячной оплате{" "}
+                ~{formatMonthlyFromRub(pkg.totalRub, pkg.months)} · экономия к
+                помесячной оплате{" "}
                 {fullWithoutDiscount - pkg.totalRub > 0
-                  ? `${fullWithoutDiscount.toLocaleString("ru-RU")} ₽ → ${pkg.totalRub.toLocaleString("ru-RU")} ₽`
+                  ? `${formatFromRub(fullWithoutDiscount)} → ${formatFromRub(pkg.totalRub)}`
                   : "—"}
               </span>
             </div>
@@ -219,7 +230,7 @@ export function RenewSubscriptionDrawer({
               ? "Загрузка…"
               : resolvedBilling === "portal"
                 ? "Открыть кабинет Stripe"
-                : `Оплатить ${pkg.totalRub.toLocaleString("ru-RU")} ₽`}
+                : `Оплатить ${formatFromRub(pkg.totalRub)}`}
           </Button>
           <Button
             variant="ghost"
@@ -239,13 +250,17 @@ function PackageOption({
   pkg,
   selected,
   onSelect,
+  formatFromRub,
+  formatMonthlyFromRub,
 }: {
   pkg: RenewalPackage;
   selected: boolean;
   onSelect: () => void;
+  formatFromRub: (rub: number) => string;
+  formatMonthlyFromRub: (totalRub: number, months: number) => string;
 }) {
   const fullList = renewalFullPriceWithoutDiscount(pkg.months);
-  const eq = renewalEquivalentMonthlyRub(pkg.totalRub, pkg.months);
+  const eqMonthly = formatMonthlyFromRub(pkg.totalRub, pkg.months);
 
   return (
     <button
@@ -271,12 +286,12 @@ function PackageOption({
         </div>
         <p className="text-xs text-muted-foreground">{pkg.caption}</p>
         <p className="text-[11px] text-muted-foreground">
-          <span className="tabular-nums">{eq} ₽/мес</span>
+          <span className="tabular-nums">{eqMonthly}</span>
           {pkg.discountPercent > 0 && (
             <>
               {" "}
               <span className="line-through opacity-70">
-                {RENEWAL_BASE_MONTHLY_RUB} ₽/мес
+                {formatMonthlyFromRub(RENEWAL_BASE_MONTHLY_RUB, 1)}
               </span>
             </>
           )}
@@ -284,11 +299,11 @@ function PackageOption({
       </div>
       <div className="flex shrink-0 flex-col items-end justify-center gap-0.5 text-right">
         <span className="text-base font-semibold tabular-nums text-foreground">
-          {pkg.totalRub.toLocaleString("ru-RU")} ₽
+          {formatFromRub(pkg.totalRub)}
         </span>
         {pkg.discountPercent > 0 && (
           <span className="text-[11px] text-muted-foreground line-through tabular-nums">
-            {fullList.toLocaleString("ru-RU")} ₽
+            {formatFromRub(fullList)}
           </span>
         )}
       </div>

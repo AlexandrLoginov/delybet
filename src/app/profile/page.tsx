@@ -12,6 +12,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { DarkThemeSwitch } from "@/components/theme/dark-theme-switch";
 import { ProfileAdminSettingRow } from "@/components/profile/profile-admin-setting-row";
+import { ProfileLanguageSettingRow } from "@/components/profile/profile-language-setting-row";
 import { ProfileTelegramIdentity } from "@/components/profile/profile-telegram-identity";
 import { ProfileProPromoBanner } from "@/components/profile/profile-pro-promo-banner";
 import {
@@ -57,6 +58,7 @@ export default function ProfilePage() {
                 hint="За час до матча и при изменении прогноза"
                 action={<ToggleStub />}
               />
+              <ProfileLanguageSettingRow />
               <ProfileAdminSettingRow />
               <SettingRowLink
                 icon={Medal}

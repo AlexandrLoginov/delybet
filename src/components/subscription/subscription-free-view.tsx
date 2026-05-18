@@ -15,10 +15,13 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
 import { SubscriptionDailyUsage } from "@/components/subscription/SubscriptionDailyUsage";
+import { useAppLocale } from "@/hooks/use-app-locale";
+import { RENEWAL_BASE_MONTHLY_RUB } from "@/lib/renewal-packages";
 import { SUBSCRIPTION_FEATURE_ROWS } from "@/lib/subscription-features";
 import { cn } from "@/lib/utils";
 
 export function SubscriptionFreeView() {
+  const { formatMonthlyFromRub } = useAppLocale();
   return (
     <main className="mx-auto w-full max-w-2xl space-y-6 px-4 pb-6 pt-5">
       <div className="mb-5">
@@ -60,7 +63,8 @@ export function SubscriptionFreeView() {
                 DelyBet Pro
               </span>
               <div className="text-xs text-muted-foreground">
-                От 499 ₽/мес — пакеты на 1–12 месяцев со скидкой за длительный период
+                От {formatMonthlyFromRub(RENEWAL_BASE_MONTHLY_RUB, 1)} — пакеты на
+                1–12 месяцев со скидкой за длительный период
               </div>
             </div>
             <Badge variant="pro" className="gap-1">
