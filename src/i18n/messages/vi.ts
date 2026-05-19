@@ -166,6 +166,7 @@ export const vi: Messages = {
     showMoreCount: "Xem thêm ({count})",
     sportAll: "Tất cả",
     openPro: "Mở bằng Pro",
+    goToAnalytics: "Xem phân tích",
     freePreviewUsed: "Đã dùng lượt xem miễn phí hôm nay",
     aiPick: "Dự đoán AI",
     inMinutes: "sau {minutes} phút",

@@ -143,6 +143,7 @@ export type Messages = {
     showMoreCount: string;
     sportAll: string;
     openPro: string;
+    goToAnalytics: string;
     freePreviewUsed: string;
     aiPick: string;
     inMinutes: string;

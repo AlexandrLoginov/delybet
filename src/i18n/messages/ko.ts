@@ -161,6 +161,7 @@ export const ko: Messages = {
     showMoreCount: "더 보기 ({count})",
     sportAll: "전체",
     openPro: "Pro로 열기",
+    goToAnalytics: "분석 보기",
     freePreviewUsed: "오늘 무료 조회를 이미 사용했습니다",
     aiPick: "AI 예측",
     inMinutes: "{minutes}분 후",

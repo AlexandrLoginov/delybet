@@ -28,7 +28,7 @@ export function AiPickStrip({
         <span className="min-w-0 truncate font-medium text-foreground">
           {t("matches.empty")}
         </span>
-        <span className="shrink-0 font-semibold text-primary">{t("matches.openPro")}</span>
+        <span className="shrink-0 font-semibold text-primary">{t("matches.goToAnalytics")}</span>
       </div>
     );
   }
@@ -39,7 +39,7 @@ export function AiPickStrip({
         <span className="text-muted-foreground">{t("matches.aiPick")}:</span>
         <span className="ml-0.5 tabular-nums font-semibold text-foreground">{n}</span>
       </span>
-      <span className="shrink-0 font-semibold text-primary">{t("matches.openPro")}</span>
+      <span className="shrink-0 font-semibold text-primary">{t("matches.goToAnalytics")}</span>
     </div>
   );
 }

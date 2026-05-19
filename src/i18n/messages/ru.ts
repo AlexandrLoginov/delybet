@@ -170,6 +170,7 @@ export const ru: Messages = {
     showMoreCount: "Показать ещё ({count})",
     sportAll: "Все",
     openPro: "Открыть в Pro",
+    goToAnalytics: "Перейти в аналитику",
     freePreviewUsed: "Бесплатный просмотр уже использован сегодня",
     aiPick: "Прогноз ИИ",
     inMinutes: "через {minutes} мин",

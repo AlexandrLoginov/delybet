@@ -157,6 +157,7 @@ export const zh: Messages = {
     showMoreCount: "显示更多（{count}）",
     sportAll: "全部",
     openPro: "用 Pro 解锁",
+    goToAnalytics: "查看分析",
     freePreviewUsed: "今日免费次数已用完",
     aiPick: "AI 预测",
     inMinutes: "{minutes} 分钟后",

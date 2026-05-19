@@ -170,6 +170,7 @@ export const en: Messages = {
     showMoreCount: "Show more ({count})",
     sportAll: "All",
     openPro: "Unlock with Pro",
+    goToAnalytics: "Go to analysis",
     freePreviewUsed: "Free view already used today",
     aiPick: "AI pick",
     inMinutes: "in {minutes} min",
