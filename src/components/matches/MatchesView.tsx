@@ -10,6 +10,8 @@ import { SportFilter } from "@/components/matches/SportFilter";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppLocale } from "@/hooks/use-app-locale";
+import { localizeMatch } from "@/lib/localize-display";
+import type { AppLocaleCode } from "@/lib/locale";
 import { useAuthMe } from "@/hooks/use-auth-me";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
@@ -41,7 +43,7 @@ function formatCountdown(totalSeconds: number) {
 }
 
 export function MatchesView() {
-  const { t } = useAppLocale();
+  const { locale, t } = useAppLocale();
   const [sport, setSport] = useState<SportSlug | "all">("all");
   const [tab, setTab] = useState<"upcoming" | "live">("upcoming");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -256,6 +258,7 @@ export function MatchesView() {
               redeemedFreeMatchId={redeemedFreeMatchId}
               unlockAllPro={unlockAllPro}
               emptyLabel={t("matches.empty")}
+              locale={locale}
             />
 
             {remaining > 0 && (
@@ -288,12 +291,14 @@ function MatchList({
   redeemedFreeMatchId,
   unlockAllPro,
   emptyLabel,
+  locale,
 }: {
   matches: Match[];
   eligibleIds: Set<string>;
   redeemedFreeMatchId: string | null;
   unlockAllPro: boolean;
   emptyLabel: string;
+  locale: AppLocaleCode;
 }) {
   if (!matches.length) {
     return (
@@ -306,7 +311,7 @@ function MatchList({
     );
   }
 
-  const groups = groupByLeague(matches);
+  const groups = groupByLeague(matches, locale);
 
   return (
     <div className="space-y-5">
@@ -349,10 +354,11 @@ function MatchList({
   );
 }
 
-function groupByLeague(matches: Match[]) {
+function groupByLeague(matches: Match[], locale: AppLocaleCode) {
   const map = new Map<string, Match[]>();
   for (const m of matches) {
-    const key = `${m.league} · ${m.country}`;
+    const lm = localizeMatch(m, locale);
+    const key = `${lm.league} · ${lm.country}`;
     const arr = map.get(key) ?? [];
     arr.push(m);
     map.set(key, arr);

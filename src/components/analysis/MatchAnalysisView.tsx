@@ -27,9 +27,14 @@ import {
   toggleFavoriteMatchId,
 } from "@/lib/favorites";
 import { useAppLocale } from "@/hooks/use-app-locale";
+import {
+  useLocalizedAnalysis,
+  useLocalizedMatch,
+} from "@/hooks/use-localized-match";
 import { localeIntlTag } from "@/i18n";
 import { analysisBlockClass } from "@/lib/analysis-ui";
-import { cn, formatKickoff } from "@/lib/utils";
+import { formatKickoff } from "@/lib/format-kickoff";
+import { cn } from "@/lib/utils";
 import type { Match } from "@/types/match";
 import type { FullAnalysis } from "@/types/analysis";
 
@@ -40,13 +45,15 @@ interface MatchAnalysisViewProps {
 }
 
 export function MatchAnalysisView({
-  match,
-  analysis,
+  match: rawMatch,
+  analysis: rawAnalysis,
   isPro,
 }: MatchAnalysisViewProps) {
   const { locale, t } = useAppLocale();
+  const match = useLocalizedMatch(rawMatch);
+  const analysis = useLocalizedAnalysis(rawAnalysis, rawMatch);
   const isLive = match.status === "live";
-  const { day, time } = formatKickoff(match.kickoffISO);
+  const { day, time } = formatKickoff(match.kickoffISO, locale, t);
   const [favorite, setFavorite] = useState(false);
 
   useEffect(() => {

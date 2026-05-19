@@ -25,6 +25,14 @@ export const ru: Messages = {
     perMonth: "/мес",
     dash: "—",
     now: "сейчас",
+    today: "Сегодня",
+    tomorrow: "Завтра",
+  },
+  sports: {
+    football: "Футбол",
+    basketball: "Баскетбол",
+    tennis: "Теннис",
+    volleyball: "Волейбол",
   },
   nav: {
     aria: "Главная навигация",
@@ -164,6 +172,12 @@ export const ru: Messages = {
     openPro: "Открыть в Pro",
     freePreviewUsed: "Бесплатный просмотр уже использован сегодня",
     aiPick: "Прогноз ИИ",
+    inMinutes: "через {minutes} мин",
+    inHours: "через {hours} ч",
+    inDays: "через {days} дн",
+    formWin: "В",
+    formDraw: "Н",
+    formLoss: "П",
   },
   analysis: {
     favoriteAdd: "В избранное",

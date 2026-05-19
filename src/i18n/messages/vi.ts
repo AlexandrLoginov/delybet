@@ -25,6 +25,14 @@ export const vi: Messages = {
     perMonth: "/tháng",
     dash: "—",
     now: "bây giờ",
+    today: "Hôm nay",
+    tomorrow: "Ngày mai",
+  },
+  sports: {
+    football: "Bóng đá",
+    basketball: "Bóng rổ",
+    tennis: "Quần vợt",
+    volleyball: "Bóng chuyền",
   },
   nav: {
     aria: "Điều hướng chính",
@@ -160,6 +168,12 @@ export const vi: Messages = {
     openPro: "Mở bằng Pro",
     freePreviewUsed: "Đã dùng lượt xem miễn phí hôm nay",
     aiPick: "Dự đoán AI",
+    inMinutes: "sau {minutes} phút",
+    inHours: "sau {hours} giờ",
+    inDays: "sau {days} ngày",
+    formWin: "T",
+    formDraw: "H",
+    formLoss: "B",
   },
   analysis: {
     favoriteAdd: "Thêm yêu thích",

@@ -10,7 +10,9 @@ import { FormPills } from "@/components/matches/FormPills";
 import { AiPickStrip } from "@/components/matches/AiPickStrip";
 import { RenewSubscriptionDrawer } from "@/components/subscription/RenewSubscriptionDrawer";
 import { useAppLocale } from "@/hooks/use-app-locale";
-import { formatKickoff, formatTimeUntil, cn } from "@/lib/utils";
+import { useLocalizedMatch } from "@/hooks/use-localized-match";
+import { formatKickoff, formatTimeUntil } from "@/lib/format-kickoff";
+import { cn } from "@/lib/utils";
 import { freePreviewKindForMatch, redeemFreePreview } from "@/lib/freemium";
 import type { FormResult, Match } from "@/types/match";
 
@@ -75,10 +77,12 @@ export function MatchCard({
   );
 }
 
-function MatchCardBody({ match }: { match: Match }) {
+function MatchCardBody({ match: rawMatch }: { match: Match }) {
+  const { locale, t } = useAppLocale();
+  const match = useLocalizedMatch(rawMatch);
   const isLive = match.status === "live";
-  const { day, time } = formatKickoff(match.kickoffISO);
-  const until = !isLive ? formatTimeUntil(match.kickoffISO) : null;
+  const { day, time } = formatKickoff(match.kickoffISO, locale, t);
+  const until = !isLive ? formatTimeUntil(match.kickoffISO, t) : null;
 
   return (
     <div className="relative">

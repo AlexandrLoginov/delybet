@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TeamLogo } from "@/components/matches/TeamLogo";
 import { useAppLocale } from "@/hooks/use-app-locale";
+import { useLocalizedHistoryMatch } from "@/hooks/use-localized-match";
 import { localeIntlTag } from "@/i18n";
 import { inferPredictedOutcome } from "@/lib/history-prediction";
 import { cn } from "@/lib/utils";
@@ -23,8 +24,9 @@ interface HistoryDetailViewProps {
   match: HistoryMatch;
 }
 
-export function HistoryDetailView({ match }: HistoryDetailViewProps) {
+export function HistoryDetailView({ match: rawMatch }: HistoryDetailViewProps) {
   const { locale, t } = useAppLocale();
+  const match = useLocalizedHistoryMatch(rawMatch);
   const date = new Date(match.finishedISO);
   const dateLabel = date.toLocaleDateString(localeIntlTag(locale), {
     day: "numeric",

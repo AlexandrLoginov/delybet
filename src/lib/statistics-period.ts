@@ -237,7 +237,10 @@ export function buildStatisticsChartSeries(
   return out;
 }
 
-export function sportBreakdownForMatches(matches: HistoryMatch[]): Array<{
+export function sportBreakdownForMatches(
+  matches: HistoryMatch[],
+  sportLabel: (slug: SportSlug) => string
+): Array<{
   sport: SportSlug;
   label: string;
   emoji: string;
@@ -252,7 +255,7 @@ export function sportBreakdownForMatches(matches: HistoryMatch[]): Array<{
     const meta = SPORTS.find((s) => s.slug === sport);
     return {
       sport,
-      label: meta?.label ?? sport,
+      label: sportLabel(sport) || meta?.slug || sport,
       emoji: meta?.emoji ?? "",
       total,
       correct,

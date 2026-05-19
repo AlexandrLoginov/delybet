@@ -29,13 +29,16 @@ import {
   computeEligibleMatchIds,
   getFreeLivePreviewEligibleIdFromMatches,
 } from "@/lib/freemium";
+import { localizeMatch } from "@/lib/localize-display";
+import type { AppLocaleCode } from "@/lib/locale";
 import { MOCK_MATCHES } from "@/lib/mock-data";
 import type { Match } from "@/types/match";
 
-function groupByLeague(matches: Match[]) {
+function groupByLeague(matches: Match[], locale: AppLocaleCode) {
   const map = new Map<string, Match[]>();
   for (const m of matches) {
-    const key = `${m.league} · ${m.country}`;
+    const lm = localizeMatch(m, locale);
+    const key = `${lm.league} · ${lm.country}`;
     const arr = map.get(key) ?? [];
     arr.push(m);
     map.set(key, arr);
@@ -76,15 +79,17 @@ function FavoritesGroupedList({
   eligibleIds,
   redeemedFreeMatchId,
   unlockAllPro,
+  locale,
 }: {
   matches: Match[];
   eligibleIds: Set<string>;
   redeemedFreeMatchId: string | null;
   unlockAllPro: boolean;
+  locale: AppLocaleCode;
 }) {
   return (
     <div className="space-y-5">
-      {groupByLeague(matches).map(({ league, items }) => (
+      {groupByLeague(matches, locale).map(({ league, items }) => (
         <section key={league} className="space-y-2">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -124,7 +129,7 @@ function FavoritesGroupedList({
 }
 
 export function FavoritesView() {
-  const { t } = useAppLocale();
+  const { locale, t } = useAppLocale();
   const [tab, setTab] = useState<"upcoming" | "live">("upcoming");
   const [clearOpen, setClearOpen] = useState(false);
   const { data: authMe } = useAuthMe();
@@ -300,6 +305,7 @@ export function FavoritesView() {
                 eligibleIds={eligibleIdsUpcoming}
                 redeemedFreeMatchId={freePreviewSlots.upcoming}
                 unlockAllPro={unlockAllPro}
+                locale={locale}
               />
             )}
           </TabsContent>
@@ -315,6 +321,7 @@ export function FavoritesView() {
                 eligibleIds={eligibleIdsLive}
                 redeemedFreeMatchId={freePreviewSlots.live}
                 unlockAllPro={unlockAllPro}
+                locale={locale}
               />
             )}
           </TabsContent>

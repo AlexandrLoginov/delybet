@@ -25,6 +25,14 @@ export const zh: Messages = {
     perMonth: "/月",
     dash: "—",
     now: "现在",
+    today: "今天",
+    tomorrow: "明天",
+  },
+  sports: {
+    football: "足球",
+    basketball: "篮球",
+    tennis: "网球",
+    volleyball: "排球",
   },
   nav: {
     aria: "主导航",
@@ -151,6 +159,12 @@ export const zh: Messages = {
     openPro: "用 Pro 解锁",
     freePreviewUsed: "今日免费次数已用完",
     aiPick: "AI 预测",
+    inMinutes: "{minutes} 分钟后",
+    inHours: "{hours} 小时后",
+    inDays: "{days} 天后",
+    formWin: "胜",
+    formDraw: "平",
+    formLoss: "负",
   },
   analysis: {
     favoriteAdd: "加入收藏",

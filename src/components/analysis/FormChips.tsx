@@ -1,3 +1,4 @@
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { analysisBlockClass } from "@/lib/analysis-ui";
 import { cn } from "@/lib/utils";
 import type { FormEntry } from "@/types/analysis";
@@ -13,13 +14,13 @@ const RESULT_STYLES: Record<FormEntry["result"], string> = {
   L: "bg-destructive/10 text-destructive ring-destructive/30",
 };
 
-const RESULT_LABEL: Record<FormEntry["result"], string> = {
-  W: "В",
-  D: "Н",
-  L: "П",
-};
-
 export function FormChips({ team, entries }: FormChipsProps) {
+  const { t } = useAppLocale();
+  const resultLabel: Record<FormEntry["result"], string> = {
+    W: t("matches.formWin"),
+    D: t("matches.formDraw"),
+    L: t("matches.formLoss"),
+  };
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -34,7 +35,7 @@ export function FormChips({ team, entries }: FormChipsProps) {
               )}
               title={`${e.opponent} · ${e.score}`}
             >
-              {RESULT_LABEL[e.result]}
+              {resultLabel[e.result]}
             </span>
           ))}
         </div>
@@ -51,7 +52,7 @@ export function FormChips({ team, entries }: FormChipsProps) {
                 RESULT_STYLES[e.result]
               )}
             >
-              {RESULT_LABEL[e.result]}
+              {resultLabel[e.result]}
             </span>
             <span className="flex-1 truncate text-sm">{e.opponent}</span>
             <span className="tabular-num text-sm font-semibold text-foreground/80">

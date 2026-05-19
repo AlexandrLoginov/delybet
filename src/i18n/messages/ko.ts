@@ -25,6 +25,14 @@ export const ko: Messages = {
     perMonth: "/월",
     dash: "—",
     now: "지금",
+    today: "오늘",
+    tomorrow: "내일",
+  },
+  sports: {
+    football: "축구",
+    basketball: "농구",
+    tennis: "테니스",
+    volleyball: "배구",
   },
   nav: {
     aria: "메인 내비게이션",
@@ -155,6 +163,12 @@ export const ko: Messages = {
     openPro: "Pro로 열기",
     freePreviewUsed: "오늘 무료 조회를 이미 사용했습니다",
     aiPick: "AI 예측",
+    inMinutes: "{minutes}분 후",
+    inHours: "{hours}시간 후",
+    inDays: "{days}일 후",
+    formWin: "승",
+    formDraw: "무",
+    formLoss: "패",
   },
   analysis: {
     favoriteAdd: "즐겨찾기 추가",

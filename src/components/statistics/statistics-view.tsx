@@ -28,6 +28,7 @@ import {
   statisticsChartCopyLocalized,
 } from "@/lib/statistics-period";
 import { MOCK_HISTORY } from "@/lib/mock-data";
+import { sportLabel } from "@/lib/sport-labels";
 import { cn } from "@/lib/utils";
 
 const tabTriggerClass =
@@ -54,8 +55,8 @@ export function StatisticsView({ isPro = false }: { isPro?: boolean }) {
   );
 
   const sportBreakdown = useMemo(
-    () => sportBreakdownForMatches(filteredMatches),
-    [filteredMatches]
+    () => sportBreakdownForMatches(filteredMatches, (slug) => sportLabel(slug, t)),
+    [filteredMatches, t]
   );
 
   const leaguesInWindow = useMemo(

@@ -27,6 +27,14 @@ export type Messages = {
     perMonth: string;
     dash: string;
     now: string;
+    today: string;
+    tomorrow: string;
+  };
+  sports: {
+    football: string;
+    basketball: string;
+    tennis: string;
+    volleyball: string;
   };
   nav: {
     aria: string;
@@ -137,6 +145,12 @@ export type Messages = {
     openPro: string;
     freePreviewUsed: string;
     aiPick: string;
+    inMinutes: string;
+    inHours: string;
+    inDays: string;
+    formWin: string;
+    formDraw: string;
+    formLoss: string;
   };
   analysis: {
     favoriteAdd: string;

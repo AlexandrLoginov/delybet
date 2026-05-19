@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { CheckCircle } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { SPORTS } from "@/lib/mock-data";
+import { useAppLocale } from "@/hooks/use-app-locale";
+import { sportsWithLabels } from "@/lib/sport-labels";
 import type { SportSlug } from "@/types/match";
 
 export function SportsPreference({ initial }: { initial: SportSlug[] }) {
+  const { t } = useAppLocale();
   const [selected, setSelected] = useState<SportSlug[]>(initial);
 
   const toggle = (s: SportSlug) =>
@@ -16,7 +18,7 @@ export function SportsPreference({ initial }: { initial: SportSlug[] }) {
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      {SPORTS.map((s) => {
+      {sportsWithLabels(t).map((s) => {
         const active = selected.includes(s.slug);
         return (
           <button

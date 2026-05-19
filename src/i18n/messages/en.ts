@@ -25,6 +25,14 @@ export const en: Messages = {
     perMonth: "/mo",
     dash: "—",
     now: "now",
+    today: "Today",
+    tomorrow: "Tomorrow",
+  },
+  sports: {
+    football: "Football",
+    basketball: "Basketball",
+    tennis: "Tennis",
+    volleyball: "Volleyball",
   },
   nav: {
     aria: "Main navigation",
@@ -164,6 +172,12 @@ export const en: Messages = {
     openPro: "Unlock with Pro",
     freePreviewUsed: "Free view already used today",
     aiPick: "AI pick",
+    inMinutes: "in {minutes} min",
+    inHours: "in {hours} h",
+    inDays: "in {days} d",
+    formWin: "W",
+    formDraw: "D",
+    formLoss: "L",
   },
   analysis: {
     favoriteAdd: "Add to favorites",

@@ -2,7 +2,7 @@
 
 import { useAppLocale } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
-import { SPORTS } from "@/lib/mock-data";
+import { sportsWithLabels } from "@/lib/sport-labels";
 import type { SportSlug } from "@/types/match";
 
 interface SportFilterProps {
@@ -23,7 +23,7 @@ export function SportFilter({
   const { t } = useAppLocale();
   const items: { slug: SportSlug | "all"; label: string; emoji: string }[] = [
     { slug: "all", label: t("matches.sportAll"), emoji: "" },
-    ...SPORTS,
+    ...sportsWithLabels(t),
   ];
 
   return (

@@ -1,3 +1,4 @@
+import { useAppLocale } from "@/hooks/use-app-locale";
 import { cn } from "@/lib/utils";
 import type { FormResult } from "@/types/match";
 
@@ -13,9 +14,13 @@ const TONES: Record<FormResult, string> = {
   L: "bg-destructive/10 text-destructive ring-destructive/30",
 };
 
-const LABELS: Record<FormResult, string> = { W: "В", D: "Н", L: "П" };
-
 export function FormPills({ results, size = "xs", className }: FormPillsProps) {
+  const { t } = useAppLocale();
+  const labels: Record<FormResult, string> = {
+    W: t("matches.formWin"),
+    D: t("matches.formDraw"),
+    L: t("matches.formLoss"),
+  };
   if (!results?.length) return null;
 
   const dim =
@@ -26,14 +31,14 @@ export function FormPills({ results, size = "xs", className }: FormPillsProps) {
       {results.map((r, i) => (
         <span
           key={i}
-          title={LABELS[r]}
+          title={labels[r]}
           className={cn(
             "flex items-center justify-center rounded-sm font-bold ring-1 ring-inset",
             dim,
             TONES[r]
           )}
         >
-          {LABELS[r]}
+          {labels[r]}
         </span>
       ))}
     </div>
