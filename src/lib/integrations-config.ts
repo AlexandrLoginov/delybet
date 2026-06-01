@@ -52,7 +52,8 @@ export function footballLeagueIds(): number[] | undefined {
 export function apiFootballSeasonYear(): number {
   const raw = process.env.API_FOOTBALL_SEASON?.trim();
   if (raw && /^\d{4}$/.test(raw)) return parseInt(raw, 10);
-  return new Date().getFullYear();
+  /** Free tier API-Football: доступны сезоны 2022–2024. На Pro задайте API_FOOTBALL_SEASON. */
+  return 2024;
 }
 
 /** Сколько дней вперёд запрашивать предстоящие матчи (1–14). */

@@ -43,8 +43,19 @@ export async function GET(req: NextRequest) {
         ? await getLiveMatches("football")
         : await getUpcomingMatches("football");
     const mapped = raw.map(rawMatchToMatch);
+    const football = filterCachedSport(mapped, sport);
+
+    /** Пока нет API для других видов — демо-матчи только для них. */
+    const withOtherSports =
+      sport === "all"
+        ? [
+            ...football,
+            ...filterMock(tab, "all").filter((m) => m.sport !== "football"),
+          ]
+        : football;
+
     return NextResponse.json({
-      matches: filterCachedSport(mapped, sport),
+      matches: withOtherSports,
       source: "api" as const,
       cacheHint: tab === "live" ? CacheKeys.liveMatches("football") : "upcoming",
     });

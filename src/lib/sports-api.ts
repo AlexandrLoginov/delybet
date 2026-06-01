@@ -200,34 +200,51 @@ function buildFormEntries(teamId: number, matches: RawMatch[]): TeamFormEntry[] 
 
 // ── Матчи ─────────────────────────────────────────────────────────────────────
 
+const UPCOMING_STATUS = new Set(["NS", "TBD", "PST"]);
+
+function isUpcomingFixture(raw: RawMatch): boolean {
+  return UPCOMING_STATUS.has(raw.fixture.status.short);
+}
+
+function matchesLeagueFilter(raw: RawMatch, leagueIds: number[] | undefined): boolean {
+  if (!leagueIds?.length) return true;
+  return leagueIds.includes(raw.league.id);
+}
+
 export async function getUpcomingMatches(
   _sport = "football",
   leagueIds?: number[]
 ): Promise<RawMatch[]> {
-  const today = new Date();
-  const from = formatDateYmd(today);
-  const to = formatDateYmd(addDays(today, upcomingMatchesDaysAhead()));
   const leagues = leagueIds ?? footballLeagueIds();
+  const daysAhead = upcomingMatchesDaysAhead();
+  const today = new Date();
+  const seen = new Set<number>();
+  const merged: RawMatch[] = [];
 
-  const params: Record<string, string> = {
-    from,
-    to,
-    status: "NS",
-  };
-  if (leagues?.length) params.league = leagues.join("-");
+  /** Free tier: `date=` работает; `from/to/status` без league часто отклоняется. */
+  for (let offset = 0; offset <= daysAhead; offset += 1) {
+    const dateStr = formatDateYmd(addDays(today, offset));
+    const cacheKey = CacheKeys.upcomingMatches(
+      `football:date:${dateStr}:${leagues?.join("-") ?? "all"}`
+    );
 
-  const cacheKey = CacheKeys.upcomingMatches(
-    `football:${from}:${to}:${params.league ?? "all"}`
-  );
+    const rows = await footballGet<RawMatch[]>(
+      "/fixtures",
+      { date: dateStr },
+      cacheKey,
+      900
+    );
 
-  const rows = await footballGet<RawMatch[]>(
-    "/fixtures",
-    params,
-    cacheKey,
-    900
-  );
+    for (const row of rows) {
+      if (seen.has(row.fixture.id)) continue;
+      if (!isUpcomingFixture(row)) continue;
+      if (!matchesLeagueFilter(row, leagues)) continue;
+      seen.add(row.fixture.id);
+      merged.push(row);
+    }
+  }
 
-  return rows.sort(
+  return merged.sort(
     (a, b) =>
       new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime()
   );
@@ -303,12 +320,21 @@ export async function getTeamForm(
   const seasonYear = season ?? apiFootballSeasonYear();
   const cacheKey = `team:form:${teamId}:${leagueId}:${seasonYear}`;
 
-  const matches = await footballGet<RawMatch[]>(
+  const allMatches = await footballGet<RawMatch[]>(
     "/fixtures",
-    { team: teamId, league: leagueId, season: seasonYear, last: 5 },
+    { team: teamId, league: leagueId, season: seasonYear },
     cacheKey,
     3600
   );
+
+  const finishedStatuses = new Set(["FT", "AET", "PEN"]);
+  const matches = allMatches
+    .filter((m) => finishedStatuses.has(m.fixture.status.short))
+    .sort(
+      (a, b) =>
+        new Date(b.fixture.date).getTime() - new Date(a.fixture.date).getTime()
+    )
+    .slice(0, 5);
 
   const entries = buildFormEntries(teamId, matches);
   const lastFive = entries.map((e) => e.result);
