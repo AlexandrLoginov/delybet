@@ -129,6 +129,14 @@ export type Messages = {
       RenewalPackageId,
       { title: string; caption: string }
     >;
+    paymentMethods: {
+      title: string;
+      subtitle: string;
+      continueButton: string;
+      stripe: { title: string; description: string; chargeNote: string };
+      payos: { title: string; description: string; chargeNote: string };
+      payosNotConfigured: string;
+    };
   };
   matches: {
     title: string;

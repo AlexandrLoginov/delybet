@@ -149,6 +149,23 @@ export const en: Messages = {
       stripeDisclaimer:
         "Charged in RUB via Stripe. Displayed prices are approximate.",
     },
+    paymentMethods: {
+      title: "Payment method",
+      subtitle: "Choose how to pay — amount shown in your currency",
+      continueButton: "Continue to payment",
+      stripe: {
+        title: "Bank card",
+        description: "Visa, Mastercard and more via Stripe",
+        chargeNote: "Charged in RUB. Displayed price is approximate.",
+      },
+      payos: {
+        title: "VietQR · Momo · bank",
+        description: "Pay in Vietnam via PayOS",
+        chargeNote: "Charged in VND at the rate at checkout.",
+      },
+      payosNotConfigured:
+        "Local PayOS payments are coming soon. Use card for now.",
+    },
     packages: {
       "1m": { title: "1 month", caption: "Standard price" },
       "3m": { title: "3 months", caption: "Great for the season" },

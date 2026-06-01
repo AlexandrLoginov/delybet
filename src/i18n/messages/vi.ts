@@ -145,6 +145,23 @@ export const vi: Messages = {
       stripeDisclaimer:
         "Thanh toán bằng RUB qua Stripe. Giá hiển thị chỉ mang tính tham khảo.",
     },
+    paymentMethods: {
+      title: "Phương thức thanh toán",
+      subtitle: "Chọn cách thanh toán — số tiền hiển thị theo tiền tệ của bạn",
+      continueButton: "Tiếp tục thanh toán",
+      stripe: {
+        title: "Thẻ ngân hàng",
+        description: "Visa, Mastercard qua Stripe",
+        chargeNote: "Thanh toán bằng RUB. Giá hiển thị chỉ mang tính tham khảo.",
+      },
+      payos: {
+        title: "VietQR · Momo · ngân hàng",
+        description: "Thanh toán tại Việt Nam qua PayOS",
+        chargeNote: "Thanh toán bằng VND theo tỷ giá khi checkout.",
+      },
+      payosNotConfigured:
+        "PayOS sắp có. Hiện tại vui lòng dùng thẻ.",
+    },
     packages: {
       "1m": { title: "1 tháng", caption: "Giá tiêu chuẩn" },
       "3m": { title: "3 tháng", caption: "Hợp mùa giải" },

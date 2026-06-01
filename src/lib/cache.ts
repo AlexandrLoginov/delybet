@@ -44,4 +44,5 @@ export const CacheKeys = {
   upcomingMatches: (sport: string) => `matches:upcoming:${sport}`,
   liveMatches: (sport: string) => `matches:live:${sport}`,
   dailyUsage: (userId: string, date: string) => `usage:${userId}:${date}`,
+  payosOrder: (orderCode: number) => `payos:order:${orderCode}`,
 };

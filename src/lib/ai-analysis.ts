@@ -6,8 +6,14 @@ import { Buffer } from "node:buffer";
 import Anthropic from "@anthropic-ai/sdk";
 
 import type { FormEntry, FullAnalysis, MatchStatsView } from "@/types/analysis";
+import type { FormResult, Match } from "@/types/match";
 
+import {
+  apiFootballSeasonYear,
+  isApiSportsConfigured,
+} from "./integrations-config";
 import { getCached, setCached, CacheKeys } from "./cache";
+import { getMockMatchById } from "./mock-data";
 import {
   getMatchById,
   getMatchNews,
@@ -72,12 +78,6 @@ export interface AnalysisResult {
     body?: string;
     sources?: { label?: string; url: string }[];
   }[];
-}
-
-function apiFootballSeasonYear(): number {
-  const raw = process.env.API_FOOTBALL_SEASON?.trim();
-  if (raw && /^\d{4}$/.test(raw)) return parseInt(raw, 10);
-  return new Date().getFullYear();
 }
 
 function parsePercentValue(raw: string | number): number {
@@ -148,6 +148,13 @@ function matchStatsToViews(stats: MatchStats | null): MatchStatsView[] {
 }
 
 function teamFormToEntries(form: TeamForm): FormEntry[] {
+  if (form.entries.length > 0) {
+    return form.entries.map((e) => ({
+      result: e.result,
+      opponent: e.opponent,
+      score: e.score,
+    }));
+  }
   return form.lastFive.map((r, i) => ({
     result: r,
     opponent: `Матч ${i + 1}`,
@@ -194,12 +201,30 @@ export async function analyzeMatch(
 ): Promise<FullAnalysis> {
   const cacheKey = CacheKeys.analysis(sport, matchId);
 
-  // 1. Проверяем кэш
   const cached = await getCached<FullAnalysis>(cacheKey);
   if (cached) return cached;
 
-  // 2. Собираем данные параллельно
-  const fixtureId = parseInt(matchId);
+  if (isApiSportsConfigured() && /^\d+$/.test(matchId)) {
+    const fixtureId = parseInt(matchId, 10);
+    const raw = await getMatchById(fixtureId);
+    if (raw) {
+      return runApiFootballAnalysis(matchId, fixtureId, cacheKey);
+    }
+  }
+
+  const mock = getMockMatchById(matchId);
+  if (!mock) {
+    throw new Error(`Match ${matchId} not found`);
+  }
+
+  return runMockFixtureAnalysis(matchId, mock, cacheKey);
+}
+
+async function runApiFootballAnalysis(
+  matchId: string,
+  fixtureId: number,
+  cacheKey: string
+): Promise<FullAnalysis> {
   const [match, stats] = await Promise.all([
     getMatchById(fixtureId),
     getMatchStats(fixtureId),
@@ -207,9 +232,7 @@ export async function analyzeMatch(
 
   if (!match) throw new Error(`Match ${matchId} not found`);
 
-  const isLive = match.fixture.status.short === "1H" ||
-    match.fixture.status.short === "2H" ||
-    match.fixture.status.short === "HT";
+  const isLive = isLiveFootballStatus(match.fixture.status.short);
 
   const season = apiFootballSeasonYear();
   const [homeForm, awayForm, news] = await Promise.all([
@@ -218,9 +241,82 @@ export async function analyzeMatch(
     getMatchNews(match.teams.home.name, match.teams.away.name),
   ]);
 
-  // 3. Строим промпт
   const prompt = buildPrompt({ match, stats, homeForm, awayForm, news, isLive });
+  return finishAnalysis(matchId, isLive, cacheKey, prompt, stats, homeForm, awayForm);
+}
 
+async function runMockFixtureAnalysis(
+  matchId: string,
+  demo: Match,
+  cacheKey: string
+): Promise<FullAnalysis> {
+  const isLive = demo.status === "live";
+  const homeForm = teamFormFromMock(demo.home.id, demo.lastFiveHome);
+  const awayForm = teamFormFromMock(demo.away.id, demo.lastFiveAway);
+  const stats = statsFromDemoMatch(demo);
+  const news = await getMatchNews(demo.home.name, demo.away.name);
+
+  const prompt = buildPromptFromDemoMatch({
+    demo,
+    stats,
+    homeForm,
+    awayForm,
+    news,
+    isLive,
+  });
+
+  return finishAnalysis(matchId, isLive, cacheKey, prompt, stats, homeForm, awayForm);
+}
+
+function isLiveFootballStatus(short: string): boolean {
+  return short === "1H" || short === "2H" || short === "HT";
+}
+
+function teamFormFromMock(
+  teamId: number,
+  lastFive: FormResult[] | undefined
+): TeamForm {
+  const seq = lastFive?.length ? lastFive : (["W", "D", "L", "W", "D"] as const);
+  const wins = seq.filter((r) => r === "W").length;
+  const losses = seq.filter((r) => r === "L").length;
+  const entries = seq.map((result, i) => ({
+    result,
+    opponent: `Матч ${i + 1}`,
+    score: "—",
+  }));
+  return {
+    teamId,
+    lastFive: [...seq],
+    goalsScored: wins * 2 + seq.filter((r) => r === "D").length,
+    goalsConceded: losses * 2 + seq.filter((r) => r === "D").length,
+    entries,
+  };
+}
+
+function statsFromDemoMatch(demo: Match): MatchStats | null {
+  const ls = demo.liveStats;
+  if (!ls) return null;
+  return {
+    possession: {
+      home: `${ls.possessionHome}%`,
+      away: `${ls.possessionAway}%`,
+    },
+    shots: { home: ls.shotsHome, away: ls.shotsAway },
+    shotsOnTarget: { home: 0, away: 0 },
+    corners: { home: 0, away: 0 },
+    xg: null,
+  };
+}
+
+async function finishAnalysis(
+  matchId: string,
+  isLive: boolean,
+  cacheKey: string,
+  prompt: string,
+  stats: MatchStats | null,
+  homeForm: TeamForm,
+  awayForm: TeamForm
+): Promise<FullAnalysis> {
   const message = await getAnthropic().messages.create({
     model: anthropicMessagesModelId(),
     max_tokens: 1536,
@@ -229,25 +325,134 @@ export async function analyzeMatch(
     messages: [{ role: "user", content: prompt }],
   });
 
-  // 5. Парсим ответ
-  const raw = (message.content[0] as { text: string }).text;
-  const core = parseAnalysisResponse(raw, matchId, isLive);
+  const block = message.content.find((b) => b.type === "text");
+  if (!block || block.type !== "text") {
+    throw new Error("Anthropic response has no text content");
+  }
+
+  const core = parseAnalysisResponse(block.text, matchId, isLive);
   const full = toFullAnalysis(core, stats, homeForm, awayForm);
 
-  // 6. Кэшируем (2 мин для Live, 15 мин для предстоящих)
   const ttlSeconds = isLive ? 120 : 900;
   await setCached(cacheKey, full, ttlSeconds);
 
   return full;
 }
 
-// ── Построитель промпта ───────────────────────────────────────────────────────
+function buildPromptFromDemoMatch({
+  demo,
+  stats,
+  homeForm,
+  awayForm,
+  news,
+  isLive,
+}: {
+  demo: Match;
+  stats: MatchStats | null;
+  homeForm: TeamForm;
+  awayForm: TeamForm;
+  news: Awaited<ReturnType<typeof getMatchNews>>;
+  isLive: boolean;
+}): string {
+  const elapsed = demo.elapsedMinutes ?? 0;
+  const score = `${demo.scoreHome ?? 0}:${demo.scoreAway ?? 0}`;
+  const sportLabel =
+    demo.sport === "football"
+      ? "футбол"
+      : demo.sport === "basketball"
+        ? "баскетбол"
+        : demo.sport;
 
-function buildPrompt({ match, stats, homeForm, awayForm, news, isLive }: any): string {
+  return `Проанализируй матч и верни JSON.
+
+## Матч
+- Вид спорта: ${sportLabel}
+- Соревнование: ${demo.league} (${demo.country}), ${demo.round}
+- Статус: ${isLive ? `Live, ${elapsed} мин, счёт ${score}` : "Предстоящий"}
+- Хозяева: ${demo.home.name}
+- Гости: ${demo.away.name}
+${demo.venue ? `- Арена: ${demo.venue}` : ""}
+
+## Форма команд (последние 5 матчей)
+- ${demo.home.name}: ${homeForm.lastFive.join("-")} | Забито (оценка): ${homeForm.goalsScored} | Пропущено (оценка): ${homeForm.goalsConceded}
+- ${demo.away.name}: ${awayForm.lastFive.join("-")} | Забито (оценка): ${awayForm.goalsScored} | Пропущено (оценка): ${awayForm.goalsConceded}
+
+## Статистика матча${stats ? `
+- Владение: Хозяева ${stats.possession.home} / Гости ${stats.possession.away}
+- Удары: ${stats.shots.home} / ${stats.shots.away}` : "\n- Матч ещё не начался или статистика недоступна"}
+
+## Актуальные новости
+${news.slice(0, 3).map((n) => `- ${n.title}`).join("\n") || "- Нет актуальных новостей"}
+
+${buildPromptJsonSchema(demo.sport === "football")}`;
+}
+
+function buildPromptJsonSchema(includeDraw: boolean): string {
+  const drawLine = includeDraw
+    ? '    "draw": <число 0-100>,\n'
+    : '    "draw": null,\n';
+
+  return `## Требуемый формат JSON
+{
+  "probabilities": {
+    "home": <число 0-100>,
+${drawLine}    "away": <число 0-100>
+  },
+  "recommendation": {
+    "outcome": "<главная формулировка по исходу>",
+    "confidence": "<HIGH | MEDIUM | LOW>",
+    "reasoning": "<1–2 предложения — общая ключевая причина>",
+    "scenarios": [
+      {
+        "kind": "<MATCH_RESULT | TOTAL | BTTS | DOUBLE_CHANCE | HANDICAP | CUSTOM>",
+        "label": "<рынок по-русски>",
+        "pick": "<формулировка ставки>",
+        "probability": <null или число 0–100>,
+        "confidence": "<HIGH | MEDIUM | LOW>",
+        "reasoning": "<1 короткое предложение>"
+      }
+    ]
+  },
+  "summary": "<краткий вывод, 1 предложение>",
+  "detailedAnalysis": "<развёрнутый анализ, 3-4 предложения>",
+  "keyFactors": [
+    { "factor": "<фактор>", "impact": "<POSITIVE_HOME | POSITIVE_AWAY | NEUTRAL>" }
+  ],
+  "newsImpact": [
+    {
+      "headline": "<заголовок>",
+      "impact": "<влияние на исход>",
+      "team": "<команда>",
+      "body": "<опционально>",
+      "sources": [{ "label": "<издание>", "url": "<https://...>" }]
+    }
+  ]
+}
+
+В recommendation.scenarios добавь **5–8 позиций**: обязательно MATCH_RESULT, TOTAL, BTTS; при уместности DOUBLE_CHANCE, HANDICAP. Формулировки — по-русски.`;
+}
+
+// ── Построитель промпта (API-Football) ───────────────────────────────────────
+
+function buildPrompt({
+  match,
+  stats,
+  homeForm,
+  awayForm,
+  news,
+  isLive,
+}: {
+  match: import("./sports-api").RawMatch;
+  stats: MatchStats | null;
+  homeForm: TeamForm;
+  awayForm: TeamForm;
+  news: Awaited<ReturnType<typeof getMatchNews>>;
+  isLive: boolean;
+}): string {
   const elapsed = match.fixture.status.elapsed;
   const score = `${match.goals.home ?? 0}:${match.goals.away ?? 0}`;
 
-  return `Проанализируй матч и верни JSON.
+  const body = `Проанализируй матч и верни JSON.
 
 ## Матч
 - Соревнование: ${match.league.name} (${match.league.country}), ${match.league.round}
@@ -266,47 +471,11 @@ function buildPrompt({ match, stats, homeForm, awayForm, news, isLive }: any): s
 - Угловые: ${stats.corners.home} / ${stats.corners.away}` : "\n- Матч ещё не начался"}
 
 ## Актуальные новости
-${news.slice(0, 3).map((n: any) => `- ${n.title}`).join("\n") || "- Нет актуальных новостей"}
+${news.slice(0, 3).map((n) => `- ${n.title}`).join("\n") || "- Нет актуальных новостей"}
 
-## Требуемый формат JSON
-{
-  "probabilities": {
-    "home": <число 0-100>,
-    "draw": <число 0-100>,
-    "away": <число 0-100>
-  },
-  "recommendation": {
-    "outcome": "<главная формулировка по исходу: П1/P2/X или понятное название>",
-    "confidence": "<HIGH | MEDIUM | LOW>",
-    "reasoning": "<1–2 предложения — общая ключевая причина>",
-    "scenarios": [
-      {
-        "kind": "<MATCH_RESULT | TOTAL | BTTS | DOUBLE_CHANCE | HANDICAP | CUSTOM>",
-        "label": "<рынок по-русски, напр. «Тотал 2.5»>",
-        "pick": "<напр. ТБ 2.5 / ТМ 2.5 / Обе забьют — да / 1X>",
-        "probability": <null или число 0–100>,
-        "confidence": "<HIGH | MEDIUM | LOW>",
-        "reasoning": "<1 короткое предложение по этому рынку>"
-      }
-    ]
-  },
-  "summary": "<краткий вывод, 1 предложение>",
-  "detailedAnalysis": "<развёрнутый анализ, 3-4 предложения>",
-  "keyFactors": [
-    { "factor": "<фактор>", "impact": "<POSITIVE_HOME | POSITIVE_AWAY | NEUTRAL>" }
-  ],
-  "newsImpact": [
-    {
-      "headline": "<заголовок новости>",
-      "impact": "<влияние на исход матча, 1–2 предложения>",
-      "team": "<команда>",
-      "body": "<опционально: 2–4 предложения сути новости>",
-      "sources": [{ "label": "<издание>", "url": "<https://...>" }]
-    }
-  ]
-}
+`;
 
-В recommendation.scenarios добавь **5–8 позиций**: обязательно MATCH_RESULT (исход), TOTAL (ТБ/ТМ по линии), BTTS; при уместности DOUBLE_CHANCE, HANDICAP. Формулировки — как в спортивной аналитике/беттинге по-русски.`;
+  return body + buildPromptJsonSchema(true);
 }
 
 // ── Парсер JSON-ответа модели ──────────────────────────────────────────────────

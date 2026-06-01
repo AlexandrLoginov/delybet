@@ -53,7 +53,7 @@ export function MatchAnalysisWithDevPro({
   const isPro = dbPro || devPro || (devTools && urlIsPro);
   const proParam = isPro ? "true" : "false";
 
-  const swrKey = `/api/analysis/${match.id}?sport=${encodeURIComponent(match.sport)}&pro=${proParam}`;
+  const swrKey = `/api/analysis/${match.id}?sport=${encodeURIComponent(match.sport)}&status=${encodeURIComponent(match.status)}&pro=${proParam}`;
 
   const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
     revalidateOnFocus: false,
@@ -89,7 +89,11 @@ export function MatchAnalysisWithDevPro({
 
   let analysis;
   try {
-    analysis = fillAnalysisDemoGaps(match, normalizeAnalysisPayload(data));
+    const normalized = normalizeAnalysisPayload(data);
+    analysis =
+      data?.dataSource === "api"
+        ? normalized
+        : fillAnalysisDemoGaps(match, normalized);
   } catch {
     return (
       <main className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8 text-center text-sm text-muted-foreground">

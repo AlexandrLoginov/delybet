@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
-import { Medal } from "@phosphor-icons/react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { CaretLeft, Medal } from "@phosphor-icons/react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { PaymentMethodStep } from "@/components/subscription/PaymentMethodStep";
 import { getMessages } from "@/i18n";
 import { useAppLocale } from "@/hooks/use-app-locale";
+import {
+  paymentMethodsForLocale,
+  shouldShowPaymentMethodStep,
+  type PaymentMethodId,
+} from "@/lib/payment-methods";
 import {
   mergeRenewalPackages,
   RENEWAL_BASE_MONTHLY_RUB,
@@ -34,6 +40,8 @@ interface RenewSubscriptionDrawerProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+type CheckoutStep = "package" | "method";
+
 export function RenewSubscriptionDrawer({
   trigger,
   defaultOpen = false,
@@ -47,15 +55,21 @@ export function RenewSubscriptionDrawer({
   const open = isControlled ? controlledOpen : internalOpen;
   function handleOpenChange(next: boolean) {
     if (!isControlled) setInternalOpen(next);
+    if (!next) setCheckoutStep("package");
     onOpenChange?.(next);
   }
 
   const resolvedBilling: "checkout" | "portal" =
     billingAction ?? (intent === "renew" ? "portal" : "checkout");
 
+  const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("package");
   const [selected, setSelected] = useState<string>(
     () => RENEWAL_PACKAGES[0]?.id ?? "1m"
   );
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodId>("stripe");
+  const [availableMethods, setAvailableMethods] = useState<PaymentMethodId[]>([
+    "stripe",
+  ]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,10 +105,52 @@ export function RenewSubscriptionDrawer({
     ? t("subscription.renew.packagesAriaRenew")
     : t("subscription.renew.packagesAriaSubscribe");
 
-  const chargeNote =
-    locale === "ru" ? null : t("subscription.renew.stripeDisclaimer");
+  const showPackages = resolvedBilling === "checkout";
+  const showMethodStep =
+    showPackages &&
+    checkoutStep === "method" &&
+    shouldShowPaymentMethodStep(locale, availableMethods);
 
-  async function submitPayment() {
+  useEffect(() => {
+    if (!open || !showPackages) return;
+    let cancelled = false;
+    void fetch(`/api/payments/methods?locale=${locale}`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then(
+        (data: { methods?: Array<{ id: PaymentMethodId; available: boolean }> }) => {
+          if (cancelled) return;
+          const ids =
+            data.methods?.map((m) => m.id) ??
+            paymentMethodsForLocale(locale).filter(() => true);
+          const fallback = paymentMethodsForLocale(locale).includes("stripe")
+            ? (["stripe"] as PaymentMethodId[])
+            : ids;
+          const resolved = ids.length > 0 ? ids : fallback;
+          setAvailableMethods(resolved);
+          setSelectedMethod(resolved[0] ?? "stripe");
+        }
+      )
+      .catch(() => {
+        if (!cancelled) {
+          setAvailableMethods(["stripe"]);
+          setSelectedMethod("stripe");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, locale, showPackages]);
+
+  function handlePrimaryPackageAction() {
+    setError(null);
+    if (shouldShowPaymentMethodStep(locale, availableMethods)) {
+      setCheckoutStep("method");
+      return;
+    }
+    void submitPayment(availableMethods[0] ?? "stripe");
+  }
+
+  async function submitPayment(method: PaymentMethodId) {
     setError(null);
     setBusy(true);
     try {
@@ -109,6 +165,34 @@ export function RenewSubscriptionDrawer({
             data.error === "NO_STRIPE_CUSTOMER"
               ? t("subscription.renew.noCustomer")
               : (data.error ?? t("subscription.renew.portalFail"))
+          );
+          return;
+        }
+        window.location.href = data.url;
+        return;
+      }
+
+      if (method === "payos") {
+        const res = await fetch("/api/payos/checkout", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ packageId: selected }),
+        });
+        const data = (await res.json()) as {
+          url?: string;
+          message?: string;
+          error?: string;
+        };
+        if (!res.ok || !data.url) {
+          setError(
+            data.error === "PAYOS_NOT_CONFIGURED"
+              ? t("subscription.paymentMethods.payosNotConfigured")
+              : (data.message ??
+                  data.error ??
+                  (res.status === 401
+                    ? t("subscription.renew.unauthorized")
+                    : t("subscription.renew.checkoutFail")))
           );
           return;
         }
@@ -143,7 +227,16 @@ export function RenewSubscriptionDrawer({
     }
   }
 
-  const showPackages = resolvedBilling === "checkout";
+  const primaryLabel = busy
+    ? t("subscription.renew.loading")
+    : resolvedBilling === "portal"
+      ? t("subscription.renew.portalButton")
+      : checkoutStep === "package" &&
+          shouldShowPaymentMethodStep(locale, availableMethods)
+        ? t("subscription.paymentMethods.continueButton")
+        : t("subscription.renew.payButton", {
+            price: formatFromRub(pkg.totalRub),
+          });
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
@@ -151,19 +244,50 @@ export function RenewSubscriptionDrawer({
       <DrawerContent>
         <div className="max-h-[min(72vh,560px)] overflow-y-auto overscroll-contain px-6">
           <DrawerHeader className="px-0 pt-0">
+            {showMethodStep ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="-ml-2 mb-1 h-8 gap-1 px-2"
+                onClick={() => {
+                  setError(null);
+                  setCheckoutStep("package");
+                }}
+              >
+                <CaretLeft className="h-4 w-4" weight="fill" />
+                {t("common.back")}
+              </Button>
+            ) : null}
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
                 <Medal className="h-3.5 w-3.5" weight="fill" />
               </div>
               <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">
-                {eyebrow}
+                {showMethodStep
+                  ? t("subscription.paymentMethods.title")
+                  : eyebrow}
               </span>
             </div>
-            <DrawerTitle className="pt-2 text-left">{title}</DrawerTitle>
-            <DrawerDescription className="text-left">{description}</DrawerDescription>
+            <DrawerTitle className="pt-2 text-left">
+              {showMethodStep
+                ? t("subscription.paymentMethods.title")
+                : title}
+            </DrawerTitle>
+            <DrawerDescription className="text-left">
+              {showMethodStep
+                ? t("subscription.paymentMethods.subtitle")
+                : description}
+            </DrawerDescription>
           </DrawerHeader>
 
-          {showPackages ? (
+          {showMethodStep ? (
+            <PaymentMethodStep
+              methods={availableMethods}
+              selected={selectedMethod}
+              onSelect={setSelectedMethod}
+            />
+          ) : showPackages ? (
             <div className="space-y-2 py-4">
               <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                 {packagesLabel}
@@ -197,15 +321,10 @@ export function RenewSubscriptionDrawer({
               {error}
             </p>
           ) : null}
-          {showPackages && chargeNote ? (
-            <p className="text-[11px] leading-snug text-muted-foreground">
-              {chargeNote}
-            </p>
-          ) : null}
         </div>
 
         <DrawerFooter className="gap-2">
-          {showPackages ? (
+          {showPackages && checkoutStep === "package" ? (
             <div className="flex w-full flex-col gap-1 pb-1 text-center">
               <span className="text-xs text-muted-foreground">
                 {t("subscription.renew.payLabel")}
@@ -221,6 +340,15 @@ export function RenewSubscriptionDrawer({
                   : t("common.dash")}
               </span>
             </div>
+          ) : showMethodStep ? (
+            <div className="flex w-full flex-col gap-1 pb-1 text-center">
+              <span className="text-xs text-muted-foreground">
+                {t("subscription.renew.payLabel")}
+              </span>
+              <span className="text-xl font-semibold tabular-nums text-foreground">
+                {formatFromRub(pkg.totalRub)}
+              </span>
+            </div>
           ) : null}
 
           <Button
@@ -228,15 +356,19 @@ export function RenewSubscriptionDrawer({
             className="w-full"
             type="button"
             disabled={busy}
-            onClick={submitPayment}
+            onClick={() => {
+              if (resolvedBilling === "portal") {
+                void submitPayment("stripe");
+                return;
+              }
+              if (checkoutStep === "method") {
+                void submitPayment(selectedMethod);
+                return;
+              }
+              handlePrimaryPackageAction();
+            }}
           >
-            {busy
-              ? t("subscription.renew.loading")
-              : resolvedBilling === "portal"
-                ? t("subscription.renew.portalButton")
-                : t("subscription.renew.payButton", {
-                    price: formatFromRub(pkg.totalRub),
-                  })}
+            {primaryLabel}
           </Button>
           <Button
             variant="ghost"

@@ -149,6 +149,23 @@ export const ru: Messages = {
         "Откройте приложение через Telegram Mini App и попробуйте снова.",
       stripeDisclaimer: "",
     },
+    paymentMethods: {
+      title: "Способ оплаты",
+      subtitle: "Выбери удобный вариант — сумма в валюте интерфейса",
+      continueButton: "Продолжить к оплате",
+      stripe: {
+        title: "Банковская карта",
+        description: "Visa, Mastercard и другие карты через Stripe",
+        chargeNote: "Списание в рублях (RUB). Цена на экране — ориентир.",
+      },
+      payos: {
+        title: "VietQR · Momo · банк",
+        description: "Оплата во Вьетнаме через PayOS",
+        chargeNote: "Списание в донгах (VND) по курсу на момент оплаты.",
+      },
+      payosNotConfigured:
+        "Локальная оплата PayOS скоро будет доступна. Пока используй карту.",
+    },
     packages: {
       "1m": { title: "1 месяц", caption: "Стандартная цена" },
       "3m": { title: "3 месяца", caption: "Выгодно для сезона" },

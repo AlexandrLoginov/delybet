@@ -1,14 +1,35 @@
 // src/lib/sports-api.ts
-// Клиент для API-Football и API-Sports (api-sports.io)
+// Клиент API-Football (api-sports.io)
 
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
+
+import { getCached, setCached, CacheKeys } from "./cache";
+import {
+  apiFootballSeasonYear,
+  apiSportsKey,
+  footballLeagueIds,
+  upcomingMatchesDaysAhead,
+} from "./integrations-config";
 
 const BASE_URL = "https://v3.football.api-sports.io";
-const SPORTS_URL = "https://v1.basketball.api-sports.io"; // аналогично для других видов
 
-const headers = {
-  "x-apisports-key": process.env.API_SPORTS_KEY!,
-};
+function headers(): Record<string, string> {
+  const key = apiSportsKey();
+  if (!key) {
+    throw new Error("API_SPORTS_KEY is not set");
+  }
+  return { "x-apisports-key": key };
+}
+
+export class SportsApiError extends Error {
+  constructor(
+    message: string,
+    readonly statusCode?: number
+  ) {
+    super(message);
+    this.name = "SportsApiError";
+  }
+}
 
 // ── Типы ──────────────────────────────────────────────────────────────────────
 
@@ -19,7 +40,13 @@ export interface RawMatch {
     status: { short: string; elapsed: number | null };
     venue: { name: string; city: string };
   };
-  league: { id: number; name: string; country: string; logo: string; round: string };
+  league: {
+    id: number;
+    name: string;
+    country: string;
+    logo: string;
+    round: string;
+  };
   teams: {
     home: { id: number; name: string; logo: string; winner: boolean | null };
     away: { id: number; name: string; logo: string; winner: boolean | null };
@@ -36,97 +63,255 @@ export interface MatchStats {
   xg: { home: number; away: number } | null;
 }
 
+export interface TeamFormEntry {
+  result: "W" | "D" | "L";
+  opponent: string;
+  score: string;
+}
+
 export interface TeamForm {
   teamId: number;
   lastFive: ("W" | "D" | "L")[];
   goalsScored: number;
   goalsConceded: number;
+  entries: TeamFormEntry[];
+}
+
+interface ApiFootballEnvelope<T> {
+  response?: T;
+  errors?: Record<string, string> | string[];
+  message?: string;
+}
+
+interface StatisticRow {
+  type: string;
+  value: string | number | null;
+}
+
+interface FixtureStatisticsTeam {
+  team: { id: number; name: string };
+  statistics: StatisticRow[];
+}
+
+interface NewsArticle {
+  title: string;
+  description?: string;
+  url?: string;
+  source?: { name?: string };
+}
+
+function formatDateYmd(d: Date): string {
+  return d.toISOString().split("T")[0]!;
+}
+
+function addDays(base: Date, days: number): Date {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+async function footballGet<T>(
+  path: string,
+  params: Record<string, string | number>,
+  cacheKey: string | null,
+  ttlSeconds: number
+): Promise<T> {
+  if (cacheKey) {
+    const cached = await getCached<T>(cacheKey);
+    if (cached != null) return cached;
+  }
+
+  try {
+    const { data } = await axios.get<ApiFootballEnvelope<T>>(`${BASE_URL}${path}`, {
+      headers: headers(),
+      params,
+      timeout: 20_000,
+    });
+
+    if (data.errors && Object.keys(data.errors).length > 0) {
+      const errText =
+        typeof data.errors === "object" && !Array.isArray(data.errors)
+          ? Object.values(data.errors).join("; ")
+          : String(data.errors);
+      throw new SportsApiError(errText || "API-Football error");
+    }
+
+    const result = (data.response ?? []) as T;
+    if (cacheKey) {
+      await setCached(cacheKey, result, ttlSeconds);
+    }
+    return result;
+  } catch (error) {
+    if (error instanceof SportsApiError) throw error;
+    if (isAxiosError(error)) {
+      const status = error.response?.status;
+      const msg =
+        (error.response?.data as { message?: string })?.message ||
+        error.message;
+      throw new SportsApiError(
+        status === 401 || status === 403
+          ? "Неверный или просроченный API_SPORTS_KEY"
+          : msg,
+        status
+      );
+    }
+    throw error;
+  }
+}
+
+function statValue(arr: StatisticRow[], type: string): string | number {
+  const row = arr.find((s) => s.type === type);
+  const v = row?.value;
+  if (v === null || v === undefined) return 0;
+  return v;
+}
+
+function parsePercentStat(v: string | number): string {
+  if (typeof v === "string" && v.includes("%")) return v;
+  const n = typeof v === "number" ? v : parseInt(String(v).replace(/\D/g, ""), 10);
+  return Number.isFinite(n) ? `${n}%` : "50%";
+}
+
+function parseIntStat(v: string | number): number {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  const n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function buildFormEntries(teamId: number, matches: RawMatch[]): TeamFormEntry[] {
+  return matches.map((m) => {
+    const isHome = m.teams.home.id === teamId;
+    const us = isHome ? m.teams.home : m.teams.away;
+    const them = isHome ? m.teams.away : m.teams.home;
+    const gf = isHome ? m.goals.home : m.goals.away;
+    const ga = isHome ? m.goals.away : m.goals.home;
+    let result: "W" | "D" | "L" = "D";
+    if (us.winner === true) result = "W";
+    else if (us.winner === false) result = "L";
+    const score =
+      gf != null && ga != null ? `${gf}:${ga}` : "—";
+    return {
+      result,
+      opponent: them.name,
+      score,
+    };
+  });
 }
 
 // ── Матчи ─────────────────────────────────────────────────────────────────────
 
-export async function getUpcomingMatches(sport = "football", leagueIds?: number[]): Promise<RawMatch[]> {
-  const today = new Date().toISOString().split("T")[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+export async function getUpcomingMatches(
+  _sport = "football",
+  leagueIds?: number[]
+): Promise<RawMatch[]> {
+  const today = new Date();
+  const from = formatDateYmd(today);
+  const to = formatDateYmd(addDays(today, upcomingMatchesDaysAhead()));
+  const leagues = leagueIds ?? footballLeagueIds();
 
-  const params: Record<string, string> = { from: today, to: tomorrow, status: "NS" };
-  if (leagueIds?.length) params.league = leagueIds.join("-");
+  const params: Record<string, string> = {
+    from,
+    to,
+    status: "NS",
+  };
+  if (leagues?.length) params.league = leagues.join("-");
 
-  const { data } = await axios.get(`${BASE_URL}/fixtures`, { headers, params });
-  return data.response ?? [];
+  const cacheKey = CacheKeys.upcomingMatches(
+    `football:${from}:${to}:${params.league ?? "all"}`
+  );
+
+  const rows = await footballGet<RawMatch[]>(
+    "/fixtures",
+    params,
+    cacheKey,
+    900
+  );
+
+  return rows.sort(
+    (a, b) =>
+      new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime()
+  );
 }
 
-export async function getLiveMatches(sport = "football"): Promise<RawMatch[]> {
-  const { data } = await axios.get(`${BASE_URL}/fixtures`, {
-    headers,
-    params: { live: "all" },
-  });
-  return data.response ?? [];
+export async function getLiveMatches(_sport = "football"): Promise<RawMatch[]> {
+  const cacheKey = CacheKeys.liveMatches("football");
+  return footballGet<RawMatch[]>(
+    "/fixtures",
+    { live: "all" },
+    cacheKey,
+    120
+  );
 }
 
 export async function getMatchById(fixtureId: number): Promise<RawMatch | null> {
-  const { data } = await axios.get(`${BASE_URL}/fixtures`, {
-    headers,
-    params: { id: fixtureId },
-  });
-  return data.response?.[0] ?? null;
+  const cacheKey = `fixture:${fixtureId}`;
+  const rows = await footballGet<RawMatch[]>(
+    "/fixtures",
+    { id: fixtureId },
+    cacheKey,
+    60
+  );
+  return rows[0] ?? null;
 }
 
 // ── Статистика ────────────────────────────────────────────────────────────────
 
-export async function getMatchStats(fixtureId: number): Promise<MatchStats | null> {
-  const { data } = await axios.get(`${BASE_URL}/fixtures/statistics`, {
-    headers,
-    params: { fixture: fixtureId },
-  });
+export async function getMatchStats(
+  fixtureId: number
+): Promise<MatchStats | null> {
+  const cacheKey = `fixture:stats:${fixtureId}`;
+  const stats = await footballGet<FixtureStatisticsTeam[]>(
+    "/fixtures/statistics",
+    { fixture: fixtureId },
+    cacheKey,
+    120
+  );
 
-  const stats = data.response;
   if (!stats?.length) return null;
 
   const home = stats[0]?.statistics ?? [];
   const away = stats[1]?.statistics ?? [];
 
-  const get = (arr: any[], type: string) =>
-    arr.find((s: any) => s.type === type)?.value ?? 0;
-
   return {
     possession: {
-      home: get(home, "Ball Possession") || "50%",
-      away: get(away, "Ball Possession") || "50%",
+      home: parsePercentStat(statValue(home, "Ball Possession")),
+      away: parsePercentStat(statValue(away, "Ball Possession")),
     },
     shots: {
-      home: get(home, "Total Shots"),
-      away: get(away, "Total Shots"),
+      home: parseIntStat(statValue(home, "Total Shots")),
+      away: parseIntStat(statValue(away, "Total Shots")),
     },
     shotsOnTarget: {
-      home: get(home, "Shots on Goal"),
-      away: get(away, "Shots on Goal"),
+      home: parseIntStat(statValue(home, "Shots on Goal")),
+      away: parseIntStat(statValue(away, "Shots on Goal")),
     },
     corners: {
-      home: get(home, "Corner Kicks"),
-      away: get(away, "Corner Kicks"),
+      home: parseIntStat(statValue(home, "Corner Kicks")),
+      away: parseIntStat(statValue(away, "Corner Kicks")),
     },
-    xg: null, // xG доступен в отдельном эндпоинте на Pro плане API
+    xg: null,
   };
 }
 
 // ── Форма команды ─────────────────────────────────────────────────────────────
 
-export async function getTeamForm(teamId: number, leagueId: number, season: number): Promise<TeamForm> {
-  const { data } = await axios.get(`${BASE_URL}/fixtures`, {
-    headers,
-    params: { team: teamId, league: leagueId, season, last: 5 },
-  });
+export async function getTeamForm(
+  teamId: number,
+  leagueId: number,
+  season?: number
+): Promise<TeamForm> {
+  const seasonYear = season ?? apiFootballSeasonYear();
+  const cacheKey = `team:form:${teamId}:${leagueId}:${seasonYear}`;
 
-  const matches: RawMatch[] = data.response ?? [];
+  const matches = await footballGet<RawMatch[]>(
+    "/fixtures",
+    { team: teamId, league: leagueId, season: seasonYear, last: 5 },
+    cacheKey,
+    3600
+  );
 
-  const form = matches.map((m) => {
-    const isHome = m.teams.home.id === teamId;
-    const winner = m.teams[isHome ? "home" : "away"].winner;
-    if (winner === true) return "W" as const;
-    if (winner === false) return "L" as const;
-    return "D" as const;
-  });
+  const entries = buildFormEntries(teamId, matches);
+  const lastFive = entries.map((e) => e.result);
 
   const goalsScored = matches.reduce((acc, m) => {
     const isHome = m.teams.home.id === teamId;
@@ -138,17 +323,27 @@ export async function getTeamForm(teamId: number, leagueId: number, season: numb
     return acc + (isHome ? m.goals.away ?? 0 : m.goals.home ?? 0);
   }, 0);
 
-  return { teamId, lastFive: form, goalsScored, goalsConceded };
+  return { teamId, lastFive, goalsScored, goalsConceded, entries };
 }
 
 // ── Новости через News API ────────────────────────────────────────────────────
 
-export async function getMatchNews(homeTeam: string, awayTeam: string): Promise<any[]> {
-  const query = encodeURIComponent(`${homeTeam} OR ${awayTeam} football`);
-  const url = `https://newsapi.org/v2/everything?q=${query}&language=ru,en&sortBy=publishedAt&pageSize=5&apiKey=${process.env.NEWS_API_KEY}`;
+export async function getMatchNews(
+  homeTeam: string,
+  awayTeam: string
+): Promise<NewsArticle[]> {
+  const apiKey = process.env.NEWS_API_KEY?.trim();
+  if (!apiKey) return [];
+
+  const query = encodeURIComponent(
+    `"${homeTeam}" OR "${awayTeam}" football`
+  );
+  const url = `https://newsapi.org/v2/everything?q=${query}&language=en,ru&sortBy=publishedAt&pageSize=5&apiKey=${apiKey}`;
 
   try {
-    const { data } = await axios.get(url);
+    const { data } = await axios.get<{ articles?: NewsArticle[] }>(url, {
+      timeout: 12_000,
+    });
     return data.articles ?? [];
   } catch {
     return [];

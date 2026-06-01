@@ -141,6 +141,23 @@ export const ko: Messages = {
       stripeDisclaimer:
         "Stripe에서 RUB로 결제됩니다. 표시 금액은 참고용입니다.",
     },
+    paymentMethods: {
+      title: "결제 수단",
+      subtitle: "결제 방법을 선택하세요 — 금액은 화면 통화로 표시됩니다",
+      continueButton: "결제 계속",
+      stripe: {
+        title: "카드",
+        description: "Stripe로 Visa, Mastercard 등",
+        chargeNote: "RUB로 결제됩니다. 표시 금액은 참고용입니다.",
+      },
+      payos: {
+        title: "VietQR · Momo · 은행",
+        description: "PayOS로 베트남에서 결제",
+        chargeNote: "결제 시점 환율로 VND가 청구됩니다.",
+      },
+      payosNotConfigured:
+        "PayOS는 곧 제공됩니다. 지금은 카드를 이용해 주세요.",
+    },
     packages: {
       "1m": { title: "1개월", caption: "표준 가격" },
       "3m": { title: "3개월", caption: "시즌에 유리" },

@@ -6,12 +6,25 @@ import {
   SESSION_COOKIE,
   verifySessionPayload,
 } from "@/lib/auth-session";
+import { isLiveAnalysisEnabled } from "@/lib/integrations-config";
 import { UI_PREVIEW_PRO_COOKIE } from "@/lib/ui-preview-pro-cookie";
 import { getMockAnalysis } from "@/lib/mock-data";
-import { checkSubscription } from "@/lib/subscription";
+import {
+  checkDailyLimit,
+  checkSubscription,
+  incrementUsage,
+} from "@/lib/subscription";
 import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
 
 export const dynamic = "force-dynamic";
+
+function usageTypeFromMatchStatus(
+  status: string | null
+): "upcoming" | "live" | null {
+  if (status === "live") return "live";
+  if (status === "upcoming") return "upcoming";
+  return null;
+}
 
 export async function GET(
   req: NextRequest,
@@ -20,6 +33,7 @@ export async function GET(
   try {
     const { matchId } = params;
     const sport = req.nextUrl.searchParams.get("sport") ?? "football";
+    const matchStatus = req.nextUrl.searchParams.get("status");
 
     const cookieStore = cookies();
     const sessionToken = cookieStore.get(SESSION_COOKIE)?.value ?? null;
@@ -41,7 +55,6 @@ export async function GET(
 
     const uiPreviewCookie =
       cookieStore.get(UI_PREVIEW_PRO_COOKIE)?.value === "1";
-    /** Предпросмотр из профиля (разрешённый @username + сессия с tg + кука). */
     const uiPreviewPro =
       Boolean(sessionUserId) &&
       uiPreviewCookie &&
@@ -51,14 +64,39 @@ export async function GET(
     const isPro =
       dbPro || uiPreviewPro || (devToolsBypass && wantsClientPro);
 
-    const useMock =
-      !process.env.ANTHROPIC_API_KEY ||
-      !process.env.API_SPORTS_KEY ||
-      process.env.NEXT_PUBLIC_USE_MOCKS === "true";
+    const useMock = !isLiveAnalysisEnabled();
+
+    if (!useMock && !isPro && sessionUserId) {
+      const usageType = usageTypeFromMatchStatus(matchStatus);
+      if (usageType) {
+        const limit = await checkDailyLimit(sessionUserId, usageType);
+        if (!limit.allowed) {
+          return NextResponse.json(
+            {
+              error: "DAILY_LIMIT",
+              used: limit.used,
+              limit: limit.limit,
+              type: usageType,
+              upgradeUrl: "/subscription",
+            },
+            { status: 402 }
+          );
+        }
+      }
+    }
 
     const analysis = useMock
       ? getMockAnalysis(matchId)
       : await analyzeMatch(matchId, sport, isPro);
+
+    if (!useMock && !isPro && sessionUserId) {
+      const usageType = usageTypeFromMatchStatus(matchStatus);
+      if (usageType) {
+        await incrementUsage(sessionUserId, usageType);
+      }
+    }
+
+    const dataSource = useMock ? ("mock" as const) : ("api" as const);
 
     if (!isPro) {
       return NextResponse.json({
@@ -74,11 +112,12 @@ export async function GET(
           scenarios: undefined,
         },
         isPro: false,
+        dataSource,
         upgradeUrl: "/subscription",
       });
     }
 
-    return NextResponse.json({ ...analysis, isPro: true });
+    return NextResponse.json({ ...analysis, isPro: true, dataSource });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(

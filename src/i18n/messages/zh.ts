@@ -137,6 +137,22 @@ export const zh: Messages = {
       unauthorized: "请通过 Telegram Mini App 打开并重试。",
       stripeDisclaimer: "通过 Stripe 以卢布 (RUB) 扣款。显示金额为参考价。",
     },
+    paymentMethods: {
+      title: "支付方式",
+      subtitle: "选择付款方式 — 金额以界面货币显示",
+      continueButton: "继续付款",
+      stripe: {
+        title: "银行卡",
+        description: "通过 Stripe 使用 Visa、Mastercard 等",
+        chargeNote: "以卢布 (RUB) 扣款。显示金额为参考价。",
+      },
+      payos: {
+        title: "VietQR · Momo · 银行",
+        description: "通过 PayOS 在越南付款",
+        chargeNote: "以越南盾 (VND) 按结账时汇率扣款。",
+      },
+      payosNotConfigured: "PayOS 即将上线，请暂时使用银行卡。",
+    },
     packages: {
       "1m": { title: "1 个月", caption: "标准价" },
       "3m": { title: "3 个月", caption: "赛季优选" },

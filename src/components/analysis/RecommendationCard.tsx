@@ -1,10 +1,5 @@
-"use client";
-
 import { Card, CardContent } from "@/components/ui/card";
-import { useAppLocale } from "@/hooks/use-app-locale";
 import { PaywallOverlay } from "@/components/paywall/PaywallOverlay";
-import { analysisBlockClass } from "@/lib/analysis-ui";
-import { cn } from "@/lib/utils";
 import type {
   AnalysisRecommendation,
   AnalysisRecommendationScenario,
@@ -15,21 +10,18 @@ interface RecommendationCardProps {
   isPro: boolean;
 }
 
-function scenarioKindShort(
-  kind: AnalysisRecommendationScenario["kind"] | undefined,
-  t: (key: string) => string
-) {
+function scenarioKindShort(kind?: AnalysisRecommendationScenario["kind"]) {
   switch (kind) {
     case "MATCH_RESULT":
       return null;
     case "TOTAL":
-      return t("analysis.scenarioTotal");
+      return "Голы";
     case "BTTS":
-      return t("analysis.scenarioBTTS");
+      return "ОЗ";
     case "DOUBLE_CHANCE":
-      return t("analysis.scenarioDoubleChance");
+      return "ДШ";
     case "HANDICAP":
-      return t("analysis.scenarioHandicap");
+      return "Фора";
     default:
       return null;
   }
@@ -38,16 +30,14 @@ function scenarioKindShort(
 function SingleScenarioCard({
   row,
   showReasoning,
-  t,
 }: {
   row: AnalysisRecommendationScenario;
   showReasoning: boolean;
-  t: (key: string) => string;
 }) {
-  const compact = scenarioKindShort(row.kind, t);
+  const compact = scenarioKindShort(row.kind);
 
   return (
-    <Card className={cn(analysisBlockClass, "overflow-hidden")}>
+    <Card className="overflow-hidden">
       <CardContent className="space-y-2 p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-xs font-medium text-muted-foreground">
@@ -85,14 +75,13 @@ export function RecommendationCard({
   recommendation,
   isPro,
 }: RecommendationCardProps) {
-  const { t } = useAppLocale();
   const rows: AnalysisRecommendationScenario[] =
     recommendation.scenarios && recommendation.scenarios.length > 0
       ? recommendation.scenarios
       : [
           {
             kind: "MATCH_RESULT",
-            label: t("analysis.outcomeLabel"),
+            label: "Исход",
             pick: recommendation.outcome,
             probability: null,
             confidence: recommendation.confidence,
@@ -106,7 +95,6 @@ export function RecommendationCard({
           key={`${row.label}-${row.kind ?? "custom"}-${i}`}
           row={row}
           showReasoning={isPro}
-          t={t}
         />
       ))}
     </div>
@@ -115,7 +103,7 @@ export function RecommendationCard({
   return (
     <section className="space-y-3">
       <h2 className="px-1 text-base font-semibold tracking-tight text-foreground">
-        {t("analysis.recommendation")}
+        Сценарии ИИ
       </h2>
 
       {isPro ? (
@@ -123,10 +111,10 @@ export function RecommendationCard({
           {scenarioStack}
 
           {recommendation.reasoning ? (
-            <Card className={cn(analysisBlockClass, "overflow-hidden")}>
+            <Card className="overflow-hidden">
               <CardContent className="space-y-1.5 p-4 sm:p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t("analysis.generalSummary")}
+                  Общее резюме
                 </p>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {recommendation.reasoning}
@@ -137,8 +125,8 @@ export function RecommendationCard({
         </>
       ) : (
         <PaywallOverlay
-          title={t("paywall.title")}
-          description={t("paywall.description")}
+          title="Сценарии ИИ — в Pro"
+          description="Прогнозы модели по исходу, тоталам и другим рынкам с пояснениями доступны после подключения подписки."
         >
           {scenarioStack}
         </PaywallOverlay>
