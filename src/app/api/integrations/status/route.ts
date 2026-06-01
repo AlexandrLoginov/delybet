@@ -3,13 +3,14 @@ import { NextResponse } from "next/server";
 import {
   analysisMatchDataSource,
   apiFootballSeasonYear,
+  forceMockData,
   footballLeagueIds,
   isAnthropicConfigured,
   isApiSportsConfigured,
-  isNewsApiConfigured,
-  upcomingMatchesDaysAhead,
   isLiveAnalysisEnabled,
   isLiveSportsDataEnabled,
+  isNewsApiConfigured,
+  upcomingMatchesDaysAhead,
 } from "@/lib/integrations-config";
 
 export const dynamic = "force-dynamic";
@@ -17,12 +18,12 @@ export const dynamic = "force-dynamic";
 /** Диагностика внешних API (без секретов). */
 export async function GET() {
   return NextResponse.json({
-    mocksForced: process.env.NEXT_PUBLIC_USE_MOCKS === "true",
+    mocksForced: forceMockData(),
     sports: {
       configured: isApiSportsConfigured(),
       liveData: isLiveSportsDataEnabled(),
       season: apiFootballSeasonYear(),
-      leagueIds: footballLeagueIds() ?? null,
+      leagueIds: footballLeagueIds(),
       upcomingDays: upcomingMatchesDaysAhead(),
       listPath: "/api/matches",
     },

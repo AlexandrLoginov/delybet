@@ -21,14 +21,17 @@ export function isNewsApiConfigured(): boolean {
 
 /** Список матчей с API-Sports (без моков). */
 export function isLiveSportsDataEnabled(): boolean {
-  if (process.env.NEXT_PUBLIC_USE_MOCKS === "true") return false;
   return isApiSportsConfigured();
 }
 
 /** ИИ-анализ через Anthropic (данные матча — API-Football или демо-список). */
 export function isLiveAnalysisEnabled(): boolean {
-  if (process.env.NEXT_PUBLIC_USE_MOCKS === "true") return false;
   return isAnthropicConfigured();
+}
+
+/** Явный режим демо-данных (перебивает API даже при наличии ключей). */
+export function forceMockData(): boolean {
+  return process.env.NEXT_PUBLIC_USE_MOCKS === "true";
 }
 
 /** Откуда берутся данные для промпта перед вызовом Anthropic. */
@@ -38,15 +41,14 @@ export function analysisMatchDataSource(): "api-football" | "mock-fixtures" | nu
   return "mock-fixtures";
 }
 
-/** Опциональный фильтр лиг: `39,140,135` (ID API-Football). Пусто — все лиги в ответе API. */
-export function footballLeagueIds(): number[] | undefined {
+/** Фильтр лиг. Пустой массив = все лиги из ответа API. */
+export function footballLeagueIds(): number[] {
   const raw = process.env.API_FOOTBALL_LEAGUE_IDS?.trim();
-  if (!raw) return undefined;
-  const ids = raw
+  if (!raw) return [];
+  return raw
     .split(/[,\s]+/)
     .map((s) => parseInt(s, 10))
     .filter((n) => Number.isFinite(n) && n > 0);
-  return ids.length > 0 ? ids : undefined;
 }
 
 export function apiFootballSeasonYear(): number {

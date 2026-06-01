@@ -110,6 +110,80 @@ function addDays(base: Date, days: number): Date {
   return d;
 }
 
+const FREE_PLAN_DATE_WINDOW_RE =
+  /try from (\d{4}-\d{2}-\d{2}) to (\d{4}-\d{2}-\d{2})/i;
+
+function isDateAccessPlanError(message: string): boolean {
+  return message.includes("do not have access to this date");
+}
+
+function parseFreePlanDateWindow(message: string): { from: string; to: string } | null {
+  const match = message.match(FREE_PLAN_DATE_WINDOW_RE);
+  if (!match?.[1] || !match[2]) return null;
+  return { from: match[1], to: match[2] };
+}
+
+function enumerateDates(from: string, to: string): string[] {
+  const dates: string[] = [];
+  let cur = new Date(`${from}T12:00:00Z`);
+  const end = new Date(`${to}T12:00:00Z`);
+  while (cur <= end) {
+    dates.push(formatDateYmd(cur));
+    cur = addDays(cur, 1);
+  }
+  return dates;
+}
+
+function buildDateCandidates(daysAhead: number): string[] {
+  const today = new Date();
+  return Array.from({ length: daysAhead + 1 }, (_, offset) =>
+    formatDateYmd(addDays(today, offset))
+  );
+}
+
+async function resolveFixtureDateCandidates(daysAhead: number): Promise<string[]> {
+  const candidates = buildDateCandidates(daysAhead);
+
+  for (const dateStr of candidates) {
+    try {
+      await footballGet<RawMatch[]>(
+        "/fixtures",
+        { date: dateStr },
+        null,
+        0
+      );
+      return candidates;
+    } catch (error) {
+      if (error instanceof SportsApiError && isDateAccessPlanError(error.message)) {
+        const window = parseFreePlanDateWindow(error.message);
+        if (window) return enumerateDates(window.from, window.to);
+      }
+    }
+  }
+
+  return candidates;
+}
+
+async function fetchFixturesByDate(
+  dateStr: string,
+  cacheKey: string,
+  ttlSeconds: number
+): Promise<RawMatch[]> {
+  try {
+    return await footballGet<RawMatch[]>(
+      "/fixtures",
+      { date: dateStr },
+      cacheKey,
+      ttlSeconds
+    );
+  } catch (error) {
+    if (error instanceof SportsApiError && isDateAccessPlanError(error.message)) {
+      return [];
+    }
+    throw error;
+  }
+}
+
 async function footballGet<T>(
   path: string,
   params: Record<string, string | number>,
@@ -206,8 +280,8 @@ function isUpcomingFixture(raw: RawMatch): boolean {
   return UPCOMING_STATUS.has(raw.fixture.status.short);
 }
 
-function matchesLeagueFilter(raw: RawMatch, leagueIds: number[] | undefined): boolean {
-  if (!leagueIds?.length) return true;
+function matchesLeagueFilter(raw: RawMatch, leagueIds: number[]): boolean {
+  if (!leagueIds.length) return true;
   return leagueIds.includes(raw.league.id);
 }
 
@@ -217,23 +291,16 @@ export async function getUpcomingMatches(
 ): Promise<RawMatch[]> {
   const leagues = leagueIds ?? footballLeagueIds();
   const daysAhead = upcomingMatchesDaysAhead();
-  const today = new Date();
+  const dateStrings = await resolveFixtureDateCandidates(daysAhead);
   const seen = new Set<number>();
   const merged: RawMatch[] = [];
 
-  /** Free tier: `date=` работает; `from/to/status` без league часто отклоняется. */
-  for (let offset = 0; offset <= daysAhead; offset += 1) {
-    const dateStr = formatDateYmd(addDays(today, offset));
+  for (const dateStr of dateStrings) {
     const cacheKey = CacheKeys.upcomingMatches(
-      `football:date:${dateStr}:${leagues?.join("-") ?? "all"}`
+      `football:date:${dateStr}:${leagues.join("-")}`
     );
 
-    const rows = await footballGet<RawMatch[]>(
-      "/fixtures",
-      { date: dateStr },
-      cacheKey,
-      900
-    );
+    const rows = await fetchFixturesByDate(dateStr, cacheKey, 900);
 
     for (const row of rows) {
       if (seen.has(row.fixture.id)) continue;
@@ -251,13 +318,15 @@ export async function getUpcomingMatches(
 }
 
 export async function getLiveMatches(_sport = "football"): Promise<RawMatch[]> {
-  const cacheKey = CacheKeys.liveMatches("football");
-  return footballGet<RawMatch[]>(
+  const leagues = footballLeagueIds();
+  const cacheKey = CacheKeys.liveMatches(`football:${leagues.join("-")}`);
+  const rows = await footballGet<RawMatch[]>(
     "/fixtures",
     { live: "all" },
     cacheKey,
     120
   );
+  return rows.filter((row) => matchesLeagueFilter(row, leagues));
 }
 
 export async function getMatchById(fixtureId: number): Promise<RawMatch | null> {

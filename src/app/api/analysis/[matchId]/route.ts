@@ -6,7 +6,7 @@ import {
   SESSION_COOKIE,
   verifySessionPayload,
 } from "@/lib/auth-session";
-import { isLiveAnalysisEnabled } from "@/lib/integrations-config";
+import { forceMockData, isLiveAnalysisEnabled } from "@/lib/integrations-config";
 import { UI_PREVIEW_PRO_COOKIE } from "@/lib/ui-preview-pro-cookie";
 import { getMockAnalysis } from "@/lib/mock-data";
 import {
@@ -64,7 +64,7 @@ export async function GET(
     const isPro =
       dbPro || uiPreviewPro || (devToolsBypass && wantsClientPro);
 
-    const useMock = !isLiveAnalysisEnabled();
+    const useMock = forceMockData() || !isLiveAnalysisEnabled();
 
     if (!useMock && !isPro && sessionUserId) {
       const usageType = usageTypeFromMatchStatus(matchStatus);

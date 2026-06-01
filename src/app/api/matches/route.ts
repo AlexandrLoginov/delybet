@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { CacheKeys } from "@/lib/cache";
-import { isLiveSportsDataEnabled } from "@/lib/integrations-config";
+import { forceMockData, isLiveSportsDataEnabled } from "@/lib/integrations-config";
 import { MOCK_MATCHES } from "@/lib/mock-data";
 import { rawMatchToMatch } from "@/lib/match-mapper";
 import { getLiveMatches, getUpcomingMatches, SportsApiError } from "@/lib/sports-api";
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     req.nextUrl.searchParams.get("tab") === "live" ? "live" : "upcoming";
   const sport = req.nextUrl.searchParams.get("sport") ?? "all";
 
-  if (!isLiveSportsDataEnabled()) {
+  if (forceMockData() || !isLiveSportsDataEnabled()) {
     return NextResponse.json({
       matches: filterMock(tab, sport),
       source: "mock" as const,
