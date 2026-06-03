@@ -66,6 +66,9 @@ export const ko: Messages = {
     planLabel: "현재 플랜",
     devPreview: "Pro 모드 (테스트)",
     devPreviewHint: "개발용",
+    dataSourceMock: "Mock",
+    dataSourceApi: "Api",
+    dataSourcePreview: "데이터 소스 (미리보기)",
     gateSignIn: "Telegram Mini App으로 로그인",
     gateBrowser: "Telegram에서 DelyBet 열기",
     openInTelegram: "Telegram에서 열기",
@@ -202,6 +205,10 @@ export const ko: Messages = {
     formHome: "홈",
     formAway: "원정",
     loadError: "분석을 불러오지 못했습니다",
+    rateLimitError:
+      "API 요청이 너무 많습니다. 1분 후 다시 시도하세요.",
+    billingError:
+      "AI 분석을 사용할 수 없습니다. Anthropic 크레딧을 충전하세요.",
     retry: "다시 시도",
     limitTitle: "오늘 Free 한도",
     limitDescription: "Pro로 무제한 이용하거나 내일 다시 오세요.",

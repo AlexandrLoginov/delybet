@@ -68,6 +68,9 @@ export type Messages = {
     planLabel: string;
     devPreview: string;
     devPreviewHint: string;
+    dataSourceMock: string;
+    dataSourceApi: string;
+    dataSourcePreview: string;
     gateSignIn: string;
     gateBrowser: string;
     openInTelegram: string;
@@ -175,6 +178,8 @@ export type Messages = {
     formHome: string;
     formAway: string;
     loadError: string;
+    rateLimitError: string;
+    billingError: string;
     retry: string;
     limitTitle: string;
     limitDescription: string;

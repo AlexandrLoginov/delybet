@@ -3,6 +3,11 @@
 
 import axios, { isAxiosError } from "axios";
 
+import {
+  apiFootballRateLimitMessage,
+  isApiFootballRateLimit,
+  waitForApiFootballSlot,
+} from "./api-football-throttle";
 import { getCached, setCached, CacheKeys } from "./cache";
 import {
   apiFootballSeasonYear,
@@ -141,27 +146,42 @@ function buildDateCandidates(daysAhead: number): string[] {
   );
 }
 
-async function resolveFixtureDateCandidates(daysAhead: number): Promise<string[]> {
-  const candidates = buildDateCandidates(daysAhead);
+let cachedFixtureDates: { dates: string[]; expiresAt: number } | null = null;
 
-  for (const dateStr of candidates) {
-    try {
-      await footballGet<RawMatch[]>(
-        "/fixtures",
-        { date: dateStr },
-        null,
-        0
-      );
-      return candidates;
-    } catch (error) {
-      if (error instanceof SportsApiError && isDateAccessPlanError(error.message)) {
-        const window = parseFreePlanDateWindow(error.message);
-        if (window) return enumerateDates(window.from, window.to);
+function rememberFixtureDates(dates: string[]): string[] {
+  cachedFixtureDates = {
+    dates,
+    expiresAt: Date.now() + 3_600_000,
+  };
+  return dates;
+}
+
+async function resolveFixtureDateCandidates(daysAhead: number): Promise<string[]> {
+  if (cachedFixtureDates && cachedFixtureDates.expiresAt > Date.now()) {
+    return cachedFixtureDates.dates.slice(0, daysAhead + 1);
+  }
+
+  const todayStr = formatDateYmd(new Date());
+
+  try {
+    await footballGet<RawMatch[]>(
+      "/fixtures",
+      { date: todayStr },
+      CacheKeys.upcomingMatches("football:probe"),
+      3600
+    );
+    return rememberFixtureDates(buildDateCandidates(daysAhead));
+  } catch (error) {
+    if (error instanceof SportsApiError && isDateAccessPlanError(error.message)) {
+      const window = parseFreePlanDateWindow(error.message);
+      if (window) {
+        const dates = enumerateDates(window.from, window.to);
+        return rememberFixtureDates(dates.slice(0, daysAhead + 1));
       }
     }
   }
 
-  return candidates;
+  return rememberFixtureDates(buildDateCandidates(daysAhead));
 }
 
 async function fetchFixturesByDate(
@@ -184,6 +204,8 @@ async function fetchFixturesByDate(
   }
 }
 
+const inflightRequests = new Map<string, Promise<unknown>>();
+
 async function footballGet<T>(
   path: string,
   params: Record<string, string | number>,
@@ -195,41 +217,59 @@ async function footballGet<T>(
     if (cached != null) return cached;
   }
 
+  const requestKey = `${path}?${JSON.stringify(params)}`;
+  const inflight = inflightRequests.get(requestKey);
+  if (inflight) return inflight as Promise<T>;
+
+  const promise = (async (): Promise<T> => {
+    await waitForApiFootballSlot();
+
+    try {
+      const { data } = await axios.get<ApiFootballEnvelope<T>>(`${BASE_URL}${path}`, {
+        headers: headers(),
+        params,
+        timeout: 20_000,
+      });
+
+      if (data.errors && Object.keys(data.errors).length > 0) {
+        const errText =
+          typeof data.errors === "object" && !Array.isArray(data.errors)
+            ? Object.values(data.errors).join("; ")
+            : String(data.errors);
+        throw new SportsApiError(errText || "API-Football error");
+      }
+
+      const result = (data.response ?? []) as T;
+      if (cacheKey) {
+        await setCached(cacheKey, result, ttlSeconds);
+      }
+      return result;
+    } catch (error) {
+      if (error instanceof SportsApiError) throw error;
+      if (isAxiosError(error)) {
+        const status = error.response?.status;
+        const msg =
+          (error.response?.data as { message?: string })?.message ||
+          error.message;
+        if (isApiFootballRateLimit(status, msg)) {
+          throw new SportsApiError(apiFootballRateLimitMessage(), 429);
+        }
+        throw new SportsApiError(
+          status === 401 || status === 403
+            ? "Неверный или просроченный API_SPORTS_KEY"
+            : msg,
+          status
+        );
+      }
+      throw error;
+    }
+  })();
+
+  inflightRequests.set(requestKey, promise);
   try {
-    const { data } = await axios.get<ApiFootballEnvelope<T>>(`${BASE_URL}${path}`, {
-      headers: headers(),
-      params,
-      timeout: 20_000,
-    });
-
-    if (data.errors && Object.keys(data.errors).length > 0) {
-      const errText =
-        typeof data.errors === "object" && !Array.isArray(data.errors)
-          ? Object.values(data.errors).join("; ")
-          : String(data.errors);
-      throw new SportsApiError(errText || "API-Football error");
-    }
-
-    const result = (data.response ?? []) as T;
-    if (cacheKey) {
-      await setCached(cacheKey, result, ttlSeconds);
-    }
-    return result;
-  } catch (error) {
-    if (error instanceof SportsApiError) throw error;
-    if (isAxiosError(error)) {
-      const status = error.response?.status;
-      const msg =
-        (error.response?.data as { message?: string })?.message ||
-        error.message;
-      throw new SportsApiError(
-        status === 401 || status === 403
-          ? "Неверный или просроченный API_SPORTS_KEY"
-          : msg,
-        status
-      );
-    }
-    throw error;
+    return await promise;
+  } finally {
+    inflightRequests.delete(requestKey);
   }
 }
 
@@ -335,7 +375,7 @@ export async function getMatchById(fixtureId: number): Promise<RawMatch | null> 
     "/fixtures",
     { id: fixtureId },
     cacheKey,
-    60
+    900
   );
   return rows[0] ?? null;
 }

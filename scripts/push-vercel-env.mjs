@@ -16,9 +16,20 @@ const KEYS = [
   "ANTHROPIC_API_KEY",
   "ANTHROPIC_MODEL",
   "API_FOOTBALL_SEASON",
+  "API_FOOTBALL_LEAGUE_IDS",
+  "API_FOOTBALL_UPCOMING_DAYS",
   "SESSION_SECRET",
   "TELEGRAM_BOT_TOKEN",
+  "NEWS_API_KEY",
+  "UPSTASH_REDIS_REST_URL",
+  "UPSTASH_REDIS_REST_TOKEN",
+  "NEXT_PUBLIC_SUPPORT_URL",
+  "NEXT_PUBLIC_TELEGRAM_BOT_URL",
 ];
+
+function isPlaceholderDb(url) {
+  return !url || url.includes("USER:PASSWORD") || url.includes("@HOST.");
+}
 
 function loadToken() {
   const authPath = join(
@@ -102,6 +113,7 @@ async function main() {
   const local = parseEnvLocal(envPath);
 
   local.NEXT_PUBLIC_APP_URL = "https://delybet.app";
+  local.NEXT_PUBLIC_USE_MOCKS = "false";
 
   for (const key of KEYS) {
     const value = local[key];
@@ -117,7 +129,21 @@ async function main() {
   await upsertEnv(token, "NEXT_PUBLIC_APP_URL", local.NEXT_PUBLIC_APP_URL);
   console.log("set NEXT_PUBLIC_APP_URL… ok");
 
-  console.log("\nDone. Redeploy: npx vercel --prod");
+  await upsertEnv(token, "NEXT_PUBLIC_USE_MOCKS", local.NEXT_PUBLIC_USE_MOCKS);
+  console.log("set NEXT_PUBLIC_USE_MOCKS… ok");
+
+  const dbUrl = local.DATABASE_URL;
+  if (dbUrl && !isPlaceholderDb(dbUrl)) {
+    process.stdout.write("set DATABASE_URL… ");
+    await upsertEnv(token, "DATABASE_URL", dbUrl);
+    console.log("ok");
+  } else {
+    console.warn(
+      "skip DATABASE_URL: placeholder in .env.local — добавьте Neon URL в Vercel для сессии Telegram"
+    );
+  }
+
+  console.log("\nDone. Redeploy: npm run vercel:deploy");
 }
 
 main().catch((err) => {

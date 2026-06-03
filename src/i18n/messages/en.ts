@@ -66,6 +66,9 @@ export const en: Messages = {
     planLabel: "Current plan",
     devPreview: "Pro mode (test)",
     devPreviewHint: "Development only",
+    dataSourceMock: "Mock",
+    dataSourceApi: "Api",
+    dataSourcePreview: "Data source (preview)",
     gateSignIn: "Sign in via Telegram Mini App",
     gateBrowser: "Open DelyBet in Telegram",
     openInTelegram: "Open in Telegram",
@@ -211,6 +214,10 @@ export const en: Messages = {
     formHome: "Home",
     formAway: "Away",
     loadError: "Could not load analysis",
+    rateLimitError:
+      "Too many API requests. Wait a minute and tap Retry.",
+    billingError:
+      "AI analysis is unavailable: add credits in the Anthropic console.",
     retry: "Retry",
     limitTitle: "Free limit for today",
     limitDescription:

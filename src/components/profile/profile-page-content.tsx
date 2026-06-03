@@ -18,7 +18,7 @@ import { ProfileLanguageSettingRow } from "@/components/profile/profile-language
 import { ProfileTelegramIdentity } from "@/components/profile/profile-telegram-identity";
 import { ProfileProPromoBanner } from "@/components/profile/profile-pro-promo-banner";
 import {
-  ProfileTariffPreviewControl,
+  ProfileAdminPreviewBar,
   ProfileTariffPreviewGate,
 } from "@/components/profile/pro-mode-dev-toggle";
 import { useAppLocale } from "@/hooks/use-app-locale";
@@ -79,9 +79,7 @@ export function ProfilePageContent() {
         </Card>
       </section>
       <ProfileTariffPreviewGate>
-        <div className="flex justify-end px-1 pt-1">
-          <ProfileTariffPreviewControl />
-        </div>
+        <ProfileAdminPreviewBar />
       </ProfileTariffPreviewGate>
     </main>
   );

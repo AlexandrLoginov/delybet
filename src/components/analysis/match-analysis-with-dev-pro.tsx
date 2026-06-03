@@ -8,6 +8,7 @@ import { MatchFreePreviewGate } from "@/components/paywall/MatchFreePreviewGate"
 import { Button } from "@/components/ui/button";
 import { useAppLocale } from "@/hooks/use-app-locale";
 import { useAuthMe } from "@/hooks/use-auth-me";
+import { useAdminDataSource } from "@/hooks/use-admin-data-source";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
 import { normalizeAnalysisPayload } from "@/lib/analysis-api-normalize";
 import { fillAnalysisDemoGaps } from "@/lib/analysis-demo-fill";
@@ -18,15 +19,19 @@ const fetcher = async (url: string) => {
   const res = await fetch(url, { credentials: "include" });
   const data = await res.json();
   if (!res.ok) {
+    const code = typeof data?.error === "string" ? data.error : "";
     const msg =
       typeof data?.message === "string" ? data.message : "ANALYSIS_FAILED";
-    throw new Error(msg);
+    const err = new Error(msg) as Error & { code?: string; status?: number };
+    err.code = code;
+    err.status = res.status;
+    throw err;
   }
   return data;
 };
 
 const matchesFetcher = async (url: string) => {
-  const res = await fetch(url);
+  const res = await fetch(url, { credentials: "include" });
   const data = await res.json();
   if (!res.ok) {
     throw new Error(
@@ -45,6 +50,7 @@ export function MatchAnalysisWithDevPro({
 }) {
   const { t } = useAppLocale();
   const { data: authMe } = useAuthMe();
+  const adminDataSource = useAdminDataSource();
   const devPro = useDevProPreview();
   const devTools =
     process.env.NODE_ENV === "development" &&
@@ -55,16 +61,22 @@ export function MatchAnalysisWithDevPro({
 
   const swrKey = `/api/analysis/${match.id}?sport=${encodeURIComponent(match.sport)}&status=${encodeURIComponent(match.status)}&pro=${proParam}`;
 
-  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
-    revalidateOnFocus: false,
-    dedupingInterval: 60_000,
-  });
+  const { data, error, isLoading, mutate } = useSWR(
+    [swrKey, adminDataSource] as const,
+    ([url]) => fetcher(url),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60_000,
+    }
+  );
 
   const needLiveFreemiumList = match.status === "live" && !isPro;
   const { data: liveListPayload, isLoading: liveListLoading, error: liveListError } =
     useSWR(
-      needLiveFreemiumList ? "/api/matches?tab=live&sport=all" : null,
-      matchesFetcher,
+      needLiveFreemiumList
+        ? (["/api/matches?tab=live&sport=all", adminDataSource] as const)
+        : null,
+      ([url]) => matchesFetcher(url),
       { revalidateOnFocus: false, dedupingInterval: 60_000 }
     );
 
@@ -72,10 +84,24 @@ export function MatchAnalysisWithDevPro({
     needLiveFreemiumList && liveListLoading && !liveListError;
 
   if (error) {
+    const err = error as Error & { code?: string; status?: number };
+    const rateLimited =
+      err.code === "RATE_LIMIT" ||
+      err.status === 429 ||
+      /429|too many requests|rate limit/i.test(err.message);
+    const billingIssue = err.code === "BILLING";
     return (
       <main className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8 text-center">
-        <p className="text-sm text-muted-foreground">{t("analysis.loadError")}</p>
-        <p className="mt-2 text-xs text-destructive">{String(error.message)}</p>
+        <p className="text-sm text-muted-foreground">
+          {billingIssue
+            ? t("analysis.billingError")
+            : rateLimited
+              ? t("analysis.rateLimitError")
+              : t("analysis.loadError")}
+        </p>
+        {!rateLimited && !billingIssue ? (
+          <p className="mt-2 text-xs text-destructive">{String(error.message)}</p>
+        ) : null}
         <Button type="button" className="mt-4" size="sm" onClick={() => mutate()}>
           {t("analysis.retry")}
         </Button>

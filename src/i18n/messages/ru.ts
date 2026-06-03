@@ -66,6 +66,9 @@ export const ru: Messages = {
     planLabel: "Текущий план",
     devPreview: "Режим Pro (тест)",
     devPreviewHint: "Только для разработки",
+    dataSourceMock: "Mock",
+    dataSourceApi: "Api",
+    dataSourcePreview: "Источник данных (тест)",
     gateSignIn: "Войдите через Telegram Mini App",
     gateBrowser: "Откройте DelyBet в Telegram",
     openInTelegram: "Открыть в Telegram",
@@ -211,6 +214,10 @@ export const ru: Messages = {
     formHome: "Дом",
     formAway: "Гости",
     loadError: "Не удалось загрузить анализ",
+    rateLimitError:
+      "Слишком много запросов к API. Подождите минуту и нажмите «Повторить».",
+    billingError:
+      "ИИ-анализ временно недоступен: пополните баланс Anthropic в консоли разработчика.",
     retry: "Повторить",
     limitTitle: "Лимит Free на сегодня",
     limitDescription:

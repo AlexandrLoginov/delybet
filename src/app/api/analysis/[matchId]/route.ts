@@ -1,14 +1,19 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { analyzeMatch } from "@/lib/ai-analysis";
+import { analyzeMatch, AiAnalysisError } from "@/lib/ai-analysis";
 import {
   SESSION_COOKIE,
   verifySessionPayload,
 } from "@/lib/auth-session";
-import { forceMockData, isLiveAnalysisEnabled } from "@/lib/integrations-config";
+import {
+  getAdminDataSourceOverrideFromRequest,
+  resolveUseMockAnalysis,
+} from "@/lib/admin-data-source";
+import { isLiveAnalysisEnabled } from "@/lib/integrations-config";
 import { UI_PREVIEW_PRO_COOKIE } from "@/lib/ui-preview-pro-cookie";
 import { getMockAnalysis } from "@/lib/mock-data";
+import { SportsApiError } from "@/lib/sports-api";
 import {
   checkDailyLimit,
   checkSubscription,
@@ -64,7 +69,18 @@ export async function GET(
     const isPro =
       dbPro || uiPreviewPro || (devToolsBypass && wantsClientPro);
 
-    const useMock = forceMockData() || !isLiveAnalysisEnabled();
+    const adminDataSource = getAdminDataSourceOverrideFromRequest(req);
+    const useMock = resolveUseMockAnalysis(adminDataSource);
+
+    if (!useMock && !isLiveAnalysisEnabled()) {
+      return NextResponse.json(
+        {
+          error: "ANALYSIS_UNAVAILABLE",
+          message: "ANTHROPIC_API_KEY не настроен для режима Api",
+        },
+        { status: 503 }
+      );
+    }
 
     if (!useMock && !isPro && sessionUserId) {
       const usageType = usageTypeFromMatchStatus(matchStatus);
@@ -119,6 +135,18 @@ export async function GET(
 
     return NextResponse.json({ ...analysis, isPro: true, dataSource });
   } catch (error) {
+    if (error instanceof AiAnalysisError) {
+      return NextResponse.json(
+        { error: error.code, message: error.message },
+        { status: error.statusCode }
+      );
+    }
+    if (error instanceof SportsApiError && error.statusCode === 429) {
+      return NextResponse.json(
+        { error: "RATE_LIMIT", message: error.message },
+        { status: 429 }
+      );
+    }
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { error: "ANALYSIS_FAILED", message },

@@ -4,6 +4,7 @@ out
 .env
 .env.local
 .env*.local
+.env.vercel.import
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts

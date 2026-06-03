@@ -31,6 +31,37 @@ function getAnthropic(): Anthropic {
   return new Anthropic({ apiKey: key });
 }
 
+export class AiAnalysisError extends Error {
+  constructor(
+    message: string,
+    readonly code: "RATE_LIMIT" | "BILLING" | "UNAVAILABLE" = "UNAVAILABLE",
+    readonly statusCode: number = 503
+  ) {
+    super(message);
+    this.name = "AiAnalysisError";
+  }
+}
+
+function rethrowAnthropicError(error: unknown): never {
+  const text = error instanceof Error ? error.message : String(error);
+  if (/credit balance is too low|insufficient.*credit|billing/i.test(text)) {
+    throw new AiAnalysisError(
+      "Недостаточно средств на балансе Anthropic. Пополните кредиты в консоли Anthropic.",
+      "BILLING",
+      503
+    );
+  }
+  if (/429|rate limit|too many requests/i.test(text)) {
+    throw new AiAnalysisError(
+      "Слишком много запросов к ИИ. Подождите минуту и нажмите «Повторить».",
+      "RATE_LIMIT",
+      429
+    );
+  }
+  if (error instanceof Error) throw error;
+  throw new Error(text);
+}
+
 /** Идентификатор модели: `ANTHROPIC_MODEL` или встроенный дефолт для Anthropic Messages API. */
 function anthropicMessagesModelId(): string {
   const fromEnv = process.env.ANTHROPIC_MODEL?.trim();
@@ -208,7 +239,7 @@ export async function analyzeMatch(
     const fixtureId = parseInt(matchId, 10);
     const raw = await getMatchById(fixtureId);
     if (raw) {
-      return runApiFootballAnalysis(matchId, fixtureId, cacheKey);
+      return runApiFootballAnalysis(matchId, fixtureId, cacheKey, raw);
     }
   }
 
@@ -223,23 +254,16 @@ export async function analyzeMatch(
 async function runApiFootballAnalysis(
   matchId: string,
   fixtureId: number,
-  cacheKey: string
+  cacheKey: string,
+  match: NonNullable<Awaited<ReturnType<typeof getMatchById>>>
 ): Promise<FullAnalysis> {
-  const [match, stats] = await Promise.all([
-    getMatchById(fixtureId),
-    getMatchStats(fixtureId),
-  ]);
-
-  if (!match) throw new Error(`Match ${matchId} not found`);
-
   const isLive = isLiveFootballStatus(match.fixture.status.short);
-
   const season = apiFootballSeasonYear();
-  const [homeForm, awayForm, news] = await Promise.all([
-    getTeamForm(match.teams.home.id, match.league.id, season),
-    getTeamForm(match.teams.away.id, match.league.id, season),
-    getMatchNews(match.teams.home.name, match.teams.away.name),
-  ]);
+
+  const stats = isLive ? await getMatchStats(fixtureId) : null;
+  const homeForm = await getTeamForm(match.teams.home.id, match.league.id, season);
+  const awayForm = await getTeamForm(match.teams.away.id, match.league.id, season);
+  const news = await getMatchNews(match.teams.home.name, match.teams.away.name);
 
   const prompt = buildPrompt({ match, stats, homeForm, awayForm, news, isLive });
   return finishAnalysis(matchId, isLive, cacheKey, prompt, stats, homeForm, awayForm);
@@ -317,13 +341,18 @@ async function finishAnalysis(
   homeForm: TeamForm,
   awayForm: TeamForm
 ): Promise<FullAnalysis> {
-  const message = await getAnthropic().messages.create({
-    model: anthropicMessagesModelId(),
-    max_tokens: 1536,
-    system: `Ты — эксперт по спортивной аналитике. Анализируй матчи объективно на основе данных.
+  let message;
+  try {
+    message = await getAnthropic().messages.create({
+      model: anthropicMessagesModelId(),
+      max_tokens: 1536,
+      system: `Ты — эксперт по спортивной аналитике. Анализируй матчи объективно на основе данных.
 Всегда отвечай строго в JSON-формате без markdown-блоков и лишнего текста.`,
-    messages: [{ role: "user", content: prompt }],
-  });
+      messages: [{ role: "user", content: prompt }],
+    });
+  } catch (error) {
+    rethrowAnthropicError(error);
+  }
 
   const block = message.content.find((b) => b.type === "text");
   if (!block || block.type !== "text") {

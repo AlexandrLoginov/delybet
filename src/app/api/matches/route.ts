@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { CacheKeys } from "@/lib/cache";
-import { forceMockData, isLiveSportsDataEnabled } from "@/lib/integrations-config";
+import {
+  getAdminDataSourceOverrideFromRequest,
+  resolveUseMockSportsData,
+} from "@/lib/admin-data-source";
 import { MOCK_MATCHES } from "@/lib/mock-data";
 import { rawMatchToMatch } from "@/lib/match-mapper";
 import { getLiveMatches, getUpcomingMatches, SportsApiError } from "@/lib/sports-api";
@@ -30,7 +33,10 @@ export async function GET(req: NextRequest) {
     req.nextUrl.searchParams.get("tab") === "live" ? "live" : "upcoming";
   const sport = req.nextUrl.searchParams.get("sport") ?? "all";
 
-  if (forceMockData() || !isLiveSportsDataEnabled()) {
+  const adminDataSource = getAdminDataSourceOverrideFromRequest(req);
+  const useMock = resolveUseMockSportsData(adminDataSource);
+
+  if (useMock) {
     return NextResponse.json({
       matches: filterMock(tab, sport),
       source: "mock" as const,
@@ -67,9 +73,11 @@ export async function GET(req: NextRequest) {
           ? error.message
           : "Unknown error";
     const status =
-      error instanceof SportsApiError && error.statusCode === 401
-        ? 503
-        : 502;
+      error instanceof SportsApiError && error.statusCode === 429
+        ? 429
+        : error instanceof SportsApiError && error.statusCode === 401
+          ? 503
+          : 502;
     return NextResponse.json(
       { error: "MATCHES_FETCH_FAILED", message },
       { status }

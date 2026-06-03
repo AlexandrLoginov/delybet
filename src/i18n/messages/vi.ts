@@ -66,6 +66,9 @@ export const vi: Messages = {
     planLabel: "Gói hiện tại",
     devPreview: "Chế độ Pro (thử)",
     devPreviewHint: "Chỉ dành cho phát triển",
+    dataSourceMock: "Mock",
+    dataSourceApi: "Api",
+    dataSourcePreview: "Nguồn dữ liệu (thử)",
     gateSignIn: "Đăng nhập qua Telegram Mini App",
     gateBrowser: "Mở DelyBet trong Telegram",
     openInTelegram: "Mở trong Telegram",
@@ -207,6 +210,10 @@ export const vi: Messages = {
     formHome: "Nhà",
     formAway: "Khách",
     loadError: "Không tải được phân tích",
+    rateLimitError:
+      "Quá nhiều yêu cầu API. Đợi một phút rồi nhấn Thử lại.",
+    billingError:
+      "Phân tích AI tạm khóa: nạp thêm credit Anthropic.",
     retry: "Thử lại",
     limitTitle: "Giới hạn Free hôm nay",
     limitDescription:
