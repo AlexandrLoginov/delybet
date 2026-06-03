@@ -1,9 +1,8 @@
 /** @username Telegram (без префикса @): админка и переключатель предпросмотра Pro в профиле. */
 const PROFILE_ADMIN_USERNAMES = new Set([
-  "alexandr_loginov_designer",
-  "alexandr.loginov.designer",
   "aleksandr_loginov_designer",
   "yaronberg",
+  "uppcorp",
 ]);
 
 export function isProfileAdminTelegramUsername(
