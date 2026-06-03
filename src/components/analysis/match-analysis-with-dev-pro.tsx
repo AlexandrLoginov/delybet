@@ -9,14 +9,19 @@ import { Button } from "@/components/ui/button";
 import { useAppLocale } from "@/hooks/use-app-locale";
 import { useAuthMe } from "@/hooks/use-auth-me";
 import { useAdminDataSource } from "@/hooks/use-admin-data-source";
+import {
+  useIsProfileAdmin,
+  useTelegramInitData,
+} from "@/hooks/use-is-profile-admin";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
+import { adminFetchInit, withAdminDataSourceParam } from "@/lib/admin-fetch";
 import { normalizeAnalysisPayload } from "@/lib/analysis-api-normalize";
 import { fillAnalysisDemoGaps } from "@/lib/analysis-demo-fill";
 import { getFreeLivePreviewEligibleIdFromMatches } from "@/lib/freemium";
 import type { Match } from "@/types/match";
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url, { credentials: "include" });
+const fetcher = async ([url, initData]: readonly [string, string | null]) => {
+  const res = await fetch(url, adminFetchInit(initData));
   const data = await res.json();
   if (!res.ok) {
     const code = typeof data?.error === "string" ? data.error : "";
@@ -30,8 +35,8 @@ const fetcher = async (url: string) => {
   return data;
 };
 
-const matchesFetcher = async (url: string) => {
-  const res = await fetch(url, { credentials: "include" });
+const matchesFetcher = async ([url, initData]: readonly [string, string | null]) => {
+  const res = await fetch(url, adminFetchInit(initData));
   const data = await res.json();
   if (!res.ok) {
     throw new Error(
@@ -51,6 +56,8 @@ export function MatchAnalysisWithDevPro({
   const { t } = useAppLocale();
   const { data: authMe } = useAuthMe();
   const adminDataSource = useAdminDataSource();
+  const isAdmin = useIsProfileAdmin();
+  const initData = useTelegramInitData();
   const devPro = useDevProPreview();
   const devTools =
     process.env.NODE_ENV === "development" &&
@@ -59,11 +66,15 @@ export function MatchAnalysisWithDevPro({
   const isPro = dbPro || devPro || (devTools && urlIsPro);
   const proParam = isPro ? "true" : "false";
 
-  const swrKey = `/api/analysis/${match.id}?sport=${encodeURIComponent(match.sport)}&status=${encodeURIComponent(match.status)}&pro=${proParam}`;
+  const swrKey = withAdminDataSourceParam(
+    `/api/analysis/${match.id}?sport=${encodeURIComponent(match.sport)}&status=${encodeURIComponent(match.status)}&pro=${proParam}`,
+    adminDataSource,
+    isAdmin
+  );
 
   const { data, error, isLoading, mutate } = useSWR(
-    [swrKey, adminDataSource] as const,
-    ([url]) => fetcher(url),
+    [swrKey, initData] as const,
+    fetcher,
     {
       revalidateOnFocus: false,
       dedupingInterval: 60_000,
@@ -74,9 +85,16 @@ export function MatchAnalysisWithDevPro({
   const { data: liveListPayload, isLoading: liveListLoading, error: liveListError } =
     useSWR(
       needLiveFreemiumList
-        ? (["/api/matches?tab=live&sport=all", adminDataSource] as const)
+        ? ([
+            withAdminDataSourceParam(
+              "/api/matches?tab=live&sport=all",
+              adminDataSource,
+              isAdmin
+            ),
+            initData,
+          ] as const)
         : null,
-      ([url]) => matchesFetcher(url),
+      matchesFetcher,
       { revalidateOnFocus: false, dedupingInterval: 60_000 }
     );
 

@@ -14,7 +14,12 @@ import { localizeMatch } from "@/lib/localize-display";
 import type { AppLocaleCode } from "@/lib/locale";
 import { useAuthMe } from "@/hooks/use-auth-me";
 import { useAdminDataSource } from "@/hooks/use-admin-data-source";
+import {
+  useIsProfileAdmin,
+  useTelegramInitData,
+} from "@/hooks/use-is-profile-admin";
 import { useDevProPreview } from "@/hooks/use-dev-pro-preview";
+import { adminFetchInit, withAdminDataSourceParam } from "@/lib/admin-fetch";
 import { useFreePreviewRedeemedIds } from "@/hooks/use-free-preview-redeemed-id";
 import {
   computeEligibleMatchIds,
@@ -28,8 +33,8 @@ const PAGE_SIZE = 5;
 const COUNTDOWN_SECONDS = 120;
 const SYNCING_MS = 1800;
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url, { credentials: "include" });
+const fetcher = async ([url, initData]: readonly [string, string | null]) => {
+  const res = await fetch(url, adminFetchInit(initData));
   const json = await res.json();
   if (!res.ok) {
     throw new Error(typeof json?.message === "string" ? json.message : "FETCH_FAILED");
@@ -53,26 +58,37 @@ export function MatchesView() {
   const secondsRef = useRef(COUNTDOWN_SECONDS);
   const { data: authMe } = useAuthMe();
   const adminDataSource = useAdminDataSource();
+  const isAdmin = useIsProfileAdmin();
+  const initData = useTelegramInitData();
   const devPro = useDevProPreview();
   const unlockAllPro = Boolean(authMe?.isPro) || devPro;
   const freePreviewSlots = useFreePreviewRedeemedIds();
   const redeemedFreeMatchId =
     tab === "live" ? freePreviewSlots.live : freePreviewSlots.upcoming;
 
-  const listUrl = `/api/matches?tab=${tab}&sport=all`;
+  const listUrl = withAdminDataSourceParam(
+    `/api/matches?tab=${tab}&sport=all`,
+    adminDataSource,
+    isAdmin
+  );
   const {
     data,
     error,
     isLoading,
     mutate: mutateMatches,
-  } = useSWR([listUrl, adminDataSource] as const, ([url]) => fetcher(url), {
+  } = useSWR([listUrl, initData] as const, fetcher, {
     revalidateOnFocus: true,
     refreshInterval: 120_000,
   });
 
+  const liveUrl = withAdminDataSourceParam(
+    "/api/matches?tab=live&sport=all",
+    adminDataSource,
+    isAdmin
+  );
   const { data: livePayload, mutate: mutateLive } = useSWR(
-    ["/api/matches?tab=live&sport=all", adminDataSource] as const,
-    ([url]) => fetcher(url),
+    [liveUrl, initData] as const,
+    fetcher,
     { refreshInterval: 60_000 }
   );
 

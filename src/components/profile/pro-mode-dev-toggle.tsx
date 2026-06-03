@@ -12,6 +12,7 @@ import {
   setAdminDataSource,
 } from "@/lib/admin-data-source-store";
 import { setDevProPreview } from "@/lib/dev-pro-preview-store";
+import { useTelegramInitData } from "@/hooks/use-is-profile-admin";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
 import { cn } from "@/lib/utils";
@@ -25,12 +26,15 @@ function syncPreviewCookie(enabled: boolean): void {
   });
 }
 
-function syncDataSourceCookie(mode: AdminDataSourceMode): void {
+function syncDataSourceCookie(
+  mode: AdminDataSourceMode,
+  initData: string | null
+): void {
   void fetch("/api/account/ui-preview-data-source", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode }),
+    body: JSON.stringify({ mode, initData: initData ?? undefined }),
   });
 }
 
@@ -106,6 +110,7 @@ export function ProfileTariffPreviewControl() {
 export function ProfileDataSourcePreviewControl() {
   const { t } = useAppLocale();
   const router = useRouter();
+  const initData = useTelegramInitData();
   const mode = useAdminDataSource();
   const useApi = mode === "api";
 
@@ -130,7 +135,7 @@ export function ProfileDataSourcePreviewControl() {
         onClick={() => {
           const next: AdminDataSourceMode = useApi ? "mock" : "api";
           setAdminDataSource(next);
-          syncDataSourceCookie(next);
+          syncDataSourceCookie(next, initData);
           router.refresh();
         }}
         className={cn(
@@ -159,9 +164,11 @@ export function ProfileDataSourcePreviewControl() {
 
 /** Free/Pro и Mock/Api в одной строке (только админ). */
 export function ProfileAdminPreviewBar() {
+  const initData = useTelegramInitData();
+
   useEffect(() => {
-    syncDataSourceCookie(getAdminDataSourceSnapshot());
-  }, []);
+    syncDataSourceCookie(getAdminDataSourceSnapshot(), initData);
+  }, [initData]);
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 px-1 pt-1">

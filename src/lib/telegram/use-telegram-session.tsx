@@ -13,7 +13,7 @@ import type { TelegramWebAppUser } from "@/types/telegram";
 export type TelegramSessionState =
   | { status: "loading" }
   | { status: "browser" }
-  | { status: "telegram"; user: TelegramWebAppUser };
+  | { status: "telegram"; user: TelegramWebAppUser; initData: string };
 
 const TelegramSessionContext = createContext<TelegramSessionState | null>(null);
 
@@ -71,7 +71,11 @@ function useTelegramSessionState(): TelegramSessionState {
         }
 
         if (unsafeUser) {
-          setState({ status: "telegram", user: unsafeUser });
+          setState({
+            status: "telegram",
+            user: unsafeUser,
+            initData,
+          });
         }
 
         if (initData) {
@@ -97,14 +101,14 @@ function useTelegramSessionState(): TelegramSessionState {
               authDate?: number;
             };
             if (data.user) {
-              setState({ status: "telegram", user: data.user });
+              setState({ status: "telegram", user: data.user, initData });
               return;
             }
           }
 
           if (res.status === 401) {
             if (unsafeUser) {
-              setState({ status: "telegram", user: unsafeUser });
+              setState({ status: "telegram", user: unsafeUser, initData });
               return;
             }
             setState({ status: "browser" });
@@ -113,7 +117,7 @@ function useTelegramSessionState(): TelegramSessionState {
         }
 
         if (unsafeUser) {
-          setState({ status: "telegram", user: unsafeUser });
+          setState({ status: "telegram", user: unsafeUser, initData });
           return;
         }
 
