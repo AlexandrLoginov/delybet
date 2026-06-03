@@ -11,18 +11,21 @@ import {
   getAdminDataSourceSnapshot,
   setAdminDataSource,
 } from "@/lib/admin-data-source-store";
-import { setDevProPreview } from "@/lib/dev-pro-preview-store";
+import {
+  getDevProPreviewSnapshot,
+  setDevProPreview,
+} from "@/lib/dev-pro-preview-store";
 import { useTelegramInitData } from "@/hooks/use-is-profile-admin";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
-import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
+import { isProfileAdminTelegramUser } from "@/lib/telegram/profile-admin-eligible";
 import { cn } from "@/lib/utils";
 
-function syncPreviewCookie(enabled: boolean): void {
+function syncPreviewCookie(enabled: boolean, initData: string | null): void {
   void fetch("/api/account/ui-preview-pro", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ enabled }),
+    body: JSON.stringify({ enabled, initData: initData ?? undefined }),
   });
 }
 
@@ -45,10 +48,7 @@ export function ProfileTariffPreviewGate({
   children: ReactNode;
 }) {
   const state = useTelegramSession();
-  if (
-    state.status !== "telegram" ||
-    !isProfileAdminTelegramUsername(state.user.username)
-  ) {
+  if (state.status !== "telegram" || !isProfileAdminTelegramUser(state.user)) {
     return null;
   }
   return <>{children}</>;
@@ -57,6 +57,7 @@ export function ProfileTariffPreviewGate({
 /** Подписи Free / Pro и переключатель предпросмотра интерфейса. */
 export function ProfileTariffPreviewControl() {
   const { t } = useAppLocale();
+  const initData = useTelegramInitData();
   const previewPro = useDevProPreview();
 
   return (
@@ -80,7 +81,7 @@ export function ProfileTariffPreviewControl() {
         onClick={() => {
           const next = !previewPro;
           setDevProPreview(next);
-          syncPreviewCookie(next);
+          syncPreviewCookie(next, initData);
         }}
         className={cn(
           "inline-flex h-6 w-10 shrink-0 items-center rounded-full p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
@@ -168,6 +169,7 @@ export function ProfileAdminPreviewBar() {
 
   useEffect(() => {
     syncDataSourceCookie(getAdminDataSourceSnapshot(), initData);
+    syncPreviewCookie(getDevProPreviewSnapshot(), initData);
   }, [initData]);
 
   return (

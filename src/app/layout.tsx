@@ -4,6 +4,7 @@ import Script from "next/script";
 
 import { LocaleProvider } from "@/hooks/use-app-locale";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { AdminModeToolbar } from "@/components/layout/admin-mode-toolbar";
 import { NavBar } from "@/components/nav/NavBar";
 import { TelegramBrowserGateProvider } from "@/components/telegram/telegram-browser-gate-provider";
 import { TelegramSessionProvider } from "@/lib/telegram/use-telegram-session";
@@ -53,7 +54,8 @@ export default function RootLayout({
           <TelegramSessionProvider>
             <LocaleProvider>
               <TelegramBrowserGateProvider>
-                <div className="min-h-screen pt-[96px] pb-[calc(49px+max(24px,env(safe-area-inset-bottom,0px)))]">
+                <AdminModeToolbar />
+                <div className="min-h-screen pt-[calc(96px+var(--admin-toolbar-h,0px))] pb-[calc(49px+max(24px,env(safe-area-inset-bottom,0px)))]">
                   {children}
                 </div>
                 <NavBar />

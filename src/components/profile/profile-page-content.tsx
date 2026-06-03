@@ -17,10 +17,6 @@ import { ProfileAdminSettingRow } from "@/components/profile/profile-admin-setti
 import { ProfileLanguageSettingRow } from "@/components/profile/profile-language-setting-row";
 import { ProfileTelegramIdentity } from "@/components/profile/profile-telegram-identity";
 import { ProfileProPromoBanner } from "@/components/profile/profile-pro-promo-banner";
-import {
-  ProfileAdminPreviewBar,
-  ProfileTariffPreviewGate,
-} from "@/components/profile/pro-mode-dev-toggle";
 import { useAppLocale } from "@/hooks/use-app-locale";
 
 const TG_CHANNEL_URL = "https://t.me/delybet_news";
@@ -78,9 +74,6 @@ export function ProfilePageContent() {
           </CardContent>
         </Card>
       </section>
-      <ProfileTariffPreviewGate>
-        <ProfileAdminPreviewBar />
-      </ProfileTariffPreviewGate>
     </main>
   );
 }

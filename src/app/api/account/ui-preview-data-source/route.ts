@@ -2,21 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getSessionPayloadFromRequest } from "@/lib/auth-session";
 import { UI_PREVIEW_DATA_SOURCE_COOKIE } from "@/lib/ui-preview-data-source-cookie";
-import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
-import { verifyAdminInitData } from "@/lib/telegram/verify-admin-init-data";
+import { isAdminRequest } from "@/lib/telegram/is-admin-request";
 
 export const dynamic = "force-dynamic";
 
 const MAX_AGE_SEC = 60 * 60 * 24 * 180;
-
-function isAdminRequest(
-  sessionTg: string | undefined,
-  initData: string | undefined
-): boolean {
-  if (isProfileAdminTelegramUsername(sessionTg)) return true;
-  if (initData?.trim() && verifyAdminInitData(initData)) return true;
-  return false;
-}
 
 export async function POST(req: NextRequest) {
   try {

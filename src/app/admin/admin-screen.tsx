@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppLocale } from "@/hooks/use-app-locale";
 import { localeIntlTag } from "@/i18n";
-import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
+import { isProfileAdminTelegramUser } from "@/lib/telegram/profile-admin-eligible";
 import { isAdminDesignPreviewUserId } from "@/lib/admin-demo-data";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 
@@ -99,7 +99,7 @@ export function AdminScreen() {
   const state = useTelegramSession();
   const allowed =
     state.status === "telegram" &&
-    isProfileAdminTelegramUsername(state.user.username);
+    isProfileAdminTelegramUser(state.user);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [busyAction, setBusyAction] = useState<

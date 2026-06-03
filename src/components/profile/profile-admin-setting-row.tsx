@@ -4,17 +4,14 @@ import Link from "next/link";
 import { CaretRight, GearFine } from "@phosphor-icons/react/ssr";
 
 import { useAppLocale } from "@/hooks/use-app-locale";
-import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
+import { isProfileAdminTelegramUser } from "@/lib/telegram/profile-admin-eligible";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 
 export function ProfileAdminSettingRow() {
   const { t } = useAppLocale();
   const state = useTelegramSession();
 
-  if (
-    state.status !== "telegram" ||
-    !isProfileAdminTelegramUsername(state.user.username)
-  ) {
+  if (state.status !== "telegram" || !isProfileAdminTelegramUser(state.user)) {
     return null;
   }
 

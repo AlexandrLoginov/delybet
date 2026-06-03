@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getSessionPayloadFromRequest } from "@/lib/auth-session";
 import { UI_PREVIEW_PRO_COOKIE } from "@/lib/ui-preview-pro-cookie";
-import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
+import { isAdminRequest } from "@/lib/telegram/is-admin-request";
 
 export const dynamic = "force-dynamic";
 
@@ -11,15 +11,13 @@ const MAX_AGE_SEC = 60 * 60 * 24 * 180;
 export async function POST(req: NextRequest) {
   try {
     const session = getSessionPayloadFromRequest(req);
-    if (!session?.sub) {
-      return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
-    }
+    const body = (await req.json()) as { enabled?: boolean; initData?: string };
+    const initData = body.initData?.trim();
 
-    if (!isProfileAdminTelegramUsername(session.tg)) {
+    if (!isAdminRequest(session?.tg, initData)) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
-    const body = (await req.json()) as { enabled?: boolean };
     const enabled = body.enabled === true;
 
     const res = NextResponse.json({ ok: true as const });

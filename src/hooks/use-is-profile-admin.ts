@@ -1,14 +1,11 @@
 "use client";
 
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
-import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
+import { isProfileAdminTelegramUser } from "@/lib/telegram/profile-admin-eligible";
 
 export function useIsProfileAdmin(): boolean {
   const state = useTelegramSession();
-  return (
-    state.status === "telegram" &&
-    isProfileAdminTelegramUsername(state.user.username)
-  );
+  return state.status === "telegram" && isProfileAdminTelegramUser(state.user);
 }
 
 export function useTelegramInitData(): string | null {

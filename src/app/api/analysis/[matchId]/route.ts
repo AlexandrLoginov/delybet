@@ -19,7 +19,7 @@ import {
   checkSubscription,
   incrementUsage,
 } from "@/lib/subscription";
-import { isProfileAdminTelegramUsername } from "@/lib/telegram/profile-admin-eligible";
+import { getAdminTelegramUsernameFromRequest } from "@/lib/telegram/admin-from-request";
 
 export const dynamic = "force-dynamic";
 
@@ -60,11 +60,9 @@ export async function GET(
 
     const uiPreviewCookie =
       cookieStore.get(UI_PREVIEW_PRO_COOKIE)?.value === "1";
+    const adminVerified = Boolean(getAdminTelegramUsernameFromRequest(req));
     const uiPreviewPro =
-      Boolean(sessionUserId) &&
-      uiPreviewCookie &&
-      wantsClientPro &&
-      isProfileAdminTelegramUsername(sessionPayload?.tg);
+      uiPreviewCookie && wantsClientPro && adminVerified;
 
     const isPro =
       dbPro || uiPreviewPro || (devToolsBypass && wantsClientPro);
