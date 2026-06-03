@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppLocale } from "@/hooks/use-app-locale";
 import { localeIntlTag } from "@/i18n";
-import { isProfileAdminTelegramUser } from "@/lib/telegram/profile-admin-eligible";
+import { useAdminFeaturesEnabled } from "@/hooks/use-is-profile-admin";
 import { isAdminDesignPreviewUserId } from "@/lib/admin-demo-data";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 
@@ -97,9 +97,7 @@ function formatDate(value: string | null, locale: string): string {
 export function AdminScreen() {
   const { locale, t } = useAppLocale();
   const state = useTelegramSession();
-  const allowed =
-    state.status === "telegram" &&
-    isProfileAdminTelegramUser(state.user);
+  const allowed = useAdminFeaturesEnabled();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [busyAction, setBusyAction] = useState<

@@ -7,7 +7,7 @@ import {
   ProfileTariffPreviewGate,
 } from "@/components/profile/pro-mode-dev-toggle";
 
-const TOOLBAR_HEIGHT_PX = 44;
+const TOOLBAR_HEIGHT_PX = 72;
 
 function AdminModeToolbarInner() {
   useEffect(() => {

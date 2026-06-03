@@ -11,6 +11,11 @@ import {
   getAdminDataSourceSnapshot,
   setAdminDataSource,
 } from "@/lib/admin-data-source-store";
+import { useAdminUserPreview } from "@/hooks/use-admin-user-preview";
+import {
+  getAdminUserPreviewSnapshot,
+  setAdminUserPreview,
+} from "@/lib/admin-user-preview-store";
 import {
   getDevProPreviewSnapshot,
   setDevProPreview,
@@ -38,6 +43,15 @@ function syncDataSourceCookie(
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ mode, initData: initData ?? undefined }),
+  });
+}
+
+function syncAdminUserCookie(enabled: boolean, initData: string | null): void {
+  void fetch("/api/account/ui-preview-admin-user", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ enabled, initData: initData ?? undefined }),
   });
 }
 
@@ -163,17 +177,78 @@ export function ProfileDataSourcePreviewControl() {
   );
 }
 
-/** Free/Pro и Mock/Api в одной строке (только админ). */
+/** User / Admin User — превью интерфейса обычного пользователя. */
+export function ProfileAdminUserPreviewControl() {
+  const { t } = useAppLocale();
+  const initData = useTelegramInitData();
+  const router = useRouter();
+  const adminUserMode = useAdminUserPreview();
+
+  return (
+    <div
+      className="flex shrink-0 items-center gap-2"
+      data-telegram-gate-exempt
+    >
+      <span
+        className={cn(
+          "text-[11px] tabular-nums",
+          !adminUserMode
+            ? "font-semibold text-foreground"
+            : "text-muted-foreground"
+        )}
+      >
+        {t("profile.adminUserModeUser")}
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={adminUserMode}
+        aria-label={t("profile.adminUserPreview")}
+        onClick={() => {
+          const next = !adminUserMode;
+          setAdminUserPreview(next);
+          syncAdminUserCookie(next, initData);
+          router.refresh();
+        }}
+        className={cn(
+          "inline-flex h-6 w-10 shrink-0 items-center rounded-full p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          adminUserMode ? "bg-success" : "bg-muted"
+        )}
+      >
+        <span
+          className={cn(
+            "h-5 w-5 rounded-full bg-white shadow-none transition-transform dark:shadow",
+            adminUserMode ? "translate-x-4" : "translate-x-0"
+          )}
+        />
+      </button>
+      <span
+        className={cn(
+          "text-[11px] tabular-nums",
+          adminUserMode
+            ? "font-semibold text-foreground"
+            : "text-muted-foreground"
+        )}
+      >
+        {t("profile.adminUserModeAdmin")}
+      </span>
+    </div>
+  );
+}
+
+/** Free/Pro, Mock/Api и Admin User (только админ). */
 export function ProfileAdminPreviewBar() {
   const initData = useTelegramInitData();
 
   useEffect(() => {
     syncDataSourceCookie(getAdminDataSourceSnapshot(), initData);
     syncPreviewCookie(getDevProPreviewSnapshot(), initData);
+    syncAdminUserCookie(getAdminUserPreviewSnapshot(), initData);
   }, [initData]);
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 px-1 pt-1">
+    <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2 px-1 pt-1">
+      <ProfileAdminUserPreviewControl />
       <ProfileTariffPreviewControl />
       <ProfileDataSourcePreviewControl />
     </div>
