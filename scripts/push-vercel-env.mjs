@@ -101,7 +101,7 @@ async function main() {
   const envPath = join(process.cwd(), ".env.local");
   const local = parseEnvLocal(envPath);
 
-  local.NEXT_PUBLIC_APP_URL = "https://delybet.vercel.app";
+  local.NEXT_PUBLIC_APP_URL = "https://delybet.app";
 
   for (const key of KEYS) {
     const value = local[key];
