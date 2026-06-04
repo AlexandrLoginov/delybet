@@ -71,9 +71,6 @@ export type Messages = {
     dataSourceMock: string;
     dataSourceApi: string;
     dataSourcePreview: string;
-    adminUserModeUser: string;
-    adminUserModeAdmin: string;
-    adminUserPreview: string;
     gateSignIn: string;
     gateBrowser: string;
     openInTelegram: string;

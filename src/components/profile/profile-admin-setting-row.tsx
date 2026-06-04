@@ -4,12 +4,12 @@ import Link from "next/link";
 import { CaretRight, GearFine } from "@phosphor-icons/react/ssr";
 
 import { useAppLocale } from "@/hooks/use-app-locale";
-import { useAdminFeaturesEnabled } from "@/hooks/use-is-profile-admin";
+import { useIsProfileAdmin } from "@/hooks/use-is-profile-admin";
 
 export function ProfileAdminSettingRow() {
   const { t } = useAppLocale();
 
-  if (!useAdminFeaturesEnabled()) {
+  if (!useIsProfileAdmin()) {
     return null;
   }
 
