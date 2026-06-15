@@ -100,6 +100,11 @@ export async function GET(req: NextRequest) {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "ADMIN_USERS_FAILED";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const dbUnavailable =
+      /connect|database|prisma|ECONNREFUSED|neon|DATABASE_URL/i.test(message);
+    return NextResponse.json(
+      { error: dbUnavailable ? "DATABASE_UNAVAILABLE" : message },
+      { status: dbUnavailable ? 503 : 500 }
+    );
   }
 }

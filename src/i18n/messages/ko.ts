@@ -315,6 +315,8 @@ export const ko: Messages = {
     demoEmpty: "DB가 비어 있어 데모 데이터를 표시합니다.",
     demoAppended: "목록 끝에 데모 사용자가 추가되었습니다.",
     loadError: "데이터 로드 실패: {error}",
+    databaseUnavailable:
+      "데이터베이스를 사용할 수 없습니다. Vercel에 DATABASE_URL(Neon)을 설정하고 prisma db push를 실행하세요.",
     users: "사용자",
     pro: "PRO",
     blocked: "차단됨",

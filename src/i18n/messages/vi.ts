@@ -334,6 +334,8 @@ export const vi: Messages = {
     demoEmpty: "Dữ liệu demo — cơ sở dữ liệu trống.",
     demoAppended: "Đã thêm người dùng demo cuối danh sách.",
     loadError: "Không tải được dữ liệu: {error}",
+    databaseUnavailable:
+      "Cơ sở dữ liệu không khả dụng. Đặt DATABASE_URL (Neon) trên Vercel và chạy prisma db push.",
     users: "Người dùng",
     pro: "PRO",
     blocked: "Bị chặn",

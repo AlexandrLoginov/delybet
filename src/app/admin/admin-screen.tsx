@@ -19,8 +19,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppLocale } from "@/hooks/use-app-locale";
 import { localeIntlTag } from "@/i18n";
-import { useIsProfileAdmin } from "@/hooks/use-is-profile-admin";
+import { useIsProfileAdmin, useTelegramInitData } from "@/hooks/use-is-profile-admin";
 import { isAdminDesignPreviewUserId } from "@/lib/admin-demo-data";
+import { adminFetchInit } from "@/lib/admin-fetch";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 
 type AdminUser = {
@@ -74,8 +75,10 @@ type PaymentsResponse = {
   payments: PaymentRow[];
 };
 
-async function jsonFetcher<T>(url: string): Promise<T> {
-  const res = await fetch(url, { credentials: "include" });
+async function jsonFetcher<T>(
+  [url, initData]: readonly [string, string | null]
+): Promise<T> {
+  const res = await fetch(url, adminFetchInit(initData));
   const data = (await res.json()) as T & { error?: string };
   if (!res.ok) throw new Error(data.error ?? "REQUEST_FAILED");
   return data as T;
@@ -94,10 +97,24 @@ function formatDate(value: string | null, locale: string): string {
   });
 }
 
+function formatAdminLoadError(
+  error: Error,
+  t: (key: string, params?: Record<string, string>) => string
+): string {
+  if (error.message === "DATABASE_UNAVAILABLE") {
+    return t("admin.databaseUnavailable");
+  }
+  if (error.message === "UNAUTHORIZED") {
+    return t("admin.loadError", { error: "UNAUTHORIZED" });
+  }
+  return t("admin.loadError", { error: error.message });
+}
+
 export function AdminScreen() {
   const { locale, t } = useAppLocale();
   const state = useTelegramSession();
   const allowed = useIsProfileAdmin();
+  const initData = useTelegramInitData();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [busyAction, setBusyAction] = useState<
@@ -109,7 +126,10 @@ export function AdminScreen() {
     error: usersError,
     isLoading: usersLoading,
     mutate: mutateUsers,
-  } = useSWR<AdminUsersResponse>(allowed ? "/api/admin/users?includeDemo=1" : null, jsonFetcher, {
+  } = useSWR<AdminUsersResponse>(
+    allowed ? (["/api/admin/users?includeDemo=1", initData] as const) : null,
+    jsonFetcher,
+    {
     revalidateOnFocus: true,
     dedupingInterval: 3000,
   });
@@ -146,7 +166,7 @@ export function AdminScreen() {
     mutate: mutatePayments,
   } = useSWR<PaymentsResponse>(
     effectiveSelectedId
-      ? `/api/admin/users/${effectiveSelectedId}/payments`
+      ? ([`/api/admin/users/${effectiveSelectedId}/payments`, initData] as const)
       : null,
     jsonFetcher,
     { revalidateOnFocus: false }
@@ -162,10 +182,14 @@ export function AdminScreen() {
         action === "extend_pro"
           ? { action, days: 30 }
           : { action };
+      const fetchInit = adminFetchInit(initData);
       const res = await fetch(`/api/admin/users/${userId}/actions`, {
         method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        credentials: fetchInit.credentials,
+        headers: {
+          ...fetchInit.headers,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(body),
       });
       const data = (await res.json()) as { error?: string };
@@ -235,7 +259,7 @@ export function AdminScreen() {
       {usersError ? (
         <Card>
           <CardContent className="p-4 text-sm text-danger">
-            {t("admin.loadError", { error: usersError.message })}
+            {formatAdminLoadError(usersError, t)}
           </CardContent>
         </Card>
       ) : null}

@@ -306,6 +306,8 @@ export const zh: Messages = {
     demoEmpty: "数据库为空，显示演示数据。",
     demoAppended: "列表末尾已添加演示用户。",
     loadError: "加载失败：{error}",
+    databaseUnavailable:
+      "数据库不可用。请在 Vercel 设置 DATABASE_URL（Neon）并运行 prisma db push。",
     users: "用户",
     pro: "PRO",
     blocked: "已封禁",

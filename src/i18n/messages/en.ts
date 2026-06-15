@@ -347,6 +347,8 @@ export const en: Messages = {
     demoAppended:
       "Demo users were appended for layout testing. Rows marked “Demo” are read-only.",
     loadError: "Failed to load data: {error}",
+    databaseUnavailable:
+      "Database unavailable. Set DATABASE_URL (Neon) on Vercel and run prisma db push.",
     users: "Users",
     pro: "PRO",
     blocked: "Blocked",
