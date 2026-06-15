@@ -55,7 +55,7 @@ export default function RootLayout({
             <LocaleProvider>
               <TelegramBrowserGateProvider>
                 <AdminModeToolbar />
-                <div className="min-h-screen pt-[96px] pb-[calc(49px+max(24px,env(safe-area-inset-bottom,0px))+var(--admin-toolbar-h,0px))]">
+                <div className="min-h-screen pt-[var(--app-inset-top,0px)] pb-[calc(49px+max(24px,env(safe-area-inset-bottom,0px))+var(--admin-toolbar-h,0px))]">
                   {children}
                 </div>
                 <NavBar />

@@ -95,6 +95,10 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    --app-inset-top: var(
+      --tg-content-safe-area-inset-top,
+      var(--tg-safe-area-inset-top, 0px)
+    );
   }
 
   body {

@@ -9,6 +9,10 @@ import {
 } from "react";
 
 import type { TelegramWebAppUser } from "@/types/telegram";
+import {
+  bindTelegramViewportInsetEvents,
+  clearViewportInsets,
+} from "@/lib/telegram/sync-viewport-insets";
 
 export type TelegramSessionState =
   | { status: "loading" }
@@ -43,6 +47,7 @@ function useTelegramSessionState(): TelegramSessionState {
 
   useEffect(() => {
     let cancelled = false;
+    let unbindInsets: (() => void) | undefined;
 
     (async () => {
       try {
@@ -53,6 +58,10 @@ function useTelegramSessionState(): TelegramSessionState {
         if (typeof WebApp.expand === "function") {
           WebApp.expand();
         }
+
+        unbindInsets = bindTelegramViewportInsetEvents(
+          WebApp as Parameters<typeof bindTelegramViewportInsetEvents>[0]
+        );
 
         const tg = (
           typeof window !== "undefined"
@@ -66,6 +75,7 @@ function useTelegramSessionState(): TelegramSessionState {
           tg?.initDataUnsafe?.user) as TelegramWebAppUser | undefined;
 
         if (!initData && !unsafeUser) {
+          clearViewportInsets();
           setState({ status: "browser" });
           return;
         }
@@ -111,6 +121,7 @@ function useTelegramSessionState(): TelegramSessionState {
               setState({ status: "telegram", user: unsafeUser, initData });
               return;
             }
+            clearViewportInsets();
             setState({ status: "browser" });
             return;
           }
@@ -121,14 +132,19 @@ function useTelegramSessionState(): TelegramSessionState {
           return;
         }
 
+        clearViewportInsets();
         setState({ status: "browser" });
       } catch {
-        if (!cancelled) setState({ status: "browser" });
+        if (!cancelled) {
+          clearViewportInsets();
+          setState({ status: "browser" });
+        }
       }
     })();
 
     return () => {
       cancelled = true;
+      unbindInsets?.();
     };
   }, []);
 
