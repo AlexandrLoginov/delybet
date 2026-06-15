@@ -147,6 +147,7 @@ export type Messages = {
     syncing: string;
     countdown: string;
     loadError: string;
+    loadErrorAdmin: string;
     tabUpcoming: string;
     tabLive: string;
     empty: string;

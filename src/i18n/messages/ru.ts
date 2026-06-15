@@ -182,6 +182,8 @@ export const ru: Messages = {
     syncing: "Обновляем ИИ-анализ…",
     countdown: "Обновление через:",
     loadError:
+      "Не удалось загрузить матчи. Попробуйте обновить страницу позже.",
+    loadErrorAdmin:
       "Не удалось загрузить матчи. Проверьте API_SPORTS_KEY или попробуйте позже.",
     tabUpcoming: "Предстоящие",
     tabLive: "Live",

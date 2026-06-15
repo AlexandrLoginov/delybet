@@ -178,6 +178,8 @@ export const vi: Messages = {
     syncing: "Đang cập nhật phân tích AI…",
     countdown: "Cập nhật sau:",
     loadError:
+      "Không tải được trận. Vui lòng thử lại sau.",
+    loadErrorAdmin:
       "Không tải được trận. Kiểm tra API_SPORTS_KEY hoặc thử lại sau.",
     tabUpcoming: "Sắp tới",
     tabLive: "Live",

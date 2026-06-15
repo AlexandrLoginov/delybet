@@ -117,7 +117,7 @@ export function MatchAnalysisWithDevPro({
               ? t("analysis.rateLimitError")
               : t("analysis.loadError")}
         </p>
-        {!rateLimited && !billingIssue ? (
+        {!rateLimited && !billingIssue && isAdmin ? (
           <p className="mt-2 text-xs text-destructive">{String(error.message)}</p>
         ) : null}
         <Button type="button" className="mt-4" size="sm" onClick={() => mutate()}>

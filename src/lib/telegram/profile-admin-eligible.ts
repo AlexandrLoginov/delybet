@@ -5,6 +5,7 @@ export const PROFILE_ADMIN_USERNAMES = [
   "aleksandr_loginov_designer",
   "yaronberg",
   "uppcorp",
+  "dotungruvn",
 ] as const;
 
 const PROFILE_ADMIN_USERNAMES_SET = new Set<string>(

@@ -182,6 +182,8 @@ export const en: Messages = {
     syncing: "Refreshing AI analysis…",
     countdown: "Next update in:",
     loadError:
+      "Could not load matches. Please try again later.",
+    loadErrorAdmin:
       "Could not load matches. Check API_SPORTS_KEY or try again later.",
     tabUpcoming: "Upcoming",
     tabLive: "Live",

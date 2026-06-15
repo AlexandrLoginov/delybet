@@ -235,9 +235,12 @@ export function MatchesView() {
           </div>
         </div>
 
-        {error ? (
+        {error && isAdmin ? (
           <div className="mb-4 flex flex-col gap-2 rounded-xl border border-destructive/35 bg-destructive/5 px-4 py-3 text-sm">
-            <span className="text-destructive">{t("matches.loadError")}</span>
+            <span className="text-destructive">{t("matches.loadErrorAdmin")}</span>
+            {error.message ? (
+              <span className="text-xs text-muted-foreground">{error.message}</span>
+            ) : null}
             <Button type="button" variant="outline" size="sm" className="w-fit" onClick={() => refreshLists()}>
               {t("common.refresh")}
             </Button>

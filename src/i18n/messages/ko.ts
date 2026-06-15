@@ -173,7 +173,9 @@ export const ko: Messages = {
     subtitle: "AI 분석 · 2분마다 업데이트",
     syncing: "AI 분석 업데이트 중…",
     countdown: "다음 업데이트:",
-    loadError: "경기를 불러오지 못했습니다. API_SPORTS_KEY를 확인하세요.",
+    loadError: "경기를 불러오지 못했습니다. 나중에 다시 시도하세요.",
+    loadErrorAdmin:
+      "경기를 불러오지 못했습니다. API_SPORTS_KEY를 확인하세요.",
     tabUpcoming: "예정",
     tabLive: "Live",
     empty: "이 카테고리에 경기가 없습니다",
