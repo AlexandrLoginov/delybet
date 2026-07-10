@@ -25,7 +25,7 @@ export function PaywallOverlay({
   const resolvedDescription = description ?? t("paywall.description");
 
   return (
-    <div className="relative h-fit w-full max-w-full self-start overflow-hidden rounded-card border border-border bg-card shadow-card">
+    <div className="relative h-fit w-full max-w-full self-start overflow-hidden rounded-xl border bg-card">
       <div
         className="pointer-events-none h-fit w-full max-w-full select-none [mask-image:linear-gradient(to_bottom,black_0,black_30%,transparent_88%)]"
         aria-hidden
@@ -33,7 +33,7 @@ export function PaywallOverlay({
         <div className="h-fit w-full max-w-full opacity-50 blur-[3px]">{children}</div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 bg-gradient-to-t from-card via-card/98 to-transparent px-6 pb-6 pt-12 text-center backdrop-blur-[2px]">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 bg-gradient-to-t from-card via-card/95 to-transparent px-6 pb-6 pt-10 text-center">
         <div className="space-y-1">
           <div className="text-sm font-semibold">{resolvedTitle}</div>
           <p className="max-w-sm text-xs text-muted-foreground">{resolvedDescription}</p>

@@ -45,10 +45,10 @@ export function SportFilter({
                 : `${s.label}, ${sportCount ?? 0}`
             }
             className={cn(
-              "inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium transition-all duration-200",
+              "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors",
               active
-                ? "border-primary/50 bg-primary/15 text-foreground shadow-glow"
-                : "border-border bg-surface text-muted-foreground hover:border-border-strong hover:bg-muted hover:text-foreground"
+                ? "border-foreground bg-foreground text-background"
+                : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
             {isAll ? (

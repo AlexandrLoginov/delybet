@@ -11,7 +11,6 @@ import {
   Moon,
 } from "@phosphor-icons/react";
 
-import { DelyBetWordmark } from "@/components/brand/DelyBetWordmark";
 import { Card, CardContent } from "@/components/ui/card";
 import { DarkThemeSwitch } from "@/components/theme/dark-theme-switch";
 import { ProfileAdminSettingRow } from "@/components/profile/profile-admin-setting-row";
@@ -28,8 +27,9 @@ export function ProfilePageContent() {
   return (
     <main className="mx-auto w-full max-w-2xl space-y-6 px-4 pb-6 pt-5">
       <div>
-        <DelyBetWordmark size="lg" />
-        <p className="mt-2 text-sm text-muted-foreground">{t("profile.title")}</p>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
+          {t("profile.title")}
+        </h1>
       </div>
       <ProfileTelegramIdentity />
       <ProfileProPromoBanner />

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { GeistSans } from "geist/font/sans";
+import { Inter } from "next/font/google";
 import Script from "next/script";
 
 import { LocaleProvider } from "@/hooks/use-app-locale";
@@ -11,7 +11,11 @@ import { TelegramSessionProvider } from "@/lib/telegram/use-telegram-session";
 
 import "./globals.css";
 
-const geistSans = GeistSans;
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "DelyBet — ИИ-анализ матчей",
@@ -23,8 +27,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f6f8" },
-    { media: "(prefers-color-scheme: dark)", color: "#080b12" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#181a20" },
   ],
 };
 
@@ -34,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru" suppressHydrationWarning className={geistSans.variable}>
+    <html lang="ru" suppressHydrationWarning className={inter.variable}>
       <body className="min-h-screen bg-background font-sans antialiased">
         {/* Telegram Mini App: до React — иначе initData может быть пустым */}
         <Script
@@ -51,7 +55,7 @@ export default function RootLayout({
             <LocaleProvider>
               <TelegramBrowserGateProvider>
                 <AdminModeToolbar />
-                <div className="min-h-screen pt-[var(--app-inset-top,0px)] pb-[calc(72px+max(20px,env(safe-area-inset-bottom,0px))+var(--admin-toolbar-h,0px))]">
+                <div className="min-h-screen pt-[var(--app-inset-top,0px)] pb-[calc(49px+max(24px,env(safe-area-inset-bottom,0px))+var(--admin-toolbar-h,0px))]">
                   {children}
                 </div>
                 <NavBar />

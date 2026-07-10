@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowClockwise, Trophy } from "@phosphor-icons/react";
 import useSWR from "swr";
 
-import { DelyBetWordmark } from "@/components/brand/DelyBetWordmark";
 import { AppPageSkeleton } from "@/components/layout/app-page-skeleton";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { SportFilter } from "@/components/matches/SportFilter";
@@ -201,8 +200,10 @@ export function MatchesView() {
       <main className="mx-auto w-full max-w-2xl px-4 pb-6 pt-5">
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
-            <DelyBetWordmark size="lg" />
-            <p className="mt-2 text-sm text-muted-foreground">
+            <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
+              {t("matches.title")}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               {t("matches.subtitle")}
             </p>
             <div
