@@ -101,13 +101,20 @@ function formatAdminLoadError(
   error: Error,
   t: (key: string, params?: Record<string, string>) => string
 ): string {
-  if (error.message === "DATABASE_UNAVAILABLE") {
-    return t("admin.databaseUnavailable");
+  switch (error.message) {
+    case "DATABASE_URL_MISSING":
+      return t("admin.databaseUrlMissing");
+    case "DATABASE_SCHEMA_MISSING":
+      return t("admin.databaseSchemaMissing");
+    case "DATABASE_CONNECTION_FAILED":
+      return t("admin.databaseConnectionFailed");
+    case "DATABASE_UNAVAILABLE":
+      return t("admin.databaseUnavailable");
+    case "UNAUTHORIZED":
+      return t("admin.loadError", { error: "UNAUTHORIZED" });
+    default:
+      return t("admin.loadError", { error: error.message });
   }
-  if (error.message === "UNAUTHORIZED") {
-    return t("admin.loadError", { error: "UNAUTHORIZED" });
-  }
-  return t("admin.loadError", { error: error.message });
 }
 
 export function AdminScreen() {

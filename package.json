@@ -11,6 +11,8 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
+    "db:push": "prisma db push",
+    "db:check": "node scripts/check-database.mjs",
     "vercel:env": "node scripts/push-vercel-env.mjs",
     "vercel:env:import": "node scripts/generate-vercel-env-import.mjs",
     "vercel:deploy": "npx vercel --prod --yes"

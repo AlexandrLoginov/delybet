@@ -316,7 +316,13 @@ export const ko: Messages = {
     demoAppended: "목록 끝에 데모 사용자가 추가되었습니다.",
     loadError: "데이터 로드 실패: {error}",
     databaseUnavailable:
-      "데이터베이스를 사용할 수 없습니다. Vercel에 DATABASE_URL(Neon)을 설정하고 prisma db push를 실행하세요.",
+      "데이터베이스를 사용할 수 없습니다. Vercel의 DATABASE_URL을 확인하세요.",
+    databaseUrlMissing:
+      "서버에 DATABASE_URL이 없습니다. Vercel → Settings → Environment Variables에 Neon 연결 문자열을 추가한 뒤 재배포하세요.",
+    databaseSchemaMissing:
+      "DB 테이블이 없습니다. 로컬에서 npm run db:push 실행 (.env.local에 유효한 DATABASE_URL 필요).",
+    databaseConnectionFailed:
+      "Neon에 연결할 수 없습니다. DATABASE_URL, Neon 프로젝트 활성 상태, ?sslmode=require 포함 여부를 확인하세요.",
     users: "사용자",
     pro: "PRO",
     blocked: "차단됨",

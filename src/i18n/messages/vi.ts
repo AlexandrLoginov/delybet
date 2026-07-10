@@ -335,7 +335,13 @@ export const vi: Messages = {
     demoAppended: "Đã thêm người dùng demo cuối danh sách.",
     loadError: "Không tải được dữ liệu: {error}",
     databaseUnavailable:
-      "Cơ sở dữ liệu không khả dụng. Đặt DATABASE_URL (Neon) trên Vercel và chạy prisma db push.",
+      "Cơ sở dữ liệu không khả dụng. Kiểm tra DATABASE_URL trên Vercel.",
+    databaseUrlMissing:
+      "Chưa đặt DATABASE_URL trên server. Thêm chuỗi kết nối Neon trong Vercel → Settings → Environment Variables, rồi redeploy.",
+    databaseSchemaMissing:
+      "Chưa có bảng trong DB. Chạy cục bộ: npm run db:push (cần DATABASE_URL hợp lệ trong .env.local).",
+    databaseConnectionFailed:
+      "Không kết nối được Neon. Kiểm tra DATABASE_URL, dự án Neon đang hoạt động và URL có ?sslmode=require.",
     users: "Người dùng",
     pro: "PRO",
     blocked: "Bị chặn",

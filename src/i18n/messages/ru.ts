@@ -349,7 +349,13 @@ export const ru: Messages = {
       "В конец списка добавлены демо-пользователи для проверки вёрстки. Для строк с меткой «Демо» действия отключены; реальные записи можно редактировать как обычно.",
     loadError: "Не удалось загрузить данные: {error}",
     databaseUnavailable:
-      "База данных недоступна. Укажите DATABASE_URL (Neon) в Vercel и выполните prisma db push.",
+      "База данных недоступна. Проверьте DATABASE_URL на Vercel.",
+    databaseUrlMissing:
+      "DATABASE_URL не задан на сервере. Добавьте строку подключения Neon в Vercel → Settings → Environment Variables, затем redeploy.",
+    databaseSchemaMissing:
+      "Таблицы в БД не созданы. Локально: npm run db:push (с рабочим DATABASE_URL в .env.local).",
+    databaseConnectionFailed:
+      "Не удаётся подключиться к Neon. Проверьте DATABASE_URL, что проект Neon активен и строка с ?sslmode=require.",
     users: "Пользователи",
     pro: "PRO",
     blocked: "Заблокированы",

@@ -275,6 +275,9 @@ export type Messages = {
     demoAppended: string;
     loadError: string;
     databaseUnavailable: string;
+    databaseUrlMissing: string;
+    databaseSchemaMissing: string;
+    databaseConnectionFailed: string;
     users: string;
     pro: string;
     blocked: string;

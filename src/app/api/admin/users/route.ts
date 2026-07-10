@@ -5,6 +5,10 @@ import {
   getAdminDesignPreviewStats,
   getAdminDesignPreviewUsers,
 } from "@/lib/admin-demo-data";
+import {
+  classifyDatabaseError,
+  isDatabaseUrlConfigured,
+} from "@/lib/database-config";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +36,13 @@ export async function GET(req: NextRequest) {
   try {
     const guard = requireAdminSession(req);
     if (!guard.ok) return guard.response;
+
+    if (!isDatabaseUrlConfigured()) {
+      return NextResponse.json(
+        { error: "DATABASE_URL_MISSING" },
+        { status: 503 }
+      );
+    }
 
     const includeDemo =
       req.nextUrl.searchParams.get("includeDemo") === "1" ||
@@ -99,12 +110,7 @@ export async function GET(req: NextRequest) {
       ...(includeDemo ? { demoRowsAppended: true as const } : {}),
     });
   } catch (e) {
-    const message = e instanceof Error ? e.message : "ADMIN_USERS_FAILED";
-    const dbUnavailable =
-      /connect|database|prisma|ECONNREFUSED|neon|DATABASE_URL/i.test(message);
-    return NextResponse.json(
-      { error: dbUnavailable ? "DATABASE_UNAVAILABLE" : message },
-      { status: dbUnavailable ? 503 : 500 }
-    );
+    const code = classifyDatabaseError(e);
+    return NextResponse.json({ error: code }, { status: 503 });
   }
 }

@@ -348,7 +348,13 @@ export const en: Messages = {
       "Demo users were appended for layout testing. Rows marked “Demo” are read-only.",
     loadError: "Failed to load data: {error}",
     databaseUnavailable:
-      "Database unavailable. Set DATABASE_URL (Neon) on Vercel and run prisma db push.",
+      "Database unavailable. Check DATABASE_URL on Vercel.",
+    databaseUrlMissing:
+      "DATABASE_URL is not set on the server. Add your Neon connection string in Vercel → Settings → Environment Variables, then redeploy.",
+    databaseSchemaMissing:
+      "Database tables are missing. Locally run: npm run db:push (with a valid DATABASE_URL in .env.local).",
+    databaseConnectionFailed:
+      "Cannot connect to Neon. Verify DATABASE_URL, that the Neon project is active, and the URL includes ?sslmode=require.",
     users: "Users",
     pro: "PRO",
     blocked: "Blocked",

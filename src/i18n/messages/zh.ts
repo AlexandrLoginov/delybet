@@ -307,7 +307,13 @@ export const zh: Messages = {
     demoAppended: "列表末尾已添加演示用户。",
     loadError: "加载失败：{error}",
     databaseUnavailable:
-      "数据库不可用。请在 Vercel 设置 DATABASE_URL（Neon）并运行 prisma db push。",
+      "数据库不可用。请检查 Vercel 上的 DATABASE_URL。",
+    databaseUrlMissing:
+      "服务器未设置 DATABASE_URL。请在 Vercel → Settings → Environment Variables 添加 Neon 连接字符串并重新部署。",
+    databaseSchemaMissing:
+      "数据库表未创建。本地运行：npm run db:push（.env.local 中需有有效的 DATABASE_URL）。",
+    databaseConnectionFailed:
+      "无法连接 Neon。请检查 DATABASE_URL、Neon 项目是否活跃，以及 URL 是否包含 ?sslmode=require。",
     users: "用户",
     pro: "PRO",
     blocked: "已封禁",
