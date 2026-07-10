@@ -16,9 +16,9 @@ export function ProfileProPromoBanner() {
   if (authMe?.isPro || devPro) return null;
 
   return (
-    <Card className="overflow-hidden border-primary/40">
-      <CardContent className="flex items-center gap-3 bg-primary/[0.08] p-4">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+    <Card className="overflow-hidden border-primary/35 shadow-glow">
+      <CardContent className="flex items-center gap-3 bg-gradient-to-r from-primary/12 via-primary/8 to-transparent p-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-button bg-primary text-primary-foreground shadow-glow">
           <Medal className="h-4 w-4" weight="fill" />
         </div>
         <div className="min-w-0 flex-1">

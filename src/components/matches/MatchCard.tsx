@@ -24,7 +24,7 @@ interface MatchCardProps {
 }
 
 const cardClass =
-  "group relative block w-full overflow-hidden rounded-xl border bg-card text-left transition-colors";
+  "group relative block w-full overflow-hidden rounded-card border border-border bg-card text-left shadow-card transition-all duration-200";
 
 export function MatchCard({
   match,
@@ -45,7 +45,7 @@ export function MatchCard({
           }
         }}
         aria-label={`${match.home.name} — ${match.away.name}`}
-        className={cn(cardClass, "hover:bg-accent/40")}
+        className={cn(cardClass, "app-card-interactive")}
       >
         <MatchCardBody match={match} />
       </Link>
@@ -61,7 +61,7 @@ export function MatchCard({
         <MatchCardBody match={match} />
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center bg-card/55 backdrop-blur-[1px]">
+      <div className="absolute inset-0 flex items-center justify-center bg-card/70 backdrop-blur-sm">
         <RenewSubscriptionDrawer
           intent="subscribe"
           billingAction="checkout"

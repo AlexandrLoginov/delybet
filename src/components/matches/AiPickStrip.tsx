@@ -34,7 +34,7 @@ export function AiPickStrip({
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 px-5 py-2.5 text-[11px]">
+    <div className="flex items-center justify-between gap-3 border-t border-border/80 bg-primary/[0.04] px-5 py-2.5 text-[11px] dark:bg-primary/[0.06]">
       <span className="min-w-0 truncate text-foreground">
         <span className="text-muted-foreground">{t("matches.aiPick")}:</span>
         <span className="ml-0.5 tabular-nums font-semibold text-foreground">{n}</span>

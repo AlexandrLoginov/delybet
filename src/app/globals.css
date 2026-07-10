@@ -3,86 +3,93 @@
 @tailwind utilities;
 
 /*
- * Палитра — на основе Binance design tokens.
- * Brand light: синий primary · dark: #FCD535 (BinanceYellow)
- * Buy:     #0ECB81 (BuyGreen)             — success / win / probability home
- * Sell:    #F6465D (SellRed)              — destructive / loss / probability away / live
- * Text:    #1E2329 / #EAECEF              — primary
- * Sub:     #707A8A / #B7BDC6              — secondary
- * Surfaces light: #FFFFFF (base и карточки) · muted #F5F5F5 для чипов/табов
- * Surfaces dark:  #181A20 / #1E2329 / #2B3139
- * Line:    #EAECEF / #2B3139
+ * DelyBet design tokens
+ * Base → Surface → Card elevation · Accent #F0B90B · OLED dark
  */
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* #FFFFFF */
-    --foreground: 213 16% 14%; /* #1E2329 */
+    --background: 220 18% 96%;
+    --surface: 0 0% 100%;
+    --foreground: 222 22% 12%;
 
-    --card: 0 0% 100%; /* #FFFFFF — карточки, плитки, блоки */
-    --card-foreground: 213 16% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 22% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 213 16% 14%;
+    --popover-foreground: 222 22% 12%;
 
-    --primary: 218 68% 56%; /* мягкий синий акцент */
-    --primary-foreground: 0 0% 100%;
+    --primary: 44 93% 49%;
+    --primary-foreground: 222 28% 12%;
 
-    --secondary: 0 0% 100%;
-    --secondary-foreground: 213 16% 14%;
+    --secondary: 220 16% 94%;
+    --secondary-foreground: 222 22% 12%;
 
-    --muted: 0 0% 96%; /* #F5F5F5 — иконки, табы, прогресс внутри карточек */
-    --muted-foreground: 217 10% 49%; /* #707A8A */
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 9% 42%;
 
-    --accent: 0 0% 96%;
-    --accent-foreground: 213 16% 14%;
+    --accent: 220 14% 93%;
+    --accent-foreground: 222 22% 12%;
 
-    --destructive: 351 91% 62%; /* #F6465D */
+    --destructive: 351 91% 62%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 156 87% 43%; /* #0ECB81 */
+    --success: 156 62% 46%;
     --success-foreground: 0 0% 100%;
-    --success-muted: 156 70% 92%;
+    --success-muted: 156 55% 92%;
 
-    --border: 213 14% 93%; /* #EAECEF */
-    --input: 213 14% 93%;
-    --ring: 218 68% 56%;
+    --border: 220 14% 88%;
+    --border-strong: 220 12% 75%;
+    --input: 220 14% 88%;
+    --ring: 44 93% 49%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    --radius-button: 0.5rem;
+    --radius-card: 0.875rem;
+
+    --shadow-card: 0 1px 2px hsl(222 22% 12% / 0.04),
+      0 4px 16px hsl(222 22% 12% / 0.06);
+    --glow-primary: 0 0 24px hsl(44 93% 49% / 0.18);
   }
 
   .dark {
-    --background: 222 14% 11%; /* #181A20 */
-    --foreground: 213 14% 93%; /* #EAECEF */
+    --background: 228 28% 4%;
+    --surface: 225 22% 7%;
+    --foreground: 210 18% 96%;
 
-    --card: 213 16% 14%; /* #1E2329 */
-    --card-foreground: 213 14% 93%;
+    --card: 222 20% 11%;
+    --card-foreground: 210 18% 96%;
 
-    --popover: 213 16% 14%;
-    --popover-foreground: 213 14% 93%;
+    --popover: 222 20% 11%;
+    --popover-foreground: 210 18% 96%;
 
-    --primary: 49 97% 60%; /* #FCD535 (брэнд один на оба режима) */
-    --primary-foreground: 220 22% 16%; /* #202630 */
+    --primary: 44 93% 49%;
+    --primary-foreground: 222 28% 12%;
 
-    --secondary: 215 14% 20%; /* #2B3139 */
-    --secondary-foreground: 213 14% 93%;
+    --secondary: 222 16% 14%;
+    --secondary-foreground: 210 18% 96%;
 
-    --muted: 215 14% 20%;
-    --muted-foreground: 213 11% 75%; /* #B7BDC6 */
+    --muted: 222 14% 14%;
+    --muted-foreground: 215 12% 68%;
 
-    --accent: 215 14% 20%;
-    --accent-foreground: 213 14% 93%;
+    --accent: 222 16% 14%;
+    --accent-foreground: 210 18% 96%;
 
-    --destructive: 351 91% 62%; /* #F6465D */
+    --destructive: 351 91% 62%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 156 87% 43%;
+    --success: 156 62% 46%;
     --success-foreground: 0 0% 100%;
-    --success-muted: 156 50% 14%;
+    --success-muted: 156 40% 14%;
 
-    --border: 215 14% 20%; /* #2B3139 */
-    --input: 215 14% 20%;
-    --ring: 49 97% 60%;
+    --border: 222 14% 18%;
+    --border-strong: 222 12% 28%;
+    --input: 222 14% 18%;
+    --ring: 44 93% 49%;
+
+    --shadow-card: 0 0 0 1px hsl(0 0% 100% / 0.04),
+      0 8px 24px hsl(0 0% 0% / 0.35);
+    --glow-primary: 0 0 20px hsl(44 93% 49% / 0.22);
   }
 }
 
@@ -104,6 +111,29 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv11", "ss01", "ss03";
+    background-image: radial-gradient(
+        ellipse 120% 80% at 50% -30%,
+        hsl(var(--primary) / 0.07),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 80% 50% at 100% 0%,
+        hsl(var(--success) / 0.04),
+        transparent 45%
+      );
+  }
+
+  .dark body {
+    background-image: radial-gradient(
+        ellipse 100% 60% at 50% -20%,
+        hsl(var(--primary) / 0.09),
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 60% 40% at 0% 100%,
+        hsl(222 40% 20% / 0.4),
+        transparent 50%
+      );
   }
 
   ::selection {
@@ -113,20 +143,40 @@
 }
 
 @layer components {
-  /** Блоки на экране матча: bg-card (белый в light, #1E2329 в dark) */
   .analysis-block {
-    @apply rounded-xl border border-border bg-card text-card-foreground shadow-none dark:shadow-sm;
+    @apply rounded-[var(--radius-card)] border border-border bg-card text-card-foreground;
+    box-shadow: var(--shadow-card);
+  }
+
+  .app-card {
+    @apply rounded-[var(--radius-card)] border border-border bg-card text-card-foreground transition-[border-color,box-shadow,transform] duration-200;
+    box-shadow: var(--shadow-card);
+  }
+
+  .app-card-interactive {
+    @apply app-card cursor-pointer hover:border-primary/35 hover:shadow-[var(--shadow-card),var(--glow-primary)];
+  }
+
+  .segmented-control {
+    @apply rounded-lg bg-muted/80 p-1 text-muted-foreground backdrop-blur-sm;
+  }
+
+  .wordmark {
+    @apply font-semibold tracking-[-0.09em];
+  }
+
+  .wordmark-accent {
+    @apply text-primary;
   }
 }
 
 @layer utilities {
-  /** Светлая тема: без box-shadow и drop-shadow на всех страницах */
   html:not(.dark) [class*="shadow"]:not([class*="shadow-none"]) {
     --tw-shadow: 0 0 #0000 !important;
     --tw-shadow-colored: 0 0 #0000 !important;
     --tw-ring-offset-shadow: 0 0 #0000 !important;
     --tw-ring-shadow: 0 0 #0000 !important;
-    box-shadow: none !important;
+    box-shadow: var(--shadow-card) !important;
   }
 
   html:not(.dark) [class*="drop-shadow"] {
@@ -137,10 +187,38 @@
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
   }
+
   .no-scrollbar {
     scrollbar-width: none;
   }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  .bg-surface {
+    background-color: hsl(var(--surface));
+  }
+
+  .glass-nav {
+    border: 1px solid hsl(var(--border) / 0.6);
+    background-color: hsl(var(--card) / 0.88);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 8px 32px hsl(0 0% 0% / 0.12);
+  }
+
+  .dark .glass-nav {
+    box-shadow: 0 8px 32px hsl(0 0% 0% / 0.45),
+      inset 0 1px 0 hsl(0 0% 100% / 0.04);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

@@ -22,7 +22,7 @@ function AdminModeToolbarInner() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-[calc(49px+max(24px,env(safe-area-inset-bottom,0px)))] z-50 border-t border-border bg-background/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+      className="fixed inset-x-0 bottom-[calc(64px+max(20px,env(safe-area-inset-bottom,0px)))] z-50 border-t border-border/60 bg-background/95 px-4 py-2 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80"
       data-admin-toolbar
       data-telegram-gate-exempt
     >
