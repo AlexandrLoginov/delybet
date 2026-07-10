@@ -384,12 +384,13 @@ export const ru: Messages = {
       "Если Stripe history недоступна, подставляется временный demo history для проверки UI.",
   },
   telegram: {
-    gateTitle: "Откройте DelyBet в Telegram",
+    gateTitle: "Войдите через Telegram",
     gateDescription:
-      "Авторизация и оплата доступны в Mini App. В браузере можно только просматривать демо.",
+      "В браузере войдите через Telegram, чтобы сохранить прогресс и оформить подписку. Или откройте Mini App.",
     loginExplanation:
       "Войдите через Telegram, чтобы сохранить прогресс и оформить подписку.",
     openApp: "Открыть в Telegram",
+    orOpenApp: "или откройте Mini App в Telegram",
   },
   theme: {
     darkAria: "Темная тема",

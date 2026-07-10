@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 
 import { NextResponse } from "next/server";
 
-import { SESSION_COOKIE, verifySession } from "@/lib/auth-session";
+import { SESSION_COOKIE, verifySession, verifySessionPayload } from "@/lib/auth-session";
 import { prisma } from "@/lib/prisma";
 import { checkSubscription } from "@/lib/subscription";
 
@@ -13,6 +13,7 @@ export async function GET() {
     const store = cookies();
     const token = store.get(SESSION_COOKIE)?.value ?? null;
     const userId = token ? verifySession(token) : null;
+    const sessionPayload = token ? verifySessionPayload(token) : null;
 
     if (!userId) {
       return NextResponse.json({
@@ -59,6 +60,7 @@ export async function GET() {
         name: user.name,
         telegramId: user.telegramId,
       },
+      telegramUsername: sessionPayload?.tg ?? null,
       isPro,
       subscription: user.subscription,
     });

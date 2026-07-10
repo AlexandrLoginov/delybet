@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProfilePlanBadge } from "@/components/profile/profile-plan-badge";
 import { TelegramBrowserLoginExplanation } from "@/components/telegram/telegram-browser-login-explanation";
+import { TelegramLoginButton } from "@/components/telegram/telegram-login-button";
 import { TelegramOpenInTelegramButton } from "@/components/telegram/telegram-open-in-telegram-button";
 import { useAppLocale } from "@/hooks/use-app-locale";
 import {
@@ -44,6 +45,10 @@ export function ProfileTelegramIdentity() {
       <Card className="shadow-none" data-telegram-gate-exempt>
         <CardContent className="space-y-4 p-5">
           <TelegramBrowserLoginExplanation />
+          <TelegramLoginButton onSuccess={() => window.location.reload()} />
+          <p className="text-center text-xs text-muted-foreground">
+            {t("telegram.orOpenApp")}
+          </p>
           <TelegramOpenInTelegramButton />
         </CardContent>
       </Card>

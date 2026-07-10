@@ -370,11 +370,12 @@ export const vi: Messages = {
       "Nếu lịch sử Stripe không khả dụng, dữ liệu demo tạm thời được hiển thị để kiểm tra UI.",
   },
   telegram: {
-    gateTitle: "Mở DelyBet trong Telegram",
+    gateTitle: "Đăng nhập qua Telegram",
     gateDescription:
-      "Đăng nhập và thanh toán trong Mini App. Trình duyệt chỉ xem demo.",
+      "Trên trình duyệt, đăng nhập Telegram để lưu tiến trình và đăng ký. Hoặc mở Mini App.",
     loginExplanation: "Đăng nhập Telegram để lưu tiến trình và đăng ký.",
     openApp: "Mở trong Telegram",
+    orOpenApp: "hoặc mở Mini App trong Telegram",
   },
   theme: { darkAria: "Giao diện tối" },
   plural: {

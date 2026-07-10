@@ -309,6 +309,7 @@ export type Messages = {
     gateDescription: string;
     loginExplanation: string;
     openApp: string;
+    orOpenApp: string;
   };
   theme: {
     darkAria: string;

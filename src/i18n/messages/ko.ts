@@ -351,10 +351,12 @@ export const ko: Messages = {
       "Stripe 기록을 사용할 수 없으면 UI 확인용 임시 데모 기록이 표시됩니다.",
   },
   telegram: {
-    gateTitle: "Telegram에서 DelyBet 열기",
-    gateDescription: "로그인과 결제는 Mini App에서만 가능합니다.",
+    gateTitle: "Telegram으로 로그인",
+    gateDescription:
+      "브라우저에서는 Telegram으로 로그인해 진행 상황을 저장하고 구독하세요. 또는 Mini App을 여세요.",
     loginExplanation: "Telegram으로 로그인해 진행 상황을 저장하고 구독하세요.",
     openApp: "Telegram에서 열기",
+    orOpenApp: "또는 Telegram Mini App 열기",
   },
   theme: { darkAria: "다크 테마" },
   plural: {

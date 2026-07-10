@@ -383,12 +383,13 @@ export const en: Messages = {
       "If Stripe history is unavailable, temporary demo history is shown for UI checks.",
   },
   telegram: {
-    gateTitle: "Open DelyBet in Telegram",
+    gateTitle: "Sign in with Telegram",
     gateDescription:
-      "Sign-in and payments work in the Mini App. The browser is for demo viewing only.",
+      "In the browser, sign in with Telegram to save progress and subscribe. Or open the Mini App.",
     loginExplanation:
       "Sign in with Telegram to save progress and subscribe.",
     openApp: "Open in Telegram",
+    orOpenApp: "or open the Mini App in Telegram",
   },
   theme: {
     darkAria: "Dark theme",

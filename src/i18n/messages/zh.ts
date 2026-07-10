@@ -341,10 +341,12 @@ export const zh: Messages = {
     stripeDemoHint: "若 Stripe 历史不可用，将显示临时演示数据以检查界面。",
   },
   telegram: {
-    gateTitle: "在 Telegram 中打开 DelyBet",
-    gateDescription: "登录与支付仅在 Mini App 中可用，浏览器仅供演示。",
+    gateTitle: "通过 Telegram 登录",
+    gateDescription:
+      "在浏览器中通过 Telegram 登录以保存进度并订阅，或打开 Mini App。",
     loginExplanation: "使用 Telegram 登录以保存进度并订阅。",
     openApp: "在 Telegram 中打开",
+    orOpenApp: "或在 Telegram 中打开 Mini App",
   },
   theme: { darkAria: "深色主题" },
   plural: {
