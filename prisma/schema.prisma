@@ -10,14 +10,15 @@ datasource db {
 }
 
 model User {
-  id             String         @id @default(cuid())
-  email          String         @unique
-  name           String?
-  telegramId     String?        @unique
-  createdAt      DateTime       @default(now())
-  subscription   Subscription?
-  dailyUsage     DailyUsage[]
-  sports         String[]       @default(["football"])
+  id               String         @id @default(cuid())
+  email            String         @unique
+  name             String?
+  telegramId       String?        @unique
+  telegramUsername String?
+  createdAt        DateTime       @default(now())
+  subscription     Subscription?
+  dailyUsage       DailyUsage[]
+  sports           String[]       @default(["football"])
 }
 
 model Subscription {

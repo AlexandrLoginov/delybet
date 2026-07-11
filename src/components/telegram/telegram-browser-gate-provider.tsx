@@ -11,13 +11,11 @@ import {
 } from "@/components/ui/drawer";
 import { useAppLocale } from "@/hooks/use-app-locale";
 import { TelegramBrowserLoginExplanation } from "@/components/telegram/telegram-browser-login-explanation";
-import { TelegramLoginButton } from "@/components/telegram/telegram-login-button";
 import { TelegramOpenInTelegramButton } from "@/components/telegram/telegram-open-in-telegram-button";
 import {
   isTelegramExternalLinkElement,
   TELEGRAM_GATE_INTERACTIVE_SELECTOR,
 } from "@/lib/telegram/telegram-browser-gate";
-import { isAuthenticatedTelegramSession } from "@/lib/telegram/session-status";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
 
 export function TelegramBrowserGateProvider({
@@ -30,10 +28,10 @@ export function TelegramBrowserGateProvider({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticatedTelegramSession(session)) {
+    if (session.status === "telegram") {
       setOpen(false);
     }
-  }, [session]);
+  }, [session.status]);
 
   useEffect(() => {
     if (session.status !== "browser") return;
@@ -75,16 +73,7 @@ export function TelegramBrowserGateProvider({
                 </div>
               </DrawerHeader>
             </div>
-            <DrawerFooter className="gap-3">
-              <TelegramLoginButton
-                onSuccess={() => {
-                  setOpen(false);
-                  window.location.reload();
-                }}
-              />
-              <p className="text-center text-xs text-muted-foreground">
-                {t("telegram.orOpenApp")}
-              </p>
+            <DrawerFooter className="gap-2">
               <TelegramOpenInTelegramButton />
             </DrawerFooter>
           </DrawerContent>

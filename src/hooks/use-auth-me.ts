@@ -10,7 +10,6 @@ export type AuthMeResponse =
         name: string | null;
         telegramId: string | null;
       };
-      telegramUsername?: string | null;
       isPro: boolean;
       subscription: {
         plan: string;

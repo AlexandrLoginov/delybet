@@ -8,11 +8,13 @@ export async function upsertUserFromTelegram(
 ): Promise<{ id: string }> {
   const telegramId = String(telegram.id);
   const email = `tg_${telegramId}@users.delybet.internal`;
+  const telegramUsername = telegram.username?.trim().toLowerCase() || null;
 
-  const name = [telegram.first_name, telegram.last_name]
-    .filter(Boolean)
-    .join(" ")
-    .trim() || telegram.first_name;
+  const name =
+    [telegram.first_name, telegram.last_name]
+      .filter(Boolean)
+      .join(" ")
+      .trim() || telegram.first_name;
 
   const user = await prisma.user.upsert({
     where: { telegramId },
@@ -20,9 +22,11 @@ export async function upsertUserFromTelegram(
       email,
       name,
       telegramId,
+      telegramUsername,
     },
     update: {
       name,
+      telegramUsername,
     },
     select: { id: true },
   });

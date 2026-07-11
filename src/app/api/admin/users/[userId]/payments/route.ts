@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireAdminSession } from "@/lib/admin-access";
-import {
-  getAdminDesignPreviewPayments,
-  getAdminDesignPreviewUserById,
-  isAdminDesignPreviewUserId,
-} from "@/lib/admin-demo-data";
 import { prisma } from "@/lib/prisma";
-import { PRO_SUBSCRIPTION_DEMO } from "@/lib/pro-subscription-demo";
 import { getStripe } from "@/lib/stripe-client";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +11,7 @@ type PaymentRow = {
   createdAt: string;
   amountRub: number;
   status: string;
-  source: "stripe" | "demo";
+  source: "stripe";
   description: string;
 };
 
@@ -34,17 +28,6 @@ export async function GET(
       return NextResponse.json({ error: "INVALID_USER_ID" }, { status: 400 });
     }
 
-    if (isAdminDesignPreviewUserId(userId)) {
-      const previewUser = getAdminDesignPreviewUserById(userId);
-      if (!previewUser) {
-        return NextResponse.json({ error: "USER_NOT_FOUND" }, { status: 404 });
-      }
-      return NextResponse.json({
-        user: previewUser,
-        payments: getAdminDesignPreviewPayments(userId),
-      });
-    }
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -52,6 +35,7 @@ export async function GET(
         name: true,
         email: true,
         telegramId: true,
+        telegramUsername: true,
         subscription: {
           select: {
             stripeCustomerId: true,
@@ -81,22 +65,12 @@ export async function GET(
           amountRub: Math.round((inv.amount_paid ?? 0) / 100),
           status: inv.status ?? "unknown",
           source: "stripe" as const,
-          description: inv.description || inv.lines.data[0]?.description || "Stripe invoice",
+          description:
+            inv.description || inv.lines.data[0]?.description || "Stripe invoice",
         }));
       } catch {
         rows = [];
       }
-    }
-
-    if (rows.length === 0) {
-      rows = PRO_SUBSCRIPTION_DEMO.history.map((row) => ({
-        id: `demo-${row.id}`,
-        createdAt: row.periodStartISO,
-        amountRub: row.amountRub,
-        status: row.status,
-        source: "demo" as const,
-        description: `${row.periodStartISO} — ${row.periodEndISO}`,
-      }));
     }
 
     return NextResponse.json({
@@ -105,6 +79,7 @@ export async function GET(
         name: user.name,
         email: user.email,
         telegramId: user.telegramId,
+        telegramUsername: user.telegramUsername,
       },
       payments: rows,
     });

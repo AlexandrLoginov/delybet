@@ -17,7 +17,6 @@ import {
 export type TelegramSessionState =
   | { status: "loading" }
   | { status: "browser" }
-  | { status: "web"; user: TelegramWebAppUser }
   | { status: "telegram"; user: TelegramWebAppUser; initData: string };
 
 const TelegramSessionContext = createContext<TelegramSessionState | null>(null);
@@ -77,36 +76,6 @@ function useTelegramSessionState(): TelegramSessionState {
 
         if (!initData && !unsafeUser) {
           clearViewportInsets();
-
-          const meRes = await fetch("/api/auth/me", { credentials: "include" });
-          if (!cancelled && meRes.ok) {
-            const me = (await meRes.json()) as {
-              authenticated?: boolean;
-              user?: {
-                name: string | null;
-                telegramId: string | null;
-              };
-              telegramUsername?: string | null;
-            };
-            const telegramId = me.user?.telegramId
-              ? Number.parseInt(me.user.telegramId, 10)
-              : NaN;
-            if (me.authenticated && Number.isFinite(telegramId)) {
-              const fullName = me.user?.name?.trim() ?? "";
-              const [firstName, ...rest] = fullName.split(/\s+/);
-              setState({
-                status: "web",
-                user: {
-                  id: telegramId,
-                  first_name: firstName || "User",
-                  last_name: rest.join(" ") || undefined,
-                  username: me.telegramUsername ?? undefined,
-                },
-              });
-              return;
-            }
-          }
-
           setState({ status: "browser" });
           return;
         }

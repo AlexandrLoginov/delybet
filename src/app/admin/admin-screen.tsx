@@ -5,11 +5,12 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import useSWR from "swr";
 import {
-  CalendarDots,
   CaretLeft,
   LockKey,
+  ShieldCheck,
   ShieldWarning,
   Sparkle,
+  User,
   UsersThree,
 } from "@phosphor-icons/react";
 
@@ -19,17 +20,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppLocale } from "@/hooks/use-app-locale";
 import { localeIntlTag } from "@/i18n";
-import { useIsProfileAdmin, useTelegramInitData } from "@/hooks/use-is-profile-admin";
-import { isAdminDesignPreviewUserId } from "@/lib/admin-demo-data";
+import {
+  useIsProfileAdmin,
+  useTelegramInitData,
+} from "@/hooks/use-is-profile-admin";
 import { adminFetchInit } from "@/lib/admin-fetch";
+import type { AdminUserStatusKind } from "@/lib/admin-user-status";
 import { useTelegramSession } from "@/lib/telegram/use-telegram-session";
+import { cn } from "@/lib/utils";
 
 type AdminUser = {
   id: string;
   name: string | null;
   email: string;
   telegramId: string | null;
+  telegramUsername: string | null;
   createdAt: string;
+  role: "admin" | "user";
+  statusKind: AdminUserStatusKind;
   subscription: {
     plan: string;
     status: string;
@@ -45,15 +53,13 @@ type AdminUsersResponse = {
   users: AdminUser[];
   stats: {
     totalUsers: number;
+    adminUsers: number;
     proUsers: number;
+    freeUsers: number;
     blockedUsers: number;
     stripeLinkedUsers: number;
   };
   generatedAt: string;
-  /** БД без пользователей — только демо-набор */
-  designPreview?: boolean;
-  /** К ответу из БД добавлены демо-строки в конец списка */
-  demoRowsAppended?: boolean;
 };
 
 type PaymentRow = {
@@ -61,7 +67,7 @@ type PaymentRow = {
   createdAt: string;
   amountRub: number;
   status: string;
-  source: "stripe" | "demo";
+  source: "stripe";
   description: string;
 };
 
@@ -71,6 +77,7 @@ type PaymentsResponse = {
     name: string | null;
     email: string;
     telegramId: string | null;
+    telegramUsername: string | null;
   };
   payments: PaymentRow[];
 };
@@ -117,6 +124,37 @@ function formatAdminLoadError(
   }
 }
 
+function statusLabel(
+  kind: AdminUserStatusKind,
+  t: (key: string) => string
+): string {
+  switch (kind) {
+    case "admin":
+      return t("admin.statusAdmin");
+    case "pro":
+      return t("admin.statusPro");
+    case "blocked":
+      return t("admin.statusBlocked");
+    default:
+      return t("admin.statusFree");
+  }
+}
+
+function statusBadgeVariant(
+  kind: AdminUserStatusKind
+): "default" | "success" | "destructive" | "muted" {
+  switch (kind) {
+    case "admin":
+      return "default";
+    case "pro":
+      return "success";
+    case "blocked":
+      return "destructive";
+    default:
+      return "muted";
+  }
+}
+
 export function AdminScreen() {
   const { locale, t } = useAppLocale();
   const state = useTelegramSession();
@@ -134,26 +172,25 @@ export function AdminScreen() {
     isLoading: usersLoading,
     mutate: mutateUsers,
   } = useSWR<AdminUsersResponse>(
-    allowed ? (["/api/admin/users?includeDemo=1", initData] as const) : null,
+    allowed ? (["/api/admin/users", initData] as const) : null,
     jsonFetcher,
     {
-    revalidateOnFocus: true,
-    dedupingInterval: 3000,
-  });
+      revalidateOnFocus: true,
+      dedupingInterval: 3000,
+    }
+  );
 
   const users = usersData?.users ?? [];
-  const designPreview = usersData?.designPreview === true;
-  const demoRowsAppended = usersData?.demoRowsAppended === true;
   const q = query.trim().toLowerCase();
   const filteredUsers = !q
     ? users
     : users.filter((u) => {
         const fields = [
           u.name ?? "",
-          u.email,
+          u.telegramUsername ?? "",
           u.telegramId ?? "",
           u.id,
-          u.subscription?.status ?? "",
+          u.statusKind,
           u.subscription?.plan ?? "",
         ];
         return fields.some((f) => f.toLowerCase().includes(q));
@@ -162,7 +199,7 @@ export function AdminScreen() {
   const effectiveSelectedId =
     selectedUserId && users.some((u) => u.id === selectedUserId)
       ? selectedUserId
-      : users[0]?.id ?? null;
+      : null;
 
   const selectedUser =
     users.find((u) => u.id === effectiveSelectedId) ?? null;
@@ -186,9 +223,7 @@ export function AdminScreen() {
     try {
       setBusyAction(action);
       const body =
-        action === "extend_pro"
-          ? { action, days: 30 }
-          : { action };
+        action === "extend_pro" ? { action, days: 30 } : { action };
       const fetchInit = adminFetchInit(initData);
       const res = await fetch(`/api/admin/users/${userId}/actions`, {
         method: "POST",
@@ -239,7 +274,7 @@ export function AdminScreen() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl space-y-4 px-4 pb-10 pt-5">
+    <main className="mx-auto max-w-2xl space-y-4 px-4 pb-10 pt-5">
       <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
         <Link href="/profile">
           <CaretLeft className="h-4 w-4 shrink-0" weight="fill" />
@@ -247,35 +282,24 @@ export function AdminScreen() {
         </Link>
       </Button>
 
-      {designPreview ? (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="p-3 text-sm text-muted-foreground">
-            {t("admin.demoEmpty")}
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {demoRowsAppended && !designPreview ? (
-        <Card className="border-border bg-muted/20">
-          <CardContent className="p-3 text-sm text-muted-foreground">
-            {t("admin.demoAppended")}
-          </CardContent>
-        </Card>
-      ) : null}
-
       {usersError ? (
         <Card>
-          <CardContent className="p-4 text-sm text-danger">
+          <CardContent className="p-4 text-sm text-destructive">
             {formatAdminLoadError(usersError, t)}
           </CardContent>
         </Card>
       ) : null}
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3">
         <StatCard
           icon={<UsersThree className="h-5 w-5" weight="fill" />}
           label={t("admin.users")}
           value={String(usersData?.stats.totalUsers ?? 0)}
+        />
+        <StatCard
+          icon={<ShieldCheck className="h-5 w-5" weight="fill" />}
+          label={t("admin.admins")}
+          value={String(usersData?.stats.adminUsers ?? 0)}
         />
         <StatCard
           icon={<Sparkle className="h-5 w-5" weight="fill" />}
@@ -283,221 +307,186 @@ export function AdminScreen() {
           value={String(usersData?.stats.proUsers ?? 0)}
         />
         <StatCard
+          icon={<User className="h-5 w-5" weight="fill" />}
+          label={t("admin.free")}
+          value={String(usersData?.stats.freeUsers ?? 0)}
+        />
+        <StatCard
           icon={<LockKey className="h-5 w-5" weight="fill" />}
           label={t("admin.blocked")}
           value={String(usersData?.stats.blockedUsers ?? 0)}
-        />
-        <StatCard
-          icon={<CalendarDots className="h-5 w-5" weight="fill" />}
-          label={t("admin.stripe")}
-          value={String(usersData?.stats.stripeLinkedUsers ?? 0)}
+          className="col-span-2"
         />
       </section>
 
       <Card>
         <CardContent className="space-y-3 p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-2">
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("admin.searchPlaceholder")}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
             <Button
               type="button"
               variant="outline"
               onClick={() => void mutateUsers()}
               disabled={usersLoading}
+              className="shrink-0"
             >
               {t("admin.refresh")}
             </Button>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full min-w-[860px] text-sm">
-              <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colUser")}</th>
-                  <th className="px-3 py-2 text-left font-medium">Telegram ID</th>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colPlan")}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colStatus")}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colDate")}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colStripe")}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colActions")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredUsers.map((u) => (
-                  <tr
-                    key={u.id}
-                    className={
-                      effectiveSelectedId === u.id
-                        ? "bg-muted/30"
-                        : "hover:bg-muted/20"
+          <div className="space-y-2">
+            {filteredUsers.map((u) => {
+              const selected = effectiveSelectedId === u.id;
+              const periodEnd = u.subscription?.currentPeriodEnd ?? null;
+              return (
+                <div
+                  key={u.id}
+                  className={cn(
+                    "rounded-xl border border-border bg-card p-3 transition-colors",
+                    selected && "border-primary/40 bg-muted/30"
+                  )}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedUserId((prev) =>
+                        prev === u.id ? null : u.id
+                      )
                     }
+                    className="w-full text-left"
                   >
-                    <td className="px-3 py-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedUserId(u.id)}
-                        className="text-left"
-                      >
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-medium">{u.name ?? t("admin.noName")}</span>
-                          {isAdminDesignPreviewUserId(u.id) ? (
-                            <Badge variant="muted" className="text-[10px]">
-                              {t("admin.demoBadge")}
-                            </Badge>
-                          ) : null}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 space-y-1">
+                        <div className="truncate font-medium">
+                          {u.name ?? t("admin.noName")}
                         </div>
-                        <div className="text-xs text-muted-foreground">{u.email}</div>
-                      </button>
-                    </td>
-                    <td className="px-3 py-2">{u.telegramId ?? "—"}</td>
-                    <td className="px-3 py-2">
-                      <Badge variant={u.subscription?.plan === "PRO" ? "success" : "muted"}>
-                        {u.subscription?.plan ?? "FREE"}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-2">
+                        {u.telegramUsername ? (
+                          <div className="truncate text-xs text-muted-foreground">
+                            @{u.telegramUsername}
+                          </div>
+                        ) : null}
+                        <div className="truncate text-xs text-muted-foreground">
+                          {t("admin.telegramId")}: {u.telegramId ?? "—"}
+                        </div>
+                      </div>
                       <Badge
-                        variant={
-                          u.subscription?.status === "blocked"
-                            ? "destructive"
-                            : u.subscription?.status === "active"
-                              ? "success"
-                              : "muted"
-                        }
+                        variant={statusBadgeVariant(u.statusKind)}
+                        className="shrink-0 normal-case tracking-normal"
                       >
-                        {u.subscription?.status ?? "no_subscription"}
+                        {statusLabel(u.statusKind, t)}
                       </Badge>
-                    </td>
-                    <td className="px-3 py-2">
-                      {formatDate(
-                        u.subscription?.currentPeriodEnd ?? null,
-                        localeIntlTag(locale)
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      {u.subscription?.stripeCustomerId ? "connected" : "—"}
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex gap-1">
+                    </div>
+                    {u.statusKind === "pro" && periodEnd ? (
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {t("admin.periodUntil", {
+                          date: formatDate(periodEnd, localeIntlTag(locale)),
+                        })}
+                      </div>
+                    ) : null}
+                  </button>
+
+                  {u.statusKind !== "admin" ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void performAction(u.id, "extend_pro")}
+                        disabled={busyAction !== null}
+                      >
+                        {t("admin.extendPro")}
+                      </Button>
+                      {u.subscription?.status === "blocked" ? (
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => void performAction(u.id, "extend_pro")}
-                          disabled={
-                            busyAction !== null ||
-                            designPreview ||
-                            isAdminDesignPreviewUserId(u.id)
-                          }
+                          onClick={() => void performAction(u.id, "unblock")}
+                          disabled={busyAction !== null}
                         >
-                          +30d
+                          {t("admin.unblock")}
                         </Button>
-                        {u.subscription?.status === "blocked" ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => void performAction(u.id, "unblock")}
-                            disabled={
-                              busyAction !== null ||
-                              designPreview ||
-                              isAdminDesignPreviewUserId(u.id)
-                            }
-                          >
-                            {t("admin.unblock")}
-                          </Button>
-                        ) : (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => void performAction(u.id, "block")}
-                            disabled={
-                              busyAction !== null ||
-                              designPreview ||
-                              isAdminDesignPreviewUserId(u.id)
-                            }
-                          >
-                            {t("admin.block")}
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {!usersLoading && filteredUsers.length === 0 ? (
-                  <tr>
-                    <td className="px-3 py-6 text-center text-muted-foreground" colSpan={7}>
-                      {t("admin.usersNotFound")}
-                    </td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void performAction(u.id, "block")}
+                          disabled={busyAction !== null}
+                        >
+                          {t("admin.block")}
+                        </Button>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
 
-      <Card>
-        <CardContent className="space-y-3 p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("admin.paymentsTitle")}
-            </h2>
-            {selectedUser ? (
-              <div className="text-xs text-muted-foreground">
-                {selectedUser.name ?? selectedUser.email}
+            {!usersLoading && filteredUsers.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+                {users.length === 0
+                  ? t("admin.usersEmpty")
+                  : t("admin.usersNotFound")}
               </div>
             ) : null}
           </div>
-
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full min-w-[680px] text-sm">
-              <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colDate")}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colAmount")}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colStatus")}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colSource")}</th>
-                  <th className="px-3 py-2 text-left font-medium">{t("admin.colUser")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {paymentsData?.payments.map((p) => (
-                  <tr key={p.id}>
-                    <td className="px-3 py-2">
-                      {formatDate(p.createdAt, localeIntlTag(locale))}
-                    </td>
-                    <td className="px-3 py-2 tabular-nums">{p.amountRub} ₽</td>
-                    <td className="px-3 py-2">{p.status}</td>
-                    <td className="px-3 py-2">
-                      <Badge variant={p.source === "stripe" ? "success" : "muted"}>
-                        {p.source}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-2">{p.description}</td>
-                  </tr>
-                ))}
-                {!paymentsLoading && (paymentsData?.payments.length ?? 0) === 0 ? (
-                  <tr>
-                    <td className="px-3 py-6 text-center text-muted-foreground" colSpan={5}>
-                      {t("admin.paymentsEmpty")}
-                    </td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            {t("admin.stripeDemoHint")}
-          </p>
         </CardContent>
       </Card>
+
+      {selectedUser ? (
+        <Card>
+          <CardContent className="space-y-3 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("admin.paymentsTitle")}
+              </h2>
+              <div className="truncate text-xs text-muted-foreground">
+                {selectedUser.name ??
+                  (selectedUser.telegramUsername
+                    ? `@${selectedUser.telegramUsername}`
+                    : selectedUser.telegramId)}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {paymentsData?.payments.map((p) => (
+                <div
+                  key={p.id}
+                  className="rounded-lg border border-border px-3 py-2 text-sm"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="tabular-nums font-medium">
+                      {p.amountRub} ₽
+                    </span>
+                    <Badge variant="muted" className="normal-case tracking-normal">
+                      {p.status}
+                    </Badge>
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {formatDate(p.createdAt, localeIntlTag(locale))}
+                  </div>
+                  {p.description ? (
+                    <div className="mt-1 truncate text-xs text-muted-foreground">
+                      {p.description}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+              {!paymentsLoading && (paymentsData?.payments.length ?? 0) === 0 ? (
+                <div className="py-4 text-center text-sm text-muted-foreground">
+                  {t("admin.paymentsEmpty")}
+                </div>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
     </main>
   );
 }
@@ -506,19 +495,23 @@ function StatCard({
   icon,
   label,
   value,
+  className,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
+  className?: string;
 }) {
   return (
-    <Card>
+    <Card className={className}>
       <CardContent className="flex items-center gap-3 p-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted text-foreground">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-foreground">
           {icon}
         </div>
         <div className="min-w-0">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">
+            {label}
+          </div>
           <div className="text-lg font-semibold tabular-nums">{value}</div>
         </div>
       </CardContent>
